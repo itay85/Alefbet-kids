@@ -30,6 +30,13 @@
         <div class="heroBadge">לנדב בן 6</div>
         <h1>קרב האותיות!</h1>
         <p class="muted">בחר בראולר, תקבל משימה, ותנצח את הבוס ⭐</p>
+
+        <div class="homeStats">
+          <div class="statMini"><span>🪙</span> <strong id="coinsTotal">0</strong> / 1000</div>
+          <div class="statMini"><span>⭐</span> <strong id="starsTotal">0</strong></div>
+          <div class="statMini"><span>🔥</span> <strong id="streak">0</strong></div>
+        </div>
+
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button">🎮 PLAY</button>
           <button id="btnParent" class="btn big" type="button">👨‍👩‍👦 הורה: בחירת אותיות</button>
@@ -38,10 +45,11 @@
       </div>
 
       <div class="panel">
-        <div class="row2">
-          <div class="stat"><div class="k">⭐ כוכבים</div><div class="v" id="starsTotal">0</div></div>
-          <div class="stat"><div class="k">🔥 רצף</div><div class="v" id="streak">0</div></div>
-        </div>
+        <h2>איך מנצחים?</h2>
+        <p class="muted">
+          כל ניחוש נכון נותן ⭐. תלחץ על הכוכב כדי לקבל 🪙 מטבעות זהב רנדומליים.
+          מגיעים ל-<strong>1000</strong> מטבעות? ניצחת!
+        </p>
         <div class="tiny">טיפ: כדי “להתקין” באייפון/אייפד: Share → Add to Home Screen.</div>
       </div>
     </section>
@@ -70,7 +78,7 @@
       <div class="panel">
         <div class="rowBetween">
           <h2>בחר בראולר</h2>
-          <div class="pill" id="modePill">אותיות</div>
+          <div class="pill" id="modePill">רנדומלי</div>
         </div>
         <p class="muted">בחר דמות – זו האות שלך לסיבוב הזה.</p>
         <div class="brawlers" id="brawlers"></div>
@@ -81,18 +89,32 @@
     <section id="screenFight" class="screen" hidden>
       <div class="panel fightTop">
         <div class="rowBetween">
-          <div class="pill" id="fightMode">Boss Fight</div>
-          <div class="statSmall">⭐ <span id="starsRound">0</span></div>
+          <div class="pill">Boss Fight</div>
+          <div class="fightStats">
+            <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
+            <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
+          </div>
         </div>
+
         <div class="prompt" id="prompt">איזו אות שומעים בתחילת המילה?</div>
-        <div class="word" id="word">רכבת</div>
+
+        <div class="wordWrap">
+          <div class="word" id="wordMasked">_כבת</div>
+          <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
+        </div>
 
         <div class="choices" id="choices"></div>
 
         <div class="feedback" id="feedback" aria-live="polite"></div>
 
+        <div class="reward" id="reward" hidden>
+          <button id="btnStar" class="starBtn" type="button" aria-label="קבל מטבעות">⭐</button>
+          <div class="rewardText" id="rewardText">לחץ על הכוכב!</div>
+          <div class="coinsPop" id="coinsPop" hidden>+100 🪙</div>
+        </div>
+
         <div class="fightFooter">
-          <button id="btnNext" class="btn primary" type="button">סיבוב הבא</button>
+          <button id="btnNext" class="btn primary" type="button" disabled>סיבוב הבא</button>
           <button id="btnHome" class="btn" type="button">🏠 בית</button>
         </div>
       </div>
@@ -116,14 +138,6 @@
         <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
       </label>
 
-      <label class="row">
-        <span>שמירת בחירת אותיות</span>
-        <select id="persistSelect">
-          <option value="local" selected>לזכור תמיד</option>
-          <option value="session">רק בסשן</option>
-        </select>
-      </label>
-
       <menu class="menu">
         <button class="btn" value="cancel">סגור</button>
         <button class="btn primary" id="btnSaveSettings" value="default">שמור</button>
@@ -131,6 +145,18 @@
 
       <p class="tiny">הערה: הקראה תלויה בקול עברי במכשיר.</p>
     </form>
+  </dialog>
+
+  <dialog id="winDialog">
+    <div class="dialog">
+      <h2>🎉 ניצחת!</h2>
+      <p class="muted">הגעת ל-1000 מטבעות זהב 🪙</p>
+      <div class="rowBetween">
+        <button id="btnKeepPlaying" class="btn primary" type="button">להמשיך לשחק</button>
+        <button id="btnResetCoins" class="btn" type="button">איפוס מטבעות</button>
+      </div>
+      <p class="tiny">טיפ: אפשר להחליף אותיות בהגדרות הורה.</p>
+    </div>
   </dialog>
 
   <script src="app.js"></script>
