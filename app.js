@@ -1,138 +1,94 @@
-// Simple Hebrew letters & words game (no build tools needed)
-const LETTERS = [
-  "א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"
+// BRAWL LETTERS – focus letters selection (default: all letters)
+const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
+
+const WORDS = [
+  "אבא","אמא","בית","דג","ים","גן","ספר","שמש","ירח","מים","אור","דלת","חלון","חתול","כלב",
+  "רכבת","טלוויזיה","טלפון","סוכר","כדור","כובע","כפית","רקפת","רופא","טוסט","טיל","סוס","סירה"
 ];
 
-// A small starter word list. You can expand it later.
-const WORDS = [
-  { w: "אבא", hint: "משפחה" },
-  { w: "אמא", hint: "משפחה" },
-  { w: "בית", hint: "מקום" },
-  { w: "דג", hint: "חיה" },
-  { w: "ים", hint: "טבע" },
-  { w: "כדור", hint: "משחק" },
-  { w: "גן", hint: "מקום" },
-  { w: "ספר", hint: "קריאה" },
-  { w: "שמש", hint: "טבע" },
-  { w: "ירח", hint: "טבע" },
-  { w: "מים", hint: "שתייה" },
-  { w: "אור", hint: "טבע" },
-  { w: "דלת", hint: "בית" },
-  { w: "חלון", hint: "בית" },
-  { w: "חתול", hint: "חיה" },
-  { w: "כלב", hint: "חיה" }
+const BRAWLERS = [
+  { name:"ספידי-ס ⚡", desc:"רץ מהר ויורה סוכריות", avatar:"⚡" },
+  { name:"קפטן-כ 🛡", desc:"מגן ענק בצורת כ", avatar:"🛡" },
+  { name:"רובו-ר 🤖", desc:"לייזר רכבת", avatar:"🤖" },
+  { name:"טורנדו-ט 🌪", desc:"סיבוב טורבו", avatar:"🌪" },
 ];
+
+const KEY_SETTINGS = "brawl_letters_settings_v1";
 
 const els = {
-  target: document.getElementById("target"),
-  prompt: document.getElementById("prompt"),
-  answers: document.getElementById("answers"),
-  feedback: document.getElementById("feedback"),
-  score: document.getElementById("score"),
-  correct: document.getElementById("correct"),
-  wrong: document.getElementById("wrong"),
-  streak: document.getElementById("streak"),
-  modePill: document.getElementById("modePill"),
-  btnSpeak: document.getElementById("btnSpeak"),
-  btnShuffle: document.getElementById("btnShuffle"),
+  home: document.getElementById("screenHome"),
+  picker: document.getElementById("screenPicker"),
+  select: document.getElementById("screenSelect"),
+  fight: document.getElementById("screenFight"),
+
+  btnSound: document.getElementById("btnSound"),
   btnSettings: document.getElementById("btnSettings"),
+
+  btnPlay: document.getElementById("btnPlay"),
+  btnParent: document.getElementById("btnParent"),
+  homeLettersHint: document.getElementById("homeLettersHint"),
+  starsTotal: document.getElementById("starsTotal"),
+  streak: document.getElementById("streak"),
+
+  lettersGrid: document.getElementById("lettersGrid"),
+  btnPickAll: document.getElementById("btnPickAll"),
+  btnPickNone: document.getElementById("btnPickNone"),
+  btnPresetNadav: document.getElementById("btnPresetNadav"),
+  pickedCount: document.getElementById("pickedCount"),
+  btnPickerContinue: document.getElementById("btnPickerContinue"),
+
+  brawlers: document.getElementById("brawlers"),
+  selectHint: document.getElementById("selectHint"),
+  modePill: document.getElementById("modePill"),
+
+  starsRound: document.getElementById("starsRound"),
+  prompt: document.getElementById("prompt"),
+  word: document.getElementById("word"),
+  choices: document.getElementById("choices"),
+  feedback: document.getElementById("feedback"),
+  btnNext: document.getElementById("btnNext"),
+  btnHome: document.getElementById("btnHome"),
+
   dialog: document.getElementById("settingsDialog"),
-  modeSelect: document.getElementById("modeSelect"),
-  difficultySelect: document.getElementById("difficultySelect"),
   autospeakSelect: document.getElementById("autospeakSelect"),
   rateInput: document.getElementById("rateInput"),
-  btnSave: document.getElementById("btnSave"),
+  persistSelect: document.getElementById("persistSelect"),
+  btnSaveSettings: document.getElementById("btnSaveSettings"),
 };
 
 const state = {
-  mode: "letters",        // letters | words | mixed
-  difficulty: "normal",   // easy | normal | hard
+  lettersMode: "all",            // 'all' | 'custom'
+  selectedLetters: [...ALL_LETTERS],
+  persist: "local",              // 'local' | 'session'
   autospeak: true,
   rate: 0.95,
-  score: 0,
-  correct: 0,
-  wrong: 0,
+
+  starsTotal: 0,
   streak: 0,
-  current: null,          // {type, value, hint}
+
+  roundStars: 0,
+  currentWord: "",
+  currentFirstLetter: "",
   locked: false
 };
 
-// Persist settings
-const LS_KEY = "alefbet_game_settings_v1";
-function loadSettings(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return;
-    const s = JSON.parse(raw);
-    if(s.mode) state.mode = s.mode;
-    if(s.difficulty) state.difficulty = s.difficulty;
-    if(typeof s.autospeak === "boolean") state.autospeak = s.autospeak;
-    if(typeof s.rate === "number") state.rate = s.rate;
-  }catch(_){}
-}
-function saveSettings(){
-  localStorage.setItem(LS_KEY, JSON.stringify({
-    mode: state.mode,
-    difficulty: state.difficulty,
-    autospeak: state.autospeak,
-    rate: state.rate
-  }));
-}
-
-function setUIFromState(){
-  els.modeSelect.value = state.mode;
-  els.difficultySelect.value = state.difficulty;
-  els.autospeakSelect.value = state.autospeak ? "on" : "off";
-  els.rateInput.value = String(state.rate);
-
-  els.score.textContent = `ניקוד: ${state.score}`;
-  els.correct.textContent = String(state.correct);
-  els.wrong.textContent = String(state.wrong);
-  els.streak.textContent = String(state.streak);
-
-  const modeLabel = state.mode === "letters" ? "אות" : state.mode === "words" ? "מילה" : "מעורב";
-  els.modePill.textContent = `מצב: ${modeLabel}`;
-}
-
 function randInt(n){ return Math.floor(Math.random() * n); }
 function pick(arr){ return arr[randInt(arr.length)]; }
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
+function shuffle(a){
+  const arr = a.slice();
+  for(let i=arr.length-1;i>0;i--){
     const j = randInt(i+1);
-    [a[i], a[j]] = [a[j], a[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return a;
+  return arr;
 }
 
-function numOptions(){
-  if(state.difficulty === "easy") return 2;
-  if(state.difficulty === "hard") return 4;
-  return 3;
-}
-
-function chooseItem(){
-  let type = state.mode;
-  if(type === "mixed"){
-    type = Math.random() < 0.5 ? "letters" : "words";
-  }
-  if(type === "letters"){
-    const value = pick(LETTERS);
-    return { type: "letter", value, hint: "בחר את האות הנכונה" };
-  }else{
-    const item = pick(WORDS);
-    return { type: "word", value: item.w, hint: `בחר את המילה הנכונה (${item.hint})` };
-  }
-}
-
-function speakHebrew(text){
-  // Works if the device has a Hebrew voice. If not, it may fall back or do nothing.
+function speak(text){
   try{
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "he-IL";
     u.rate = state.rate;
-    // Prefer Hebrew voice if available
     const voices = window.speechSynthesis.getVoices?.() || [];
     const heVoice = voices.find(v => (v.lang || "").toLowerCase().startsWith("he"));
     if(heVoice) u.voice = heVoice;
@@ -140,113 +96,289 @@ function speakHebrew(text){
   }catch(_){}
 }
 
-function renderQuestion(){
-  state.locked = false;
-  els.feedback.textContent = "";
-  els.answers.innerHTML = "";
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(KEY_SETTINGS);
+    if(!raw) return;
+    const s = JSON.parse(raw);
 
-  const q = chooseItem();
-  state.current = q;
+    if(s.persist === "session" || s.persist === "local") state.persist = s.persist;
+    if(typeof s.autospeak === "boolean") state.autospeak = s.autospeak;
+    if(typeof s.rate === "number") state.rate = s.rate;
 
-  els.prompt.textContent = q.hint;
-  els.target.textContent = q.value;
-
-  const optionsCount = numOptions();
-  let options = [q.value];
-
-  if(q.type === "letter"){
-    while(options.length < optionsCount){
-      const cand = pick(LETTERS);
-      if(!options.includes(cand)) options.push(cand);
+    if(s.lettersMode === "custom" && Array.isArray(s.selectedLetters) && s.selectedLetters.length){
+      state.lettersMode = "custom";
+      state.selectedLetters = s.selectedLetters.filter(x => ALL_LETTERS.includes(x));
+      if(!state.selectedLetters.length) state.selectedLetters = [...ALL_LETTERS];
+    } else {
+      state.lettersMode = "all";
+      state.selectedLetters = [...ALL_LETTERS];
     }
+
+    if(typeof s.starsTotal === "number") state.starsTotal = s.starsTotal;
+    if(typeof s.streak === "number") state.streak = s.streak;
+  }catch(_){}
+}
+
+function saveSettings(){
+  localStorage.setItem(KEY_SETTINGS, JSON.stringify({
+    lettersMode: state.lettersMode,
+    selectedLetters: state.lettersMode === "custom" ? state.selectedLetters : [],
+    persist: state.persist,
+    autospeak: state.autospeak,
+    rate: state.rate,
+    starsTotal: state.starsTotal,
+    streak: state.streak
+  }));
+}
+
+function setUI(){
+  els.starsTotal.textContent = String(state.starsTotal);
+  els.streak.textContent = String(state.streak);
+
+  els.autospeakSelect.value = state.autospeak ? "on" : "off";
+  els.rateInput.value = String(state.rate);
+  els.persistSelect.value = state.persist;
+
+  if(state.lettersMode === "all"){
+    els.homeLettersHint.textContent = "מצב אותיות: כל האותיות (א–ת)";
   }else{
-    while(options.length < optionsCount){
-      const cand = pick(WORDS).w;
-      if(!options.includes(cand)) options.push(cand);
-    }
-  }
-
-  options = shuffle(options);
-
-  options.forEach(opt => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "answerBtn";
-    b.textContent = opt;
-
-    // tiny hint under words (first letter)
-    if(q.type === "word"){
-      const sm = document.createElement("small");
-      sm.textContent = `אות ראשונה: ${opt[0]}`;
-      b.appendChild(sm);
-    }
-
-    b.addEventListener("click", () => onAnswer(b, opt));
-    els.answers.appendChild(b);
-  });
-
-  setUIFromState();
-  if(state.autospeak){
-    setTimeout(() => speakHebrew(q.value), 120);
+    els.homeLettersHint.textContent = `מצב אותיות: פוקוס על (${state.selectedLetters.join(" ")})`;
   }
 }
 
-function onAnswer(btn, opt){
-  if(state.locked) return;
-  state.locked = true;
+function show(screen){
+  [els.home, els.picker, els.select, els.fight].forEach(s => s.hidden = true);
+  screen.hidden = false;
+}
 
-  const correct = opt === state.current.value;
-  const buttons = Array.from(els.answers.querySelectorAll("button"));
+function buildPicker(){
+  els.lettersGrid.innerHTML = "";
+  const selected = new Set(state.lettersMode === "custom" ? state.selectedLetters : ALL_LETTERS);
 
-  if(correct){
-    btn.classList.add("correct");
-    state.correct += 1;
-    state.streak += 1;
-    state.score += (10 + Math.min(10, state.streak)); // small streak bonus
-    els.feedback.textContent = "✅ נכון!";
-    speakHebrew(state.current.value);
+  ALL_LETTERS.forEach(letter => {
+    const d = document.createElement("div");
+    d.className = "letterChip" + (selected.has(letter) ? " selected" : "");
+    d.textContent = letter;
+
+    d.addEventListener("click", () => {
+      state.lettersMode = "custom";
+      const set = new Set(state.selectedLetters);
+      if(set.has(letter)) { set.delete(letter); d.classList.remove("selected"); }
+      else { set.add(letter); d.classList.add("selected"); }
+      state.selectedLetters = Array.from(set).filter(x => ALL_LETTERS.includes(x));
+      updatePickedCount();
+    });
+
+    els.lettersGrid.appendChild(d);
+  });
+
+  if(state.lettersMode === "all"){
+    state.selectedLetters = [...ALL_LETTERS];
+  }
+  updatePickedCount();
+}
+
+function updatePickedCount(){
+  if(state.selectedLetters.length === 0){
+    els.pickedCount.textContent = "בחר לפחות אות אחת";
   }else{
-    btn.classList.add("wrong");
-    state.wrong += 1;
-    state.streak = 0;
-    state.score = Math.max(0, state.score - 2);
-    els.feedback.textContent = `❌ לא. התשובה הנכונה: ${state.current.value}`;
-    // highlight correct
-    const ok = buttons.find(b => b.firstChild && b.firstChild.nodeType === Node.TEXT_NODE
-      ? b.firstChild.textContent === state.current.value
-      : b.textContent.trim().startsWith(state.current.value));
-    if(ok) ok.classList.add("correct");
-    speakHebrew(state.current.value);
+    els.pickedCount.textContent = `נבחרו: ${state.selectedLetters.length} אותיות`;
+  }
+}
+
+function pickerSelectAll(){
+  state.lettersMode = "all";
+  state.selectedLetters = [...ALL_LETTERS];
+  buildPicker();
+}
+function pickerSelectNone(){
+  state.lettersMode = "custom";
+  state.selectedLetters = [];
+  buildPicker();
+}
+function pickerPresetNadav(){
+  state.lettersMode = "custom";
+  state.selectedLetters = ["ס","כ","ר","ט"];
+  buildPicker();
+}
+
+function openPicker(){
+  buildPicker();
+  show(els.picker);
+}
+
+function pickerContinue(){
+  if(state.selectedLetters.length === 0){
+    updatePickedCount();
+    return;
+  }
+  // If picked all => treat as all
+  const set = new Set(state.selectedLetters);
+  state.lettersMode = (set.size === ALL_LETTERS.length) ? "all" : "custom";
+  if(state.lettersMode === "all") state.selectedLetters = [...ALL_LETTERS];
+
+  saveSettings();
+  setUI();
+  show(els.home);
+}
+
+function buildBrawlers(){
+  els.brawlers.innerHTML = "";
+
+  // Letters shown as brawlers:
+  // - all: 4 random letters each round
+  // - custom: 4 random from selected (or all of them if <4)
+  let pool = (state.lettersMode === "custom") ? state.selectedLetters.slice() : ALL_LETTERS.slice();
+  if(pool.length === 0) pool = ALL_LETTERS.slice();
+
+  let letters = shuffle(pool).slice(0, Math.min(4, pool.length));
+  // If fewer than 4 letters (custom small), pad with same pool (still unique if possible)
+  if(letters.length < 4){
+    const extraPool = pool.filter(x => !letters.includes(x));
+    while(letters.length < 4 && extraPool.length){
+      letters.push(extraPool.shift());
+    }
   }
 
-  setUIFromState();
-  // Next question
-  setTimeout(renderQuestion, 900);
+  const skins = shuffle(BRAWLERS);
+
+  letters.forEach((letter, i) => {
+    const skin = skins[i % skins.length];
+    const card = document.createElement("div");
+    card.className = "brawler";
+    card.innerHTML = `
+      <div class="bLeft">
+        <div class="bAvatar">${skin.avatar}</div>
+        <div class="bText">
+          <div class="bName">${skin.name}</div>
+          <div class="bDesc">${skin.desc}</div>
+        </div>
+      </div>
+      <div class="bRight">${letter}</div>
+    `;
+    card.addEventListener("click", () => startFight(letter));
+    els.brawlers.appendChild(card);
+  });
+
+  els.modePill.textContent = (state.lettersMode === "custom") ? "פוקוס" : "רנדומלי";
+  els.selectHint.textContent = (state.lettersMode === "custom")
+    ? `פוקוס על: ${state.selectedLetters.join(" ")}`
+    : "רנדומלי מלא: א–ת (4 בראולרים בכל סיבוב)";
+}
+
+function openSelect(){
+  buildBrawlers();
+  show(els.select);
+}
+
+function pickWord(){
+  const allowed = new Set(state.selectedLetters);
+  const pool = WORDS.filter(w => allowed.has(w[0]));
+  return pool.length ? pick(pool) : pick(WORDS);
+}
+
+function buildChoices(correctLetter){
+  const basePool = (state.lettersMode === "custom" ? state.selectedLetters : ALL_LETTERS);
+  const choices = new Set([correctLetter]);
+  while(choices.size < 4){
+    choices.add(pick(basePool));
+  }
+  return shuffle(Array.from(choices));
+}
+
+function startFight(chosenLetter){
+  state.locked = false;
+  state.roundStars = 0;
+  els.starsRound.textContent = "0";
+  els.feedback.textContent = "";
+
+  const w = pickWord();
+  state.currentWord = w;
+  state.currentFirstLetter = w[0];
+
+  els.prompt.textContent = "איזו אות שומעים בתחילת המילה?";
+  els.word.textContent = w;
+
+  const letters = buildChoices(state.currentFirstLetter);
+  els.choices.innerHTML = "";
+  letters.forEach(letter => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "choiceBtn";
+    b.textContent = letter;
+    b.addEventListener("click", () => answer(letter, b));
+    els.choices.appendChild(b);
+  });
+
+  show(els.fight);
+
+  if(state.autospeak){
+    setTimeout(() => speak(w), 120);
+  }
+}
+
+function answer(letter, btn){
+  if(state.locked) return;
+
+  if(letter === state.currentFirstLetter){
+    btn.classList.add("correct");
+    state.roundStars += 1;
+    state.starsTotal += 1;
+    state.streak += 1;
+    els.starsRound.textContent = String(state.roundStars);
+
+    els.feedback.textContent = (state.roundStars >= 3)
+      ? "⭐⭐⭐ סופר פאוור! אתה אלוף!"
+      : "💥 בום! פגיעה! ניצחת את הבוס!";
+
+    if(state.autospeak) speak(state.currentWord);
+
+    // lock this round after correct
+    state.locked = true;
+    Array.from(els.choices.querySelectorAll("button")).forEach(b => b.disabled = true);
+
+    setUI();
+    saveSettings();
+  }else{
+    btn.classList.add("wrong");
+    state.streak = 0;
+    els.feedback.textContent = "😅 הבוס התחמק — ננסה שוב!";
+    if(state.autospeak) speak(state.currentWord);
+    setUI();
+    saveSettings();
+  }
 }
 
 function openSettings(){
   els.dialog.showModal();
 }
-function applySettingsFromUI(){
-  state.mode = els.modeSelect.value;
-  state.difficulty = els.difficultySelect.value;
+function saveSettingsFromDialog(){
   state.autospeak = els.autospeakSelect.value === "on";
   state.rate = parseFloat(els.rateInput.value || "0.95");
+  state.persist = els.persistSelect.value === "session" ? "session" : "local";
   saveSettings();
-  setUIFromState();
+  setUI();
+  els.dialog.close();
 }
 
-els.btnShuffle.addEventListener("click", renderQuestion);
-els.btnSpeak.addEventListener("click", () => {
-  if(state.current) speakHebrew(state.current.value);
-});
-els.btnSettings.addEventListener("click", openSettings);
-els.btnSave.addEventListener("click", () => {
-  applySettingsFromUI();
-  els.dialog.close();
-});
+// events
+els.btnPlay.addEventListener("click", openSelect);
+els.btnParent.addEventListener("click", openPicker);
 
+els.btnPickAll.addEventListener("click", pickerSelectAll);
+els.btnPickNone.addEventListener("click", pickerSelectNone);
+els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
+els.btnPickerContinue.addEventListener("click", pickerContinue);
+
+els.btnNext.addEventListener("click", openSelect);
+els.btnHome.addEventListener("click", () => show(els.home));
+
+els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
+els.btnSettings.addEventListener("click", openSettings);
+els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
+
+// init
 loadSettings();
-setUIFromState();
-// Start with a question right away
-renderQuestion();
+setUI();
+show(els.home);
