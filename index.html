@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>משחק אותיות ומילים</title>
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">אב</div>
+      <div>
+        <div class="title">משחק אותיות ומילים</div>
+        <div class="subtitle">לומדים לזהות אותיות ולקרוא מילים קצרות</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btnSpeak" class="btn" type="button">🔊 הקרא</button>
+      <button id="btnShuffle" class="btn" type="button">🔁 חדש</button>
+      <button id="btnSettings" class="btn" type="button">⚙️</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card big">
+      <div class="modeRow">
+        <div class="modePill" id="modePill">מצב: אות</div>
+        <div class="score" id="score">ניקוד: 0</div>
+      </div>
+
+      <div class="prompt" id="prompt">לחץ על "חדש" כדי להתחיל</div>
+
+      <div class="target" id="target" aria-live="polite">א</div>
+
+      <div class="answers" id="answers"></div>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>התקדמות</h2>
+      <div class="progressRow">
+        <div>✅ נכונות: <span id="correct">0</span></div>
+        <div>❌ שגויות: <span id="wrong">0</span></div>
+        <div>🔥 רצף: <span id="streak">0</span></div>
+      </div>
+      <div class="tiny">
+        טיפ: באייפון/אייפד אפשר להוסיף למסך הבית: Share → Add to Home Screen.
+      </div>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog">
+      <h2>הגדרות</h2>
+
+      <label class="row">
+        <span>מצב</span>
+        <select id="modeSelect">
+          <option value="letters">אותיות</option>
+          <option value="words">מילים</option>
+          <option value="mixed">מעורב</option>
+        </select>
+      </label>
+
+      <label class="row">
+        <span>רמת קושי</span>
+        <select id="difficultySelect">
+          <option value="easy">קל (2 תשובות)</option>
+          <option value="normal" selected>רגיל (3 תשובות)</option>
+          <option value="hard">קשה (4 תשובות)</option>
+        </select>
+      </label>
+
+      <label class="row">
+        <span>הקראה אוטומטית</span>
+        <select id="autospeakSelect">
+          <option value="on" selected>כן</option>
+          <option value="off">לא</option>
+        </select>
+      </label>
+
+      <label class="row">
+        <span>מהירות הקראה</span>
+        <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
+      </label>
+
+      <menu class="menu">
+        <button class="btn" value="cancel">סגור</button>
+        <button class="btn primary" id="btnSave" value="default">שמור</button>
+      </menu>
+      <p class="tiny">
+        הערה: הקראת עברית משתמשת ב-TTS של המכשיר. אם אין קול עברי, זה עדיין יעבוד בלי הקראה.
+      </p>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js");
+    }
+  </script>
+</body>
+</html>
