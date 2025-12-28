@@ -232,3 +232,30 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 }
 
 .starBtn[disabled]{opacity:.6; cursor:not-allowed; filter:saturate(.8);}
+
+/* v6: arena mode - choice cards as brawlers */
+.choices.arena { grid-template-columns: 1fr 1fr; gap: 12px; }
+.choiceCard{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px; border-radius:16px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  transition: transform .08s ease, border-color .15s ease, background .15s ease;
+}
+.choiceCard:active{ transform: scale(.98); }
+.choiceCard.disabled{ opacity:.7; cursor:not-allowed; }
+.choiceCard.correct{ border-color: rgba(0,255,140,.9); background: rgba(0,255,140,.10); }
+.choiceCard.wrong{ border-color: rgba(255,70,70,.9); background: rgba(255,70,70,.10); }
+.choiceLeft{ display:flex; gap:10px; align-items:center; }
+.choiceAvatar{
+  width:44px; height:44px; border-radius:12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.choiceAvatar img{ width:100%; height:100%; object-fit:cover; }
+.choiceName{ font-weight:800; }
+.choiceLetter{ font-size:26px; font-weight:900; opacity:.95; }
+.choiceHint{ font-size:12px; opacity:.75; }
