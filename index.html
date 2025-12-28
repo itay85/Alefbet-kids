@@ -19,6 +19,7 @@
     </div>
 
     <div class="controls">
+      <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
       <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
     </div>
@@ -39,7 +40,7 @@
 
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button">🎮 PLAY</button>
-          <button id="btnParent" class="btn big" type="button">👨‍👩‍👦 הורה: בחירת אותיות</button>
+          <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
@@ -54,33 +55,13 @@
       </div>
     </section>
 
-    <section id="screenPicker" class="screen" hidden>
-      <div class="panel">
-        <h2>בחירת אותיות להתמקדות</h2>
-        <p class="muted">לחצו על אות כדי לסמן/לבטל. כשתסיימו — “המשך”.</p>
-
-        <div class="pickerToolbar">
-          <button class="btn" id="btnPickAll" type="button">בחר הכל</button>
-          <button class="btn" id="btnPickNone" type="button">נקה</button>
-          <button class="btn" id="btnPresetNadav" type="button">נדב: ס כ ר ט</button>
-        </div>
-
-        <div class="lettersGrid" id="lettersGrid"></div>
-
-        <div class="pickerFooter">
-          <div class="tiny" id="pickedCount"></div>
-          <button id="btnPickerContinue" class="btn primary" type="button">המשך</button>
-        </div>
-      </div>
-    </section>
-
     <section id="screenSelect" class="screen" hidden>
       <div class="panel">
         <div class="rowBetween">
           <h2>בחר בראולר</h2>
           <div class="pill" id="modePill">רנדומלי</div>
         </div>
-        <p class="muted">בחר דמות – זו האות שלך לסיבוב הזה.</p>
+        <p class="muted">בחר דמות – זו האות שלך. המשחק ימשיך איתה אוטומטית.</p>
         <div class="brawlers" id="brawlers"></div>
         <div class="tiny" id="selectHint"></div>
       </div>
@@ -89,7 +70,7 @@
     <section id="screenFight" class="screen" hidden>
       <div class="panel fightTop">
         <div class="rowBetween">
-          <div class="pill">Boss Fight</div>
+          <div class="pill" id="currentBrawlerPill">בחר בראולר</div>
           <div class="fightStats">
             <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
@@ -99,7 +80,7 @@
         <div class="prompt" id="prompt">איזו אות שומעים בתחילת המילה?</div>
 
         <div class="wordWrap">
-          <div class="word" id="wordMasked">_כבת</div>
+          <div class="word" id="wordMasked">_</div>
           <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
         </div>
 
@@ -108,18 +89,41 @@
         <div class="feedback" id="feedback" aria-live="polite"></div>
 
         <div class="reward" id="reward" hidden>
-          <button id="btnStar" class="starBtn" type="button" aria-label="קבל מטבעות">⭐</button>
+          <button id="btnStar" class="starBtn" type="button" aria-label="קבל מטבעות" disabled>⭐</button>
           <div class="rewardText" id="rewardText">לחץ על הכוכב!</div>
           <div class="coinsPop" id="coinsPop" hidden>+100 🪙</div>
         </div>
 
         <div class="fightFooter">
-          <button id="btnNext" class="btn primary" type="button" disabled>סיבוב הבא</button>
-          <button id="btnHome" class="btn" type="button">🏠 בית</button>
+          <button id="btnTryAgain" class="btn" type="button" hidden>נסה שוב</button>
+          <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
         </div>
       </div>
     </section>
   </main>
+
+  <dialog id="lettersDialog">
+    <div class="dialog">
+      <div class="rowBetween">
+        <h2 style="margin:0">בחירת אותיות להתמקדות</h2>
+        <button id="btnCloseLetters" class="btn" type="button">סגור</button>
+      </div>
+      <p class="muted" style="margin-top:10px">לחצו על אות כדי לסמן/לבטל. סגור = שומר וחוזר למשחק.</p>
+
+      <div class="pickerToolbar">
+        <button class="btn" id="btnPickAll" type="button">בחר הכל</button>
+        <button class="btn" id="btnPickNone" type="button">נקה</button>
+        <button class="btn" id="btnPresetNadav" type="button">נדב: ס כ ר ט</button>
+      </div>
+
+      <div class="lettersGrid" id="lettersGrid"></div>
+
+      <div class="pickerFooter">
+        <div class="tiny" id="pickedCount"></div>
+        <div class="tiny">אפשר לפתוח/לסגור גם עם כפתור 👨‍👩‍👦 למעלה</div>
+      </div>
+    </div>
+  </dialog>
 
   <dialog id="settingsDialog">
     <form method="dialog" class="dialog">
@@ -155,7 +159,7 @@
         <button id="btnKeepPlaying" class="btn primary" type="button">להמשיך לשחק</button>
         <button id="btnResetCoins" class="btn" type="button">איפוס מטבעות</button>
       </div>
-      <p class="tiny">טיפ: אפשר להחליף אותיות בהגדרות הורה.</p>
+      <p class="tiny">טיפ: אפשר להחליף אותיות עם 👨‍👩‍👦 למעלה.</p>
     </div>
   </dialog>
 
