@@ -434,6 +434,8 @@ const els = {
 };
 
 const state = {
+  debugEnabled: false,
+
   lettersMode: "all",
   selectedLetters: [...ALL_LETTERS],
 
@@ -747,7 +749,7 @@ els.choices.innerHTML = "";
         <div class="choiceAvatar">${br.img ? `<img src="${br.img}" alt="${br.name}">` : `<div class="noImg">${letter}</div>`}</div>
         <div>
           <div class="choiceName">${br.name}</div>
-          <div class="choiceHint">בחר את הבראולר שמתחיל באות הנכונה</div>
+          <div class="choiceHint">שומר האות ${letter}</div>
         </div>
       </div>
       <div class="choiceLetter">${letter}</div>

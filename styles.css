@@ -327,3 +327,15 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 .versionBadge{font-size:12px;opacity:.7;margin-inline-start:6px;}
 
 .debugPanel{pointer-events:none;}
+
+.choiceCard{
+  position: relative;
+  overflow: hidden;
+}
+.choiceAvatar img{
+  animation: breathe 2.2s ease-in-out infinite;
+}
+@keyframes breathe{
+  0%,100%{transform: scale(1);}
+  50%{transform: scale(1.05);}
+}
