@@ -1,71 +1,29 @@
-// Brawl Letters Service Worker (v28)
-const VERSION = "v37";
-const CACHE = `brawl-letters-${VERSION}`;
 
-// Precache core files (assets will still be cache-first when fetched)
-const CORE = [
+const CACHE_NAME = "brawl-letters-79";
+const ASSETS = [
   "./",
-  "./index.html?v=37",
-  "./styles.css?v=37",
-  "./app.js?v=37",
-  "./manifest.webmanifest?v=37",
+  "./index.html?v=79",
+  "./styles.css?v=79",
+  "./app.js?v=79",
+  "./manifest.webmanifest?v=79",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png",
+  "./assets/logos/logo1.png", "./assets/logos/logo2.png", "./assets/logos/logo3.png", "./assets/logos/logo4.png", "./assets/logos/logo5.png", "./assets/logos/logo6.png",
+  // bosses and brawlers are optional; cache as available
 ];
 
 self.addEventListener("install", (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(CORE))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).catch(()=>{}));
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
-    await self.clients.claim();
-  })());
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+  );
 });
 
 self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
-
-  // Only handle same-origin
-  if(url.origin !== location.origin) return;
-
-  // Network-first for navigations / HTML so updates take effect immediately
-  if (req.mode === "navigate" || url.pathname.endsWith(".html")) {
-    event.respondWith((async () => {
-      try {
-        const fresh = await fetch(req, { cache: "no-store" });
-        const cache = await caches.open(CACHE);
-        cache.put(req, fresh.clone());
-        return fresh;
-      } catch (e) {
-        const cached = await caches.match(req);
-        return cached || caches.match("./");
-      }
-    })());
-    return;
-  }
-
-  // For JS/CSS, prefer network but fall back to cache
-  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".webmanifest")) {
-    event.respondWith((async () => {
-      try {
-        const fresh = await fetch(req, { cache: "no-store" });
-        const cache = await caches.open(CACHE);
-        cache.put(req, fresh.clone());
-        return fresh;
-      } catch (e) {
-        return (await caches.match(req)) || fetch(req);
-      }
-    })());
-    return;
-  }
-
-  // Cache-first for everything else (images, icons, etc.)
   event.respondWith(
-    caches.match(req).then((cached) => cached || fetch(req))
+    caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });

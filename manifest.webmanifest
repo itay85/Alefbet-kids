@@ -1,12 +1,10 @@
 {
-  "name": "BRAWL LETTERS – קרב האותיות",
+  "name": "Brawl Letters",
   "short_name": "BrawlLetters",
-  "start_url": ".",
+  "start_url": "./?v=79",
   "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#0b1020",
-  "lang": "he",
-  "dir": "rtl",
+  "background_color": "#0b0f24",
+  "theme_color": "#0b0f24",
   "icons": [
     {
       "src": "assets/icons/icon-192.png",
