@@ -572,8 +572,8 @@ function pickerPresetNadav(){ state.lettersMode="custom"; state.selectedLetters=
 
 // Brawlers (skin)
 function brawlerForLetter(letter){
-  if(SPECIAL_BRAWLERS[letter]) return SPECIAL_BRAWLERS[letter];
-  return { name: `בוס ${letter}`, desc: `דמות מיוחדת`, img: `assets/brawlers/letter-${letter}.svg` };
+  // v15: backward-compat — "brawler" cards should show the letter boss
+  return bossForLetter(letter);
 }
 
 
