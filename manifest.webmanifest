@@ -1,7 +1,7 @@
 {
   "name": "Brawl Letters",
   "short_name": "BrawlLetters",
-  "start_url": "./?v=80",
+  "start_url": "./?v=81",
   "display": "standalone",
   "background_color": "#0b0f24",
   "theme_color": "#0b0f24",

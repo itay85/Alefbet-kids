@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v80";
+const BUILD = "v81";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -762,7 +762,9 @@ function renderPlayerPill(){
 function renderStats(){
   els.starsNum.textContent = String(state.settings.stars || 0);
   els.coinsNum.textContent = String(state.settings.coins || 0);
-  const logoPath = `assets/logos/${state.settings.logo}`;
+  const logoPath = `assets/logos/${state.settings.logo
+  if(els.streakPill){ els.streakPill.textContent = `🔥 סופר: ${state.settings.streak || 0}`; }
+}`;
   els.logoImg.src = logoPath;
 
   if(els.streakPill){
@@ -955,7 +957,7 @@ function chooseAnswer(letter){
     renderStats();
 
     // Coins are awarded on claim; amount depends on attempts/mistakes
-    showRewardOverlay("ניצחת! ⭐", 0);
+    showRewardOverlay("coins","ניצחת! ⭐","לחץ על הכוכב לקבל מטבעות","⭐","");
   } else {
     // Wrong: keep same question, remove this option, let the child try again
     state.hadMistake = true;
@@ -1002,46 +1004,15 @@ function grantStarsBonus(starsAdd, title){
 async function claimReward(){
   if(state.rewardClaimed) return;
   state.rewardClaimed = true;
-  const starBtn = els.rewardOverlay?.querySelector?.('[data-action="claimReward"]');
-  if(starBtn){ starBtn.disabled = true; }
-  if(!state.answered) return;
-  if(els.rewardOverlay.classList.contains("hidden")) return;
+  if(els.rewardMainBtn) els.rewardMainBtn.disabled = true;
 
-  els.rewardSub.textContent = "מקבל פרס…";
+  // MODE: chest => convert 1000 coins to stars
+  if(state.rewardMode === "chest"){
+    const fromStars = state.settings.stars || 0;
+    const addStars = randInt(defaults.chestStarsMin, defaults.chestStarsMax);
+    state.settings.stars = fromStars + addStars;
 
-  // If the child needed multiple attempts and the last remaining option was correct -> 0 coins
-  const enabledCount = [...els.answers.querySelectorAll("button.answerBtn:not([disabled])")].length;
-  let addCoins = 0;
-
-  if(state.hadMistake){
-    // If mistakes until forced (only correct left)
-    if(enabledCount === 1){
-      addCoins = 0;
-    } else {
-      addCoins = randInt(defaults.coinsReducedMin, defaults.coinsReducedMax);
-    }
-  } else {
-    addCoins = randInt(defaults.coinsPerWinMin, defaults.coinsPerWinMax);
-  }
-
-  const from = state.settings.coins || 0;
-  state.settings.coins = from + addCoins;
-
-  // Update overlay text
-  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "0 🪙";
-  els.rewardHint.textContent = addCoins ? "כל הכבוד! 🪙" : "ניסית יפה! הפעם בלי מטבעות 🙂";
-
-  // Animate coins count
-  const to = state.settings.coins;
-  await animateNumber(els.coinsNum, from, to, 14);
-
-  // If reached 1000 coins => open surprise chest: give random stars (3-13), subtract 1000
-  if(state.settings.coins >= defaults.goalCoins){
-    state.settings.coins = state.settings.coins - defaults.goalCoins;
-    const starsAdd = randInt(defaults.chestStarsMin, defaults.chestStarsMax);
-    state.settings.stars = (state.settings.stars || 0) + starsAdd;
-
-    // Unlock logos by stars thresholds (every 100 stars => +1 logo)
+    // unlock logos by stars
     const unlockCount = Math.min(LOGOS.length, 1 + Math.floor((state.settings.stars || 0) / defaults.starsToUnlockStep));
     if(unlockCount > (state.settings.unlockedLogos || 1)){
       state.settings.unlockedLogos = unlockCount;
@@ -1050,61 +1021,64 @@ async function claimReward(){
     settingsSave();
     renderStats();
 
-    hideReward();
+    els.rewardCoinsText.textContent = `+${addStars} ⭐`;
+    els.rewardHint.textContent = "הפתעה!";
+    els.rewardSub.textContent = "קיבלת כוכבים 🎉";
 
-    // Show surprise overlay (reuse reward overlay)
-    showRewardOverlay("הפתעה! ⭐", 0);
-    els.rewardCoinsText.textContent = `+${starsAdd} ⭐`;
-    els.rewardSub.textContent = "קיבלת כוכבים!";
-
-    // Animate stars number update visually
-    els.starsNum.textContent = String(state.settings.stars || 0);
-    els.coinsNum.textContent = String(state.settings.coins || 0);
-
-    // If unlocked all logos -> fireworks end screen
+    // End game
     if((state.settings.unlockedLogos || 1) >= LOGOS.length){
       els.rewardHint.textContent = "🎆 כל הכבוד! סיימת את המשחק 🎆";
       els.rewardSub.textContent = "פתחת את כל הלוגואים!";
-      // Disable answering further
-      els.answers.innerHTML = "";
       return;
     }
 
-    // Offer to choose newly unlocked logo, if any
-    if(unlockCount > 1 && (state.settings.stars % defaults.starsToUnlockStep) <= defaults.chestStarsMax){
-      // open logo picker after closing overlay
+    // if new logo unlocked, open picker after a moment
+    if((state.settings.stars % defaults.starsToUnlockStep) === 0){
       setTimeout(()=>{ hideReward(); openLogo(true); }, 900);
       return;
     }
 
-    // Continue game
     setTimeout(()=>{ hideReward(); newQuestion(); }, 900);
-
-    if(state.pendingSuperBonus){
-      state.pendingSuperBonus = false;
-      const sAdd2 = randInt(defaults.superBonusStarsMin, defaults.superBonusStarsMax);
-      setTimeout(()=>{ grantStarsBonus(sAdd2, "🔥 בוסט סופר! 🔥"); }, 950);
-      setTimeout(()=>{ hideReward(); newQuestion(); }, 1900);
-    }
     return;
   }
 
+  // MODE: coins reward for a solved word
+  const addCoins = computeCoinsForThisWin();
+  const fromCoins = state.settings.coins || 0;
+  const toCoins = fromCoins + addCoins;
+  state.settings.coins = toCoins;
   settingsSave();
-  renderStats();
 
+  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "0 🪙";
+  els.rewardHint.textContent = addCoins ? "כל הכבוד!" : "ניסית יפה!";
+  els.rewardSub.textContent = addCoins ? "קיבלת מטבעות" : "הפעם בלי מטבעות";
+
+  await animateNumber(els.coinsNum, fromCoins, toCoins, 12);
+
+  // If reached goal coins, DO NOT delete silently: show chest popup
+  if(state.settings.coins >= defaults.goalCoins){
+    state.settings.coins = state.settings.coins - defaults.goalCoins;
+    settingsSave();
+    renderStats();
+
+    // Show chest overlay requiring a click
+    showRewardOverlay(
+      "chest",
+      "כל הכבוד! צברת 1000 מטבעות 🎁",
+      "לחץ על ההפתעה כדי לקבל כוכבים",
+      "🎁",
+      ""
+    );
+    return;
+  }
+
+  renderStats();
   hideReward();
 
-  if(state.pendingSuperBonus){
-    state.pendingSuperBonus = false;
-    const sAdd = randInt(defaults.superBonusStarsMin, defaults.superBonusStarsMax);
-    // Show bonus overlay briefly, then continue
-    grantStarsBonus(sAdd, "🔥 בוסט סופר! 🔥");
-    setTimeout(()=>{ hideReward(); newQuestion(); }, 950);
-    return;
-  }
-
-  setTimeout(()=>{ newQuestion(); }, 120);
+  // Super bonus every 40 streak is handled elsewhere after hideReward in existing flow (kept)
+  setTimeout(()=>{ newQuestion(); }, 140);
 }
+
 function openLetters(){
   renderLettersGrid();
   els.lettersDialog.showModal();
@@ -1371,3 +1345,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
   attachDelegation();
   boot();
 });
+
+function computeCoinsForThisWin(){
+  // If mistakes until forced correct (only one option left) => 0
+  const enabledCount = [...els.answers.querySelectorAll("button.answerBtn:not([disabled])")].length;
+  if(state.hadMistake){
+    if(enabledCount === 1) return 0;
+    return randInt(defaults.coinsReducedMin, defaults.coinsReducedMax);
+  }
+  return randInt(defaults.coinsPerWinMin, defaults.coinsPerWinMax);
+}

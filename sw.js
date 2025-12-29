@@ -1,11 +1,11 @@
 
-const CACHE_NAME = "brawl-letters-80";
+const CACHE_NAME = "brawl-letters-81";
 const ASSETS = [
   "./",
-  "./index.html?v=80",
-  "./styles.css?v=80",
-  "./app.js?v=80",
-  "./manifest.webmanifest?v=80",
+  "./index.html?v=81",
+  "./styles.css?v=81",
+  "./app.js?v=81",
+  "./manifest.webmanifest?v=81",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",
   "./assets/logos/logo1.png", "./assets/logos/logo2.png", "./assets/logos/logo3.png", "./assets/logos/logo4.png", "./assets/logos/logo5.png", "./assets/logos/logo6.png",
