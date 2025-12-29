@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAWL LETTERS – קרב האותיות</title>
   <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="./manifest.webmanifest?v=42">
-  <link rel="stylesheet" href="./styles.css?v=42">
+  <link rel="manifest" href="./manifest.webmanifest?v=43">
+  <link rel="stylesheet" href="./styles.css?v=43">
 </head>
 <body>
   <header class="top">
@@ -187,7 +187,27 @@
     </div>
   </dialog>
 
-  <script src="./app.js?v=42"></script>
+  
+<script>
+(function(){
+  try{
+    var el = document.getElementById("debugLog");
+    var p = document.getElementById("debugPanel");
+    if(p) p.classList.remove("hidden");
+    if(el){
+      el.textContent += "[BOOT] inline probe executed ✅
+";
+    }else{
+      // If debug isn't in DOM yet, write to body
+      document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:10px;left:10px;right:10px;z-index:999999;background:#000;color:#fff;padding:10px;border-radius:12px'>[BOOT] probe ran but debugLog missing</div>");
+    }
+  }catch(e){
+    document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:10px;left:10px;right:10px;z-index:999999;background:#000;color:#fff;padding:10px;border-radius:12px'>[BOOT] probe error: "+String(e)+"</div>");
+  }
+})();
+</script>
+
+<script src="./app.js?v=43"></script>
   <div id="modalUnlock" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modalCard">
       <div class="modalTitle">🎁 קיבלת לוגו חדש!</div>

@@ -35,8 +35,6 @@ window.addEventListener("unhandledrejection", (e) => {
   console.error = (...a)=>{ try{ dbg("ERR: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origErr(...a); };
 })();
 
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=42"); }
-
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1;i>0;i--){
