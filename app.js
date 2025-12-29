@@ -456,7 +456,7 @@ const els = {
 const state = {
   giftStarAt1000: false,
 
-  MIN_SELECTED_LETTERS: 3,
+  MIN_SELECTED_LETTERS: 4,
 
   unlockedLogos: [],
   logoLocked: true,
@@ -590,7 +590,7 @@ function buildPicker(){
 
 function updatePickedCount(){
   els.pickedCount.textContent = (state.selectedLetters.length === 0)
-    ? "בחר לפחות אות אחת"
+    ? "בחר לפחות 4 אותיות"
     : `נבחרו: ${state.selectedLetters.length} אותיות`;
 }
 
@@ -1152,7 +1152,10 @@ function loadV67(){
 }
 
 // ===== ACTIONS_V67 + DELEGATION =====
+let __v67_inited=false;
 function initV67(){
+  if(__v67_inited) return;
+  __v67_inited=true;
   const acts = {
     startGame(){ try{ startGame(); }catch(_){ } },
     openLetters(){ try{ openLetters(); }catch(_){ } },
@@ -1240,7 +1243,131 @@ function initV67(){
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  if(!USE_LEGACY_BINDINGS){
-    try{ initV67(); }catch(_){}
-  }
+  try{ setTimeout(()=>{ try{ initV67(); }catch(_){} }, 0); }catch(_){}
 });
+
+// ===== V69_LOGO_ACTIONS =====
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest && e.target.closest('[data-action="openLogo"]');
+  if(btn){
+    e.preventDefault(); e.stopPropagation();
+    try{ e.stopImmediatePropagation(); }catch(_){}
+    try{ if(typeof openLogoModal==="function") openLogoModal(); }catch(_){}
+  }
+}, true);
+
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest && e.target.closest('[data-action="closeLogo"]');
+  if(btn){
+    e.preventDefault(); e.stopPropagation();
+    try{ e.stopImmediatePropagation(); }catch(_){}
+    try{ if(typeof closeLogoModal==="function") closeLogoModal(); }catch(_){}
+  }
+}, true);
+
+// ===== DELEGATION_V70 (stable click routing, cancels legacy) =====
+(function(){
+  function safe(fn){ try{ fn(); }catch(e){ try{ if(window.__DBGLOG) window.__DBGLOG(String(e)); }catch(_){} } }
+  const A = {
+    startGame: ()=> safe(()=> startGame()),
+    openLetters: ()=> safe(()=> openLetters()),
+    closeLetters: ()=> safe(()=> closeLetters()),
+    pickAll: ()=> safe(()=> pickAll()),
+    pickNone: ()=> safe(()=> pickNone()),
+    presetNadav: ()=> safe(()=> (typeof presetNadav==="function" ? presetNadav() : null)),
+    openSettings: ()=> safe(()=> (els.settingsDialog && els.settingsDialog.showModal())),
+    closeSettings: ()=> safe(()=> (els.settingsDialog && els.settingsDialog.close())),
+    saveSettings: ()=> safe(()=> { 
+      try{
+        const t=document.getElementById("debugToggle");
+        if(t && typeof debugSet==="function") debugSet(t.value==="on");
+      }catch(_){}
+      if(typeof saveV67==="function") saveV67(); else if(typeof save==="function") save();
+      (els.settingsDialog && els.settingsDialog.close && els.settingsDialog.close());
+    }),
+    resetGame: ()=> safe(()=> {
+      if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
+      try{
+        if(typeof settingsKeyV67==="function") localStorage.removeItem(settingsKeyV67());
+        else localStorage.removeItem("brawl_letters_settings_v5");
+      }catch(_){}
+      location.reload();
+    }),
+    resetCoins: ()=> safe(()=> resetCoins()),
+    repeatWord: ()=> safe(()=> { if(state && state.currentWord && typeof speak==="function") speak(state.currentWord); }),
+    claimReward: ()=> safe(()=> claimReward()),
+    toggleReveal: ()=> safe(()=> toggleReveal()),
+    tryAgain: ()=> safe(()=> tryAgain()),
+    keepPlaying: ()=> safe(()=> keepPlaying()),
+    openPlayers: ()=> safe(()=> { 
+      const dlg=document.getElementById("playersDialog"); if(!dlg) return;
+      if(typeof playersSelectRender==="function") playersSelectRender();
+      dlg.showModal();
+    }),
+    closePlayers: ()=> safe(()=> document.getElementById("playersDialog")?.close()),
+    createFirstPlayer: ()=> safe(()=> { if(typeof acts==="undefined" && typeof initV67==="function"){}; if(typeof actions!=="undefined"){}; if(typeof actsV70!=="undefined"){}; if(typeof A_createFirstPlayer==="function") A_createFirstPlayer(); else if(typeof actsCreateFirstPlayer==="function") actsCreateFirstPlayer(); else if(typeof actions_createFirstPlayer==="function") actions_createFirstPlayer(); else if(typeof PROFILES_V67!=="undefined"){}; 
+      // fallback to v67 action if exists
+      if(typeof initV67==="function"){ /* no-op */ }
+      if(typeof actions === "object" && actions.createFirstPlayer) actions.createFirstPlayer();
+      if(typeof acts === "object" && acts.createFirstPlayer) acts.createFirstPlayer();
+      if(typeof createFirstPlayer === "function") createFirstPlayer();
+      if(typeof playersSave==="function" && typeof playerIdSet==="function"){
+        const input=document.getElementById("firstPlayerName");
+        let name=(input?.value || "שחקן 1").trim(); if(!name) name="שחקן 1";
+        playersSave([{id:"p1", name}]); playerIdSet("p1");
+        document.getElementById("firstPlayerDialog")?.close();
+        if(typeof loadV67==="function") loadV67(); else if(typeof load==="function") load();
+        if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
+      }
+    }),
+    addPlayer: ()=> safe(()=> { 
+      if(typeof playersGet==="function" && typeof playersSave==="function" && typeof playerIdSet==="function"){
+        const ps=playersGet();
+        const name=(prompt("שם השחקן החדש:", `שחקן ${ps.length+1}`) || "").trim();
+        if(!name) return;
+        const id="p"+Date.now().toString(36);
+        ps.push({id, name}); playersSave(ps); playerIdSet(id);
+        if(typeof playersSelectRender==="function") playersSelectRender();
+        if(typeof loadV67==="function") loadV67(); else load();
+        if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
+      }
+    }),
+    renamePlayer: ()=> safe(()=> {
+      if(typeof playersGet==="function" && typeof playersSave==="function" && typeof playerIdGet==="function"){
+        const ps=playersGet(); const id=playerIdGet();
+        const p=ps.find(x=>x.id===id); if(!p) return;
+        const name=(prompt("שם חדש:", p.name) || "").trim(); if(!name) return;
+        p.name=name; playersSave(ps);
+        if(typeof playersSelectRender==="function") playersSelectRender();
+        if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
+      }
+    }),
+    openLogo: ()=> safe(()=> (typeof openLogoModal==="function" ? openLogoModal() : null)),
+    closeLogo: ()=> safe(()=> (typeof closeLogoModal==="function" ? closeLogoModal() : null)),
+    dbgCopy: ()=> safe(()=> { const t=document.getElementById("debugLog")?.textContent||""; navigator.clipboard?.writeText(t); }),
+    dbgClear: ()=> safe(()=> { const el=document.getElementById("debugLog"); if(el) el.textContent=""; }),
+    dbgHide: ()=> safe(()=> { const p=document.getElementById("debugPanel"); if(p) p.classList.add("hidden"); }),
+  };
+
+  // capture phase to cancel legacy listeners
+  document.addEventListener("click", function(e){
+    const btn = e.target && e.target.closest ? e.target.closest("[data-action]") : null;
+    if(!btn) return;
+    const act = btn.getAttribute("data-action");
+    if(!act || !A[act]) return;
+    e.preventDefault();
+    e.stopPropagation();
+    try{ e.stopImmediatePropagation(); }catch(_){}
+    A[act]();
+  }, true);
+
+  document.addEventListener("change", function(e){
+    const sel = e.target && e.target.closest ? e.target.closest("#playerSelect") : null;
+    if(!sel) return;
+    try{
+      if(typeof playerIdSet==="function") playerIdSet(sel.value);
+      if(typeof loadV67==="function") loadV67(); else if(typeof load==="function") load();
+      if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
+    }catch(_){}
+  }, true);
+})();

@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v67 ✅
+    BUILD v70 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -69,7 +69,8 @@
   <div class="pill" id="currentBrawlerPill">בחר בראולר</div>
           <div class="fightStats">
             <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong>
-            <button id="btnLettersInGame" class="btn small" type="button" data-action="openLetters">בחירת אותיות</button>
+
+            <button id="btnLogo" class="btn small" type="button" data-action="openLogo" title="הלוגו שלי"></button>
           </div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
           </div>
@@ -106,7 +107,7 @@
     <div class="modalCard">
       <div class="modalHeader">
         <div class="modalTitle">בחר לוגו למשחק</div>
-        <button id="btnCloseLogoModal" class="btn" type="button" aria-label="סגור">✕</button>
+        <button id="btnCloseLogoModal" class="btn" type="button" aria-label="סגור" data-action="closeLogo">✕</button>
       </div>
       <div class="modalBody">
         <div class="rowBetween">
@@ -130,7 +131,7 @@
       <div class="pickerToolbar">
         <button class="btn" id="btnPickAll" type="button" data-action="pickAll">בחר הכל</button>
         <button class="btn" id="btnPickNone" type="button" data-action="pickNone">נקה</button>
-        <button class="btn" id="btnPresetNadav" type="button">נדב: ס כ ר ט</button>
+        <button class="btn" id="btnPresetNadav" type="button" data-action="presetNadav">נדב: ס כ ר ט</button>
       </div>
 
       <div class="lettersGrid" id="lettersGrid"></div>
