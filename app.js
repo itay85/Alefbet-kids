@@ -878,6 +878,7 @@ els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
 els.btnPlay.addEventListener("click", () => {
+  showDebug("START clicked (v24)");
   if(!state.chosenLogoId) openBrawlers();
   else startNewQuestion();
 });
