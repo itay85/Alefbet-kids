@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v79";
+const BUILD = "v80";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -786,6 +786,9 @@ function hideReward(){
   els.rewardOverlay.classList.add("hidden");
 }
 function showRewardOverlay(hintText, addCoins=0){
+  const starBtn = els.rewardOverlay?.querySelector?.('[data-action="claimReward"]');
+  if(starBtn){ starBtn.disabled = false; }
+
   els.rewardHint.textContent = hintText || "כל הכבוד!";
   els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "";
   els.rewardSub.textContent = "לחץ על הכוכב לקבל מטבעות";
@@ -883,6 +886,7 @@ function buildOptions(correct){
 }
 
 function newQuestion(){
+  state.rewardClaimed = false;
   state.attempts = 0;
   state.eliminated = new Set();
   state.hadMistake = false;
@@ -902,7 +906,7 @@ function newQuestion(){
     state.correctLetter=t2;
     state.currentWord=pickWordForLetter(t2) || "מילה";
   } else {
-    
+    state.settings.streak = 0;
     state.correctLetter = target;
     state.currentWord = word;
   }
@@ -996,6 +1000,10 @@ function grantStarsBonus(starsAdd, title){
 }
 
 async function claimReward(){
+  if(state.rewardClaimed) return;
+  state.rewardClaimed = true;
+  const starBtn = els.rewardOverlay?.querySelector?.('[data-action="claimReward"]');
+  if(starBtn){ starBtn.disabled = true; }
   if(!state.answered) return;
   if(els.rewardOverlay.classList.contains("hidden")) return;
 

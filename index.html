@@ -11,12 +11,11 @@
 <body>
 <header class="topbar">
     <button class="iconBtn" type="button" data-action="openSettings" aria-label="הגדרות">⚙️</button>
-    
     <div class="brand">
       <div class="title">BRAWL LETTERS</div>
-      <div class="subtitle">קרב האותיות</div>
+      <div class="subtitle">קרב האותיות – משחק מהיר ואנרגטי</div>
     </div>
-    <button class="pill pillBtn" type="button" data-action="openPlayers" id="currentPlayerPill" aria-label="שחקן נוכחי">—</button>
+    <button class="pill pillBtn" type="button" data-action="openPlayers" id="currentPlayerPill" aria-label="שחקן נוכחי">שחקן: -</button>
   </header>
 
   <main class="wrap">
@@ -66,9 +65,9 @@
       <div class="questionBox" id="questionBox" aria-live="polite">
         <div class="qTitle">איזו אות שומעים בתחילת המילה?</div>
         <div class="wordBox" id="wordMasked">—</div>
-        <div class="rowCenter controlsRow">
-          <button class="btn btnSmall" type="button" data-action="repeatWord">🔊 השמע מילה</button>
+        <div class="rowCenter">
           <button class="btn btnSmall" type="button" data-action="revealFirst">👀 גלה אות</button>
+          <button class="btn btnSmall" type="button" data-action="repeatWord">🔊 השמע מילה</button>
         </div>
       </div>
 
@@ -83,7 +82,8 @@
           <div class="muted" id="rewardSub">לחץ על הכוכב לקבל מטבעות</div>
         </div>
       </div>
-<div class="muted" id="rewardText"></div>
+<button class="starBig" type="button" data-action="claimReward" aria-label="קבל פרס">⭐</button>
+        <div class="muted" id="rewardText"></div>
       </div>
     </section>
   </main>
