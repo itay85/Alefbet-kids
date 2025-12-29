@@ -1,40 +1,3 @@
-
-// ===== DEBUG (v42) =====
-function dbgLine(msg){
-  const el = document.getElementById("debugLog");
-  if(!el) return;
-  const t = new Date().toISOString().split("T")[1].replace("Z","");
-  el.textContent += `[${t}] ${msg}\n`;
-  el.scrollTop = el.scrollHeight;
-}
-function dbg(msg){
-  try{ dbgLine(String(msg)); }catch(e){}
-}
-function dbgShow(){
-  const p = document.getElementById("debugPanel");
-  if(p) p.classList.remove("hidden");
-}
-function dbgHide(){
-  const p = document.getElementById("debugPanel");
-  if(p) p.classList.add("hidden");
-}
-window.addEventListener("error", (e) => {
-  dbgShow();
-  dbg(`ERROR: ${e.message} @${e.filename}:${e.lineno}:${e.colno}`);
-});
-window.addEventListener("unhandledrejection", (e) => {
-  dbgShow();
-  dbg(`PROMISE: ${e.reason && (e.reason.stack||e.reason.message||e.reason)}`);
-});
-(function hookConsole(){
-  const origLog = console.log.bind(console);
-  const origWarn = console.warn.bind(console);
-  const origErr = console.error.bind(console);
-  console.log = (...a)=>{ try{ dbg("LOG: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origLog(...a); };
-  console.warn = (...a)=>{ try{ dbg("WARN: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origWarn(...a); };
-  console.error = (...a)=>{ try{ dbg("ERR: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origErr(...a); };
-})();
-
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1;i>0;i--){
@@ -44,6 +7,59 @@ function shuffle(arr){
   return a;
 }
 
+function showDebug(msg){try{const el=document.getElementById('debugPanel'); if(el) el.textContent=msg;}catch(e){}}
+// BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
+const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
+
+
+
+// v29: similar-sound confusion pairs to increase difficulty
+const CONFUSION_MAP = {
+  "ס": "ש",
+  "ש": "ס",
+  "כ": "ק",
+  "ק": "כ",
+  "ת": "ט",
+  "ט": "ת",
+  "א": "ה",
+  "ה": "א"
+};
+
+// v13: Letter bosses (explicit mapping to existing filenames)
+const LETTER_BOSS_INDEX = {
+  "א": "01",
+  "ב": "02",
+  "ג": "03",
+  "ד": "04",
+  "ה": "05",
+  "ו": "06",
+  "ז": "07",
+  "ח": "08",
+  "ט": "09",
+  "י": "10",
+  "כ": "11",
+  "ל": "12",
+  "מ": "13",
+  "נ": "14",
+  "ס": "15",
+  "ע": "16",
+  "פ": "17",
+  "צ": "18",
+  "ק": "19",
+  "ר": "20",
+  "ש": "21",
+  "ת": "22",
+};
+
+
+function bossForLetter(ch){
+  const idx = LETTER_BOSS_INDEX[ch];
+  const nm = LETTER_BOSS_NAMES[ch] || `בוס ${ch}`;
+  if(!idx){
+    return { name: nm, img: null };
+  }
+  return { name: nm, img: `assets/bosses/boss_${idx}_${ch}.png` };
+}
 
 
 const WORD_BANK = {
@@ -378,10 +394,15 @@ const els = {
   home: document.getElementById("screenHome"),
   select: document.getElementById("screenSelect"),
   fight: document.getElementById("screenFight"),
-lettersDialog: document.getElementById("lettersDialog"),
+
+  btnParentToggle: document.getElementById("btnParentToggle"),
+  lettersDialog: document.getElementById("lettersDialog"),
   btnCloseLetters: document.getElementById("btnCloseLetters"),
-btnSettings: document.getElementById("btnSettings"),
-btnReset: document.getElementById("btnReset"),
+
+  btnSound: document.getElementById("btnSound"),
+  btnSettings: document.getElementById("btnSettings"),
+  btnLogo: document.getElementById("btnLogo"),
+  btnReset: document.getElementById("btnReset"),
   logoModal: document.getElementById("logoModal"),
   logoModalBackdrop: document.getElementById("logoModalBackdrop"),
   btnCloseLogoModal: document.getElementById("btnCloseLogoModal"),
@@ -410,8 +431,6 @@ btnReset: document.getElementById("btnReset"),
   wordMasked: document.getElementById("wordMasked"),
   btnReveal: document.getElementById("btnReveal"),
   btnRepeat: document.getElementById("btnRepeat"),
-  btnLogoHud: document.getElementById("btnLogoHud"),
-  btnOpenLettersHome: document.getElementById("btnOpenLettersHome"),
   choices: document.getElementById("choices"),
   feedback: document.getElementById("feedback"),
 
@@ -432,9 +451,6 @@ btnReset: document.getElementById("btnReset"),
   btnKeepPlaying: document.getElementById("btnKeepPlaying"),
   btnResetCoins: document.getElementById("btnResetCoins"),
 };
-
-function on(el, ev, fn){ if(el) el.addEventListener(ev, fn); }
-
 
 const state = {
   giftStarAt1000: false,
@@ -898,28 +914,31 @@ function resetGame(){
 function resetCoins(){ state.coins = 0; save(); setUI(); }
 
 // Events
-els.btnParentToggle && els.btnParentToggle.addEventListener("click", toggleLetters);
-els.btnCloseLetters && els.btnCloseLetters.addEventListener("click", closeLetters);
-els.btnPickAll && els.btnPickAll.addEventListener("click", pickerSelectAll);
-els.btnPickNone && els.btnPickNone.addEventListener("click", pickerSelectNone);
-els.btnPresetNadav && els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
-els.lettersDialog && els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
+els.btnParentToggle.addEventListener("click", toggleLetters);
+els.btnCloseLetters.addEventListener("click", closeLetters);
+els.btnPickAll.addEventListener("click", pickerSelectAll);
+els.btnPickNone.addEventListener("click", pickerSelectNone);
+els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
+els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
-els.btnPlay && els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
-els.btnTryAgain && els.btnTryAgain.addEventListener("click", tryAgain);
+els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
+els.btnOpenBrawlers.addEventListener("click", openBrawlers);
+els.btnChangeBrawler.addEventListener("click", openBrawlers);
+els.btnTryAgain.addEventListener("click", tryAgain);
 
-els.btnReveal && els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
-els.btnStar && els.btnStar.addEventListener("click", claimReward);
+els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
+els.btnStar.addEventListener("click", claimReward);
 
-els.btnSettings && els.btnSettings.addEventListener("click", openSettings);
-if(els.btnParentToggle) els.btnParentToggle && els.btnParentToggle.addEventListener("click", openLetters);
-if(els.btnReset) els.btnReset && els.btnReset.addEventListener("click", resetGame);
-if(els.btnCloseLogoModal) els.btnCloseLogoModal && els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
-if(els.logoModalBackdrop) els.logoModalBackdrop && els.logoModalBackdrop.addEventListener("click", closeLogoModal);
-els.btnSaveSettings && els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
+els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
+els.btnSettings.addEventListener("click", openSettings);
+if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
+if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
+if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
+if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
+els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
 
-els.btnKeepPlaying && els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
-els.btnResetCoins && els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
+els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
+els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
 load(); setUI(); renderLogoButton(); show(els.home);
@@ -927,12 +946,19 @@ load(); setUI(); renderLogoButton(); show(els.home);
 
 // v25: hard fallback start hook (works even if addEventListener wiring fails)
 window.__startGame = function(){
-  if(typeof validateLettersSelection === "function" && !validateLettersSelection()) return;
+  if(!validateLettersSelection()) return;
   try{
-    if(typeof showScreen === "function") { try{ showScreen("fight"); }catch(e){} }
-    if(typeof startNewQuestion === "function") startNewQuestion();
+    showDebug("START via __startGame ✅");
+    // emulate the normal play click
+    if(typeof startNewQuestion === "function"){
+      // ensure we are in fight screen
+      try{ showScreen && showScreen("fight"); }catch(e){}
+      try{ startNewQuestion(); }catch(e){ showDebug("startNewQuestion error: " + (e.message||e)); }
+    }else{
+      showDebug("startNewQuestion missing ❌");
+    }
   }catch(e){
-    // no-op
+    showDebug("START error: " + (e.message||e));
   }
 };
 
@@ -1001,7 +1027,7 @@ function showUnlockModal(stars){
   els.modalUnlock.classList.remove("hidden");
 }
 if(els.btnUnlockLater){
-  els.btnUnlockLater && els.btnUnlockLater.addEventListener("click", () => {
+  els.btnUnlockLater.addEventListener("click", () => {
     if(els.modalUnlock) els.modalUnlock.classList.add("hidden");
   });
 }
@@ -1035,44 +1061,3 @@ function checkGiftStar(){
     try{ localStorage.setItem("giftStarAt1000","1"); }catch(e){}
   }
 }
-
-function bindRepeatButton(){
-  const btn = document.getElementById("btnRepeat");
-  if(!btn) return;
-  btn.addEventListener("click", () => {
-    if(state.currentWord) speak(state.currentWord);
-  });
-}
-
-function bindHowToToggle(){
-  const btn = document.getElementById("btnToggleHowTo");
-  const content = document.getElementById("howToContent");
-  if(!btn || !content) return;
-  let hidden = false;
-  try{ hidden = localStorage.getItem("howToHidden")==="1"; }catch(e){}
-  const apply = () => {
-    content.style.display = hidden ? "none" : "";
-    btn.textContent = hidden ? "הצג" : "הסתר";
-    try{ localStorage.setItem("howToHidden", hidden ? "1" : "0"); }catch(e){}
-  };
-  apply();
-  btn.addEventListener("click", () => { hidden = !hidden; apply(); });
-}
-document.addEventListener("DOMContentLoaded", () => {
-  const btnCopy = document.getElementById("btnDbgCopy");
-  const btnClear = document.getElementById("btnDbgClear");
-  const btnHide = document.getElementById("btnDbgHide");
-  const logEl = document.getElementById("debugLog");
-  if(btnCopy && logEl){
-    btnCopy.addEventListener("click", async () => {
-      try{ await navigator.clipboard.writeText(logEl.textContent || ""); dbg("Copied to clipboard."); }catch(e){ dbg("Copy failed: "+e); }
-    });
-  }
-  if(btnClear && logEl){
-    btnClear.addEventListener("click", () => { logEl.textContent=""; dbg("Cleared."); });
-  }
-  if(btnHide){
-    btnHide.addEventListener("click", () => dbgHide());
-  }
-  dbg("Debug panel ready.");
-});

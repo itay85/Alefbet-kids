@@ -1,1 +1,1 @@
-// Service worker disabled in v43
+// SW disabled for debugging v45

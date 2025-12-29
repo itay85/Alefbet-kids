@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAWL LETTERS – קרב האותיות</title>
   <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="./manifest.webmanifest?v=44">
-  <link rel="stylesheet" href="./styles.css?v=44">
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v44 ✅ (אם אתה לא רואה את זה — אתה לא על הגרסה הנכונה)
+    BUILD v45 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -23,11 +23,13 @@
       </div>
     </div>
 
-    
     <div class="controls">
+      <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
+      <button id="btnLogo" class="btn" type="button" title="לוגו שלי">🧩</button>
+      <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
+      <button id="btnReset" class="btn" type="button" title="איפוס">🔄</button>
     </div>
-
   </header>
 
   <main class="wrap">
@@ -45,11 +47,18 @@
 
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()">🎮 התחל משחק</button>
-          <button id="btnOpenLettersHome" class="btn big" type="button">👨‍👩‍👦 בחירת אותיות (הורה)</button>
+          <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
 
+      <div class="panel">
+        <h2>איך מנצחים?</h2>
+        <p class="muted">
+          כל ניחוש נכון נותן ⭐. תלחץ על הכוכב כדי לקבל 🪙 מטבעות זהב רנדומליים.
+          מגיעים ל-<strong>1000</strong> מטבעות? ניצחת!
+        </p>
+        <div class="tiny">טיפ: כדי “להתקין” באייפון/אייפד: Share → Add to Home Screen.</div>
       </div>
     </section>
 <section id="screenSelect" class="screen hidden"></section>
@@ -57,30 +66,13 @@
 
 
     <section id="screenFight" class="screen" hidden>
-      
-      <div class="panel howToPanel" id="howToPanel">
-        <div class="rowBetween">
-          <h2 class="howToTitle">איך מנצחים?</h2>
-          <button id="btnToggleHowTo" class="btn small" type="button">הסתר</button>
-        </div>
-        <div id="howToContent">
-          <p class="muted">
-            כל ניחוש נכון נותן ⭐. תלחץ על הכוכב כדי לקבל 🪙 מטבעות זהב רנדומליים.
-            מגיעים ל-<strong>1000</strong> מטבעות? ניצחת!
-          </p>
-          <div class="tiny">טיפ: אפשר תמיד ללחוץ 🔊 כדי לשמוע שוב את המילה.</div>
-        </div>
-      </div>
-
-
       <div class="panel fightTop">
         <div class="rowBetween">
           <div class="pill" id="bossPill"></div>
-<div class="fightStats">
+  <div class="pill" id="currentBrawlerPill">בחר בראולר</div>
+          <div class="fightStats">
             <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
-            <button id="btnRepeat" class="btn small" type="button" title="השמע מילה">🔊</button>
-            <button id="btnLogoHud" class="logoBtn" type="button" title="החלף לוגו"></button>
           </div>
         </div>
 
@@ -88,7 +80,8 @@
 
         <div class="wordWrap">
           <div class="word" id="wordMasked">_</div>
-<button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
+          <button id="btnRepeat" class="btn small" type="button">🔊 השמע מילה</button>
+          <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
         </div>
 
         <div class="choices" id="choices"></div>
@@ -103,7 +96,8 @@
 
         <div class="fightFooter">
           <button id="btnTryAgain" class="btn" type="button" hidden>נסה שוב</button>
-</div>
+          <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
+        </div>
       </div>
     </section>
   </main>
@@ -167,11 +161,7 @@
         <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
       </label>
 
-      <div class="rowBetween" style="margin:10px 0 2px;">
-  <button id="btnReset" class="btn" type="button">🔄 איפוס משחק</button>
-</div>
-
-<menu class="menu">
+      <menu class="menu">
         <button class="btn" value="cancel">סגור</button>
         <button class="btn primary" id="btnSaveSettings" value="default">שמור</button>
       </menu>
@@ -192,27 +182,15 @@
     </div>
   </dialog>
 
-  
-<script>
-(function(){
-  try{
-    var el = document.getElementById("debugLog");
-    var p = document.getElementById("debugPanel");
-    if(p) p.classList.remove("hidden");
-    if(el){
-      el.textContent += "[BOOT] inline probe executed ✅
-";
-    }else{
-      // If debug isn't in DOM yet, write to body
-      document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:10px;left:10px;right:10px;z-index:999999;background:#000;color:#fff;padding:10px;border-radius:12px'>[BOOT] probe ran but debugLog missing</div>");
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js");
     }
-  }catch(e){
-    document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:10px;left:10px;right:10px;z-index:999999;background:#000;color:#fff;padding:10px;border-radius:12px'>[BOOT] probe error: "+String(e)+"</div>");
-  }
-})();
-</script>
+  </script>
 
-<script src="./app.js?v=44"></script>
+  <div id="debugPanel" class="debugPanel hidden"></div>
+
   <div id="modalUnlock" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modalCard">
       <div class="modalTitle">🎁 קיבלת לוגו חדש!</div>
@@ -225,30 +203,30 @@
   </div>
 
 
-  <div id="debugPanel" class="debugPanel">
-    <div class="debugHeader">
+  <div id="earlyDebug" style="position:fixed;bottom:10px;left:10px;right:10px;z-index:9999998;background:rgba(0,0,0,.78);color:#fff;padding:10px;border-radius:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
       <strong>DEBUG</strong>
-      <div class="debugBtns">
-        <button id="btnDbgCopy" class="btn small" type="button">העתק</button>
-        <button id="btnDbgClear" class="btn small" type="button">נקה</button>
-        <button id="btnDbgHide" class="btn small" type="button">הסתר</button>
+      <div style="display:flex;gap:8px">
+        <button id="dbgCopy" style="padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff">העתק</button>
+        <button id="dbgClear" style="padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff">נקה</button>
+        <button id="dbgHide" style="padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff">הסתר</button>
       </div>
     </div>
-    <pre id="debugLog" class="debugLog"></pre>
+    <pre id="dbgLog" style="margin:0;max-height:26vh;overflow:auto;white-space:pre-wrap;word-break:break-word"></pre>
   </div>
-
-
-  <div style="position:fixed;bottom:10px;left:10px;right:10px;z-index:9999998;background:#111;color:#fff;padding:10px;border-radius:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;opacity:.92">
-    NO-JS DEBUG: אם אתה רואה את התיבה הזו אבל אין שום תגובה לכפתורים, אז HTML נטען אבל JS לא רץ / לא נטען.
-  </div>
-
-<script>
-(function(){
-  try{
-    document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:60px;left:10px;right:10px;z-index:9999999;background:#0a0;color:#fff;padding:10px;border-radius:12px;font-weight:800;text-align:center'>JS PROBE: inline script ran ✅</div>");
-  }catch(e){}
-})();
-</script>
+  <script>
+  (function(){
+    const logEl = document.getElementById("dbgLog");
+    function log(msg){ try{ logEl.textContent += msg + "\n"; }catch(e){} }
+    window.__DBGLOG = log;
+    log("[BOOT] early debug script ran ✅");
+    window.addEventListener("error", (e)=>{ log("[ERROR] " + e.message + " @" + e.filename + ":" + e.lineno + ":" + e.colno); });
+    window.addEventListener("unhandledrejection", (e)=>{ log("[PROMISE] " + (e.reason && (e.reason.stack||e.reason.message||e.reason))); });
+    document.getElementById("dbgCopy").addEventListener("click", async ()=>{ try{ await navigator.clipboard.writeText(logEl.textContent||""); log("[COPY] ok"); }catch(e){ log("[COPY] failed " + e); } });
+    document.getElementById("dbgClear").addEventListener("click", ()=>{ logEl.textContent=""; log("[CLEAR]"); });
+    document.getElementById("dbgHide").addEventListener("click", ()=>{ document.getElementById("earlyDebug").style.display="none"; });
+  })();
+  </script>
 
 </body>
 </html>
