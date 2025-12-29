@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAWL LETTERS – קרב האותיות</title>
   <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="./manifest.webmanifest?v=37">
-  <link rel="stylesheet" href="./styles.css?v=37">
+  <link rel="manifest" href="./manifest.webmanifest?v=39">
+  <link rel="stylesheet" href="./styles.css?v=39">
 </head>
 <body>
   <header class="top">
@@ -20,8 +20,6 @@
 
     
     <div class="controls">
-      <button id="btnParentToggle" class="btn" type="button" title="הורה: בחירת אותיות">👨‍👩‍👦</button>
-      <button id="btnLogo" class="btn" type="button" title="הלוגו שלי"></button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
     </div>
 
@@ -42,7 +40,7 @@
 
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()">🎮 התחל משחק</button>
-          <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
+          <button id="btnOpenLettersHome" class="btn big" type="button">👨‍👩‍👦 בחירת אותיות (הורה)</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
@@ -76,6 +74,8 @@
 <div class="fightStats">
             <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
+            <button id="btnRepeat" class="btn small" type="button" title="השמע מילה">🔊</button>
+            <button id="btnLogoHud" class="logoBtn" type="button" title="החלף לוגו"></button>
           </div>
         </div>
 
@@ -83,8 +83,7 @@
 
         <div class="wordWrap">
           <div class="word" id="wordMasked">_</div>
-          <button id="btnRepeat" class="btn small" type="button">🔊 השמע מילה</button>
-          <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
+<button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
         </div>
 
         <div class="choices" id="choices"></div>
@@ -99,8 +98,7 @@
 
         <div class="fightFooter">
           <button id="btnTryAgain" class="btn" type="button" hidden>נסה שוב</button>
-          <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
-        </div>
+</div>
       </div>
     </section>
   </main>
@@ -189,13 +187,8 @@
     </div>
   </dialog>
 
-  <script src="./app.js?v=37"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./sw.js");
-    }
-  </script>
-<div id="modalUnlock" class="modal hidden" role="dialog" aria-modal="true">
+  <script src="./app.js?v=39"></script>
+  <div id="modalUnlock" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modalCard">
       <div class="modalTitle">🎁 קיבלת לוגו חדש!</div>
       <div class="modalSubtitle">הגעת ל־<span id="unlockStars">100</span> כוכבים. בחר לוגו חדש להוסיף לאוסף:</div>

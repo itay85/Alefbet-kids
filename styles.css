@@ -344,3 +344,9 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 
 .howToPanel{margin-bottom:12px;}
 .howToTitle{margin:0;font-size:18px;}
+
+.logoBtn{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:14px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;}
+.logoBtn img{width:38px;height:38px;object-fit:contain;}
+.fightStats{display:flex;align-items:center;gap:10px;}
+.rowBetween{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.homeStats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}

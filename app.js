@@ -1,4 +1,4 @@
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=37"); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=39"); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -343,13 +343,10 @@ const els = {
   home: document.getElementById("screenHome"),
   select: document.getElementById("screenSelect"),
   fight: document.getElementById("screenFight"),
-
-  btnParentToggle: document.getElementById("btnParentToggle"),
-  lettersDialog: document.getElementById("lettersDialog"),
+lettersDialog: document.getElementById("lettersDialog"),
   btnCloseLetters: document.getElementById("btnCloseLetters"),
 btnSettings: document.getElementById("btnSettings"),
-  btnLogo: document.getElementById("btnLogo"),
-  btnReset: document.getElementById("btnReset"),
+btnReset: document.getElementById("btnReset"),
   logoModal: document.getElementById("logoModal"),
   logoModalBackdrop: document.getElementById("logoModalBackdrop"),
   btnCloseLogoModal: document.getElementById("btnCloseLogoModal"),
@@ -378,6 +375,8 @@ btnSettings: document.getElementById("btnSettings"),
   wordMasked: document.getElementById("wordMasked"),
   btnReveal: document.getElementById("btnReveal"),
   btnRepeat: document.getElementById("btnRepeat"),
+  btnLogoHud: document.getElementById("btnLogoHud"),
+  btnOpenLettersHome: document.getElementById("btnOpenLettersHome"),
   choices: document.getElementById("choices"),
   feedback: document.getElementById("feedback"),
 
@@ -861,28 +860,28 @@ function resetGame(){
 function resetCoins(){ state.coins = 0; save(); setUI(); }
 
 // Events
-els.btnParentToggle.addEventListener("click", toggleLetters);
-els.btnCloseLetters.addEventListener("click", closeLetters);
-els.btnPickAll.addEventListener("click", pickerSelectAll);
-els.btnPickNone.addEventListener("click", pickerSelectNone);
-els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
-els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
+els.btnParentToggle && els.btnParentToggle.addEventListener("click", toggleLetters);
+els.btnCloseLetters && els.btnCloseLetters.addEventListener("click", closeLetters);
+els.btnPickAll && els.btnPickAll.addEventListener("click", pickerSelectAll);
+els.btnPickNone && els.btnPickNone.addEventListener("click", pickerSelectNone);
+els.btnPresetNadav && els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
+els.lettersDialog && els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
-els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
-els.btnTryAgain.addEventListener("click", tryAgain);
+els.btnPlay && els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
+els.btnTryAgain && els.btnTryAgain.addEventListener("click", tryAgain);
 
-els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
-els.btnStar.addEventListener("click", claimReward);
+els.btnReveal && els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
+els.btnStar && els.btnStar.addEventListener("click", claimReward);
 
-els.btnSettings.addEventListener("click", openSettings);
-if(els.btnParentToggle) els.btnParentToggle.addEventListener("click", openLetters);
-if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
-if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
-if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
-els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
+els.btnSettings && els.btnSettings.addEventListener("click", openSettings);
+if(els.btnParentToggle) els.btnParentToggle && els.btnParentToggle.addEventListener("click", openLetters);
+if(els.btnReset) els.btnReset && els.btnReset.addEventListener("click", resetGame);
+if(els.btnCloseLogoModal) els.btnCloseLogoModal && els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
+if(els.logoModalBackdrop) els.logoModalBackdrop && els.logoModalBackdrop.addEventListener("click", closeLogoModal);
+els.btnSaveSettings && els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
 
-els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
-els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
+els.btnKeepPlaying && els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
+els.btnResetCoins && els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
 load(); setUI(); renderLogoButton(); show(els.home);
@@ -964,7 +963,7 @@ function showUnlockModal(stars){
   els.modalUnlock.classList.remove("hidden");
 }
 if(els.btnUnlockLater){
-  els.btnUnlockLater.addEventListener("click", () => {
+  els.btnUnlockLater && els.btnUnlockLater.addEventListener("click", () => {
     if(els.modalUnlock) els.modalUnlock.classList.add("hidden");
   });
 }
