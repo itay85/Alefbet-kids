@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAWL LETTERS – קרב האותיות</title>
   <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="./manifest.webmanifest?v=43">
-  <link rel="stylesheet" href="./styles.css?v=43">
+  <link rel="manifest" href="./manifest.webmanifest?v=44">
+  <link rel="stylesheet" href="./styles.css?v=44">
 </head>
 <body>
+  <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
+    BUILD v44 ✅ (אם אתה לא רואה את זה — אתה לא על הגרסה הנכונה)
+  </div>
+  <div style="height:44px"></div>
+
   <header class="top">
     <div class="brand">
       <div class="logo" aria-hidden="true">BL</div>
@@ -207,7 +212,7 @@
 })();
 </script>
 
-<script src="./app.js?v=43"></script>
+<script src="./app.js?v=44"></script>
   <div id="modalUnlock" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modalCard">
       <div class="modalTitle">🎁 קיבלת לוגו חדש!</div>
@@ -231,6 +236,19 @@
     </div>
     <pre id="debugLog" class="debugLog"></pre>
   </div>
+
+
+  <div style="position:fixed;bottom:10px;left:10px;right:10px;z-index:9999998;background:#111;color:#fff;padding:10px;border-radius:12px;font-family:ui-monospace,Menlo,monospace;font-size:12px;opacity:.92">
+    NO-JS DEBUG: אם אתה רואה את התיבה הזו אבל אין שום תגובה לכפתורים, אז HTML נטען אבל JS לא רץ / לא נטען.
+  </div>
+
+<script>
+(function(){
+  try{
+    document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:60px;left:10px;right:10px;z-index:9999999;background:#0a0;color:#fff;padding:10px;border-radius:12px;font-weight:800;text-align:center'>JS PROBE: inline script ran ✅</div>");
+  }catch(e){}
+})();
+</script>
 
 </body>
 </html>
