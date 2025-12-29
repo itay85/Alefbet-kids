@@ -259,3 +259,26 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 .choiceName{ font-weight:800; }
 .choiceLetter{ font-size:26px; font-weight:900; opacity:.95; }
 .choiceHint{ font-size:12px; opacity:.75; }
+
+/* v9: logo popup + reset */
+.modal.hidden{ display:none; }
+.modal{ position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; }
+.modalBackdrop{ position:absolute; inset:0; background: rgba(0,0,0,.6); }
+.modalCard{
+  position:relative;
+  width:min(560px, 94vw);
+  border-radius:18px;
+  background: rgba(20,20,30,.96);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  overflow:hidden;
+}
+.modalHeader{ display:flex; align-items:center; justify-content:space-between; padding:14px 14px 10px; }
+.modalTitle{ font-weight:900; }
+.modalBody{ padding: 0 14px 14px; }
+#btnLogoLogoImg{ width:26px; height:26px; border-radius:10px; display:block; }
+.logoMini{
+  width:24px; height:24px; border-radius:10px;
+  vertical-align:middle;
+  margin-inline-start:6px;
+}

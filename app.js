@@ -308,6 +308,21 @@ const SPECIAL_BRAWLERS = {
   "ט": { name:"טורנדו", desc:"מערבולת על-קולית", img:"assets/brawlers/tornado.svg" },
 };
 
+// v9: Player logos (original art)
+const PLAYER_LOGOS = [
+  { id: "logo1", name: "זיקו", img: "assets/logos/logo1.png" },
+  { id: "logo2", name: "נובה", img: "assets/logos/logo2.png" },
+  { id: "logo3", name: "בּוֹלט", img: "assets/logos/logo3.png" },
+  { id: "logo4", name: "קְרִיסְטַל", img: "assets/logos/logo4.png" },
+  { id: "logo5", name: "פִּיקְסֶל", img: "assets/logos/logo5.png" },
+  { id: "logo6", name: "טוֹרְבּוֹ", img: "assets/logos/logo6.png" },
+];
+
+function getLogoById(id){
+  return PLAYER_LOGOS.find(l => l.id === id) || PLAYER_LOGOS[0];
+}
+
+
 const els = {
   home: document.getElementById("screenHome"),
   select: document.getElementById("screenSelect"),
@@ -319,6 +334,11 @@ const els = {
 
   btnSound: document.getElementById("btnSound"),
   btnSettings: document.getElementById("btnSettings"),
+  btnLogo: document.getElementById("btnLogo"),
+  btnReset: document.getElementById("btnReset"),
+  logoModal: document.getElementById("logoModal"),
+  logoModalBackdrop: document.getElementById("logoModalBackdrop"),
+  btnCloseLogoModal: document.getElementById("btnCloseLogoModal"),
 
   btnPlay: document.getElementById("btnPlay"),
   btnOpenBrawlers: document.getElementById("btnOpenBrawlers"),
@@ -374,7 +394,7 @@ const state = {
   starsTotal: 0,
   streak: 0,
 
-  chosenBrawlerLetter: null, // skin choice only
+  chosenLogoId: "logo1", // player logo
 
   currentWord: "",
   currentFirstLetter: "",
@@ -415,7 +435,7 @@ function save(){
     coins: state.coins,
     starsTotal: state.starsTotal,
     streak: state.streak,
-    chosenBrawlerLetter: state.chosenBrawlerLetter
+    chosenLogoId: state.chosenLogoId
   }));
 }
 
@@ -439,7 +459,7 @@ function load(){
     if(typeof s.coins === "number") state.coins = s.coins;
     if(typeof s.starsTotal === "number") state.starsTotal = s.starsTotal;
     if(typeof s.streak === "number") state.streak = s.streak;
-    if(typeof s.chosenBrawlerLetter === "string") state.chosenBrawlerLetter = s.chosenBrawlerLetter;
+    if(typeof s.chosenLogoId === "string") state.chosenLogoId = s.chosenLogoId;
   }catch(_){}
 }
 
@@ -454,8 +474,8 @@ function setUI(){
   els.homeLettersHint.textContent =
     (state.lettersMode === "all") ? "מצב אותיות: כל האותיות (א–ת)" : `מצב אותיות: פוקוס על (${state.selectedLetters.join(" ")})`;
 
-  if(state.chosenBrawlerLetter){
-    const b = brawlerForLetter(state.chosenBrawlerLetter);
+  if(state.chosenLogoId){
+    const b = brawlerForLetter(state.chosenLogoId);
     els.currentBrawlerPill.textContent = `בראולר: ${b.name}`;
   } else {
     els.currentBrawlerPill.textContent = "בחר בראולר";
@@ -517,42 +537,60 @@ function brawlerForLetter(letter){
   return { name: `בוט-${letter}`, desc: `דמות מיוחדת`, img: `assets/brawlers/letter-${letter}.svg` };
 }
 
-function buildBrawlers(){
-  els.brawlers.innerHTML = "";
-  // show 4 random skins to pick from (letters, but doesn't lock the quiz)
-  const pool = (state.lettersMode === "custom") ? state.selectedLetters.slice() : ALL_LETTERS.slice();
-  const letters = shuffle(pool).slice(0,4);
 
-  letters.forEach(letter => {
-    const b = brawlerForLetter(letter);
-    const card = document.createElement("div");
-    card.className = "brawler";
+function buildLogos(){
+  els.brawlers.innerHTML = "";
+  PLAYER_LOGOS.forEach((logo) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "brawlerCard";
+    const selected = (state.chosenLogoId === logo.id);
     card.innerHTML = `
-      <div class="bLeft">
-        <img class="bAvatarImg" src="${b.img}" alt="${b.name}">
-        <div class="bText">
-          <div class="bName">${b.name}</div>
-          <div class="bDesc">דמות בלבד – השאלות משתנות בכל פעם</div>
-        </div>
-      </div>
-      <div class="bRight">${letter}</div>
+      <div class="brawlerImgWrap"><img class="brawlerImg" src="${logo.img}" alt="${logo.name}"></div>
+      <div class="brawlerName">${logo.name}</div>
+      <div class="brawlerDesc">הלוגו שלך</div>
+      ${selected ? '<div class="badge">נבחר</div>' : ''}
     `;
-    card.addEventListener("click", () => chooseBrawler(letter));
+    card.addEventListener("click", () => {
+      state.chosenLogoId = logo.id;
+      save();
+      renderLogoButton();
+      closeLogoModal();
+      // Keep playing: just update pill
+      renderCurrent();
+      // If we're at home, start the game
+      if (!els.fight.hidden && els.fight) return;
+      start();
+    });
     els.brawlers.appendChild(card);
   });
 
-  els.modePill.textContent = (state.lettersMode === "custom") ? "פוקוס" : "רנדומלי";
-  els.selectHint.textContent = "הבראולר הוא דמות/סקין. בכל שאלה המילה תתחיל באות אחרת – צריך לחשוב 🙂";
+  if(els.selectHint){
+    els.selectHint.textContent = "אפשר להחליף לוגו בכל רגע בלחיצה על 🧩";
+  }
+  if(els.modePill){
+    els.modePill.textContent = "לוגו";
+  }
 }
 
-function openBrawlers(){ buildBrawlers(); show(els.select); }
 
-function chooseBrawler(letter){
-  state.chosenBrawlerLetter = letter;
-  save();
-  setUI();
-  startNewQuestion();
+
+function renderLogoButton(){
+  if(!els.btnLogo) return;
+  const logo = getLogoById(state.chosenLogoId);
+  els.btnLogo.innerHTML = `<img id="btnLogoLogoImg" src="${logo.img}" alt="${logo.name}">`;
 }
+function openLogoModal(){
+  if(!els.logoModal) return;
+  buildLogos();
+  els.logoModal.classList.remove("hidden");
+}
+function closeLogoModal(){
+  if(!els.logoModal) return;
+  els.logoModal.classList.add("hidden");
+}
+
+function openBrawlers(){ openLogoModal(); }
 
 // Niqqud-safe masking
 const COMBINING = /[\u0591-\u05C7]/;
@@ -607,7 +645,7 @@ function resetRoundUI(){
 }
 
 function startNewQuestion(){
-  if(!state.chosenBrawlerLetter) return openBrawlers();
+  if(!state.chosenLogoId) return openBrawlers();
 
   resetRoundUI();
   const w = pickWord();
@@ -736,6 +774,32 @@ function saveSettingsFromDialog(){
   state.rate = parseFloat(els.rateInput.value || "0.95");
   save(); setUI(); els.dialog.close();
 }
+
+function resetGame(){
+  const ok = confirm("לאפס את המשחק ולהתחיל מהתחלה?");
+  if(!ok) return;
+  localStorage.removeItem(STORAGE_KEY);
+  // reset core
+  state.lettersMode = "all";
+  state.selectedLetters = [...ALL_LETTERS];
+  state.coins = 0;
+  state.starsTotal = 0;
+  state.streak = 0;
+  state.chosenLogoId = "logo1";
+  state.used = {};
+  state.currentWord = "";
+  state.currentFirstLetter = "";
+  state.revealed = false;
+  state.locked = false;
+  state.rewardClaimed = false;
+  state.roundStars = 0;
+  state.wrongAttemptsThisWord = 0;
+  save();
+  setUI();
+  renderLogoButton();
+  show(els.home);
+}
+
 function resetCoins(){ state.coins = 0; save(); setUI(); }
 
 // Events
@@ -747,7 +811,7 @@ els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
 els.btnPlay.addEventListener("click", () => {
-  if(!state.chosenBrawlerLetter) openBrawlers();
+  if(!state.chosenLogoId) openBrawlers();
   else startNewQuestion();
 });
 els.btnOpenBrawlers.addEventListener("click", openBrawlers);
@@ -759,10 +823,14 @@ els.btnStar.addEventListener("click", claimReward);
 
 els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
 els.btnSettings.addEventListener("click", openSettings);
+if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
+if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
+if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
+if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
 els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
 
 els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
 els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
-load(); setUI(); show(els.home);
+load(); setUI(); renderLogoButton(); show(els.home);

@@ -20,8 +20,10 @@
 
     <div class="controls">
       <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
+      <button id="btnLogo" class="btn" type="button" title="לוגו שלי">🧩</button>
       <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
+      <button id="btnReset" class="btn" type="button" title="איפוס">🔄</button>
     </div>
   </header>
 
@@ -55,17 +57,6 @@
       </div>
     </section>
 
-    <section id="screenSelect" class="screen" hidden>
-      <div class="panel">
-        <div class="rowBetween">
-          <h2>בחר בראולר</h2>
-          <div class="pill" id="modePill">רנדומלי</div>
-        </div>
-        <p class="muted">בחר דמות – זו האות שלך. המשחק ימשיך איתה אוטומטית.</p>
-        <div class="brawlers" id="brawlers"></div>
-        <div class="tiny" id="selectHint"></div>
-      </div>
-    </section>
 
     <section id="screenFight" class="screen" hidden>
       <div class="panel fightTop">
@@ -101,6 +92,25 @@
       </div>
     </section>
   </main>
+
+  <!-- Logo Picker (Popup) -->
+  <div id="logoModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="בחירת לוגו">
+    <div class="modalBackdrop" id="logoModalBackdrop"></div>
+    <div class="modalCard">
+      <div class="modalHeader">
+        <div class="modalTitle">בחר לוגו למשחק</div>
+        <button id="btnCloseLogoModal" class="btn" type="button" aria-label="סגור">✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="rowBetween">
+          <div class="pill" id="modePill">רנדומלי</div>
+          <div class="tiny" id="selectHint"></div>
+        </div>
+        <div class="brawlers" id="brawlers"></div>
+      </div>
+    </div>
+  </div>
+
 
   <dialog id="lettersDialog">
     <div class="dialog">
