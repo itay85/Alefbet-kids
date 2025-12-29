@@ -1,4 +1,4 @@
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=33"); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=34"); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -9,59 +9,6 @@ function shuffle(arr){
   return a;
 }
 
-function showDebug(msg){try{const el=document.getElementById('debugPanel'); if(el) el.textContent=msg;}catch(e){}}
-// BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
-const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
-
-
-
-// v29: similar-sound confusion pairs to increase difficulty
-const CONFUSION_MAP = {
-  "ס": "ש",
-  "ש": "ס",
-  "כ": "ק",
-  "ק": "כ",
-  "ת": "ט",
-  "ט": "ת",
-  "א": "ה",
-  "ה": "א"
-};
-
-// v13: Letter bosses (explicit mapping to existing filenames)
-const LETTER_BOSS_INDEX = {
-  "א": "01",
-  "ב": "02",
-  "ג": "03",
-  "ד": "04",
-  "ה": "05",
-  "ו": "06",
-  "ז": "07",
-  "ח": "08",
-  "ט": "09",
-  "י": "10",
-  "כ": "11",
-  "ל": "12",
-  "מ": "13",
-  "נ": "14",
-  "ס": "15",
-  "ע": "16",
-  "פ": "17",
-  "צ": "18",
-  "ק": "19",
-  "ר": "20",
-  "ש": "21",
-  "ת": "22",
-};
-
-
-function bossForLetter(ch){
-  const idx = LETTER_BOSS_INDEX[ch];
-  const nm = LETTER_BOSS_NAMES[ch] || `בוס ${ch}`;
-  if(!idx){
-    return { name: nm, img: null };
-  }
-  return { name: nm, img: `assets/bosses/boss_${idx}_${ch}.png` };
-}
 
 
 const WORD_BANK = {
@@ -948,19 +895,12 @@ load(); setUI(); renderLogoButton(); show(els.home);
 
 // v25: hard fallback start hook (works even if addEventListener wiring fails)
 window.__startGame = function(){
-  if(!validateLettersSelection()) return;
+  if(typeof validateLettersSelection === "function" && !validateLettersSelection()) return;
   try{
-    showDebug("START via __startGame ✅");
-    // emulate the normal play click
-    if(typeof startNewQuestion === "function"){
-      // ensure we are in fight screen
-      try{ showScreen && showScreen("fight"); }catch(e){}
-      try{ startNewQuestion(); }catch(e){ showDebug("startNewQuestion error: " + (e.message||e)); }
-    }else{
-      showDebug("startNewQuestion missing ❌");
-    }
+    if(typeof showScreen === "function") { try{ showScreen("fight"); }catch(e){} }
+    if(typeof startNewQuestion === "function") startNewQuestion();
   }catch(e){
-    showDebug("START error: " + (e.message||e));
+    // no-op
   }
 };
 
@@ -1062,4 +1002,12 @@ function checkGiftStar(){
     state.stars = (state.stars || 0) + 1; // gift star only
     try{ localStorage.setItem("giftStarAt1000","1"); }catch(e){}
   }
+}
+
+function bindRepeatButton(){
+  const btn = document.getElementById("btnRepeat");
+  if(!btn) return;
+  btn.addEventListener("click", () => {
+    if(state.currentWord) speak(state.currentWord);
+  });
 }
