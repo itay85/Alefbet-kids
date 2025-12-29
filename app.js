@@ -1,5 +1,36 @@
 // BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
 const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
+
+// v11: Letter bosses (images)
+const LETTER_BOSSES = {
+  "א": { name: "בּוֹס א", img: "assets/bosses/boss_01_א.png" },
+  "ב": { name: "בּוֹס ב", img: "assets/bosses/boss_02_ב.png" },
+  "ג": { name: "בּוֹס ג", img: "assets/bosses/boss_03_ג.png" },
+  "ד": { name: "בּוֹס ד", img: "assets/bosses/boss_04_ד.png" },
+  "ה": { name: "בּוֹס ה", img: "assets/bosses/boss_05_ה.png" },
+  "ו": { name: "בּוֹס ו", img: "assets/bosses/boss_06_ו.png" },
+  "ז": { name: "בּוֹס ז", img: "assets/bosses/boss_07_ז.png" },
+  "ח": { name: "בּוֹס ח", img: "assets/bosses/boss_08_ח.png" },
+  "ט": { name: "בּוֹס ט", img: "assets/bosses/boss_09_ט.png" },
+  "י": { name: "בּוֹס י", img: "assets/bosses/boss_10_י.png" },
+  "כ": { name: "בּוֹס כ", img: "assets/bosses/boss_11_כ.png" },
+  "ל": { name: "בּוֹס ל", img: "assets/bosses/boss_12_ל.png" },
+  "מ": { name: "בּוֹס מ", img: "assets/bosses/boss_13_מ.png" },
+  "נ": { name: "בּוֹס נ", img: "assets/bosses/boss_14_נ.png" },
+  "ס": { name: "בּוֹס ס", img: "assets/bosses/boss_15_ס.png" },
+  "ע": { name: "בּוֹס ע", img: "assets/bosses/boss_16_ע.png" },
+  "פ": { name: "בּוֹס פ", img: "assets/bosses/boss_17_פ.png" },
+  "צ": { name: "בּוֹס צ", img: "assets/bosses/boss_18_צ.png" },
+  "ק": { name: "בּוֹס ק", img: "assets/bosses/boss_19_ק.png" },
+  "ר": { name: "בּוֹס ר", img: "assets/bosses/boss_20_ר.png" },
+  "ש": { name: "בּוֹס ש", img: "assets/bosses/boss_21_ש.png" },
+  "ת": { name: "בּוֹס ת", img: "assets/bosses/boss_22_ת.png" },
+};
+
+function bossForLetter(ch){
+  return LETTER_BOSSES[ch] || { name: `בּוֹס ${ch}`, img: null };
+}
+
 const WORD_BANK = {
   "א": [
     "אָבָּא",
@@ -357,6 +388,7 @@ const els = {
   selectHint: document.getElementById("selectHint"),
   modePill: document.getElementById("modePill"),
 
+  bossPill: document.getElementById("bossPill"),
   currentBrawlerPill: document.getElementById("currentBrawlerPill"),
   coinsHud: document.getElementById("coinsHud"),
   starsRound: document.getElementById("starsRound"),
