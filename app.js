@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v73";
+const BUILD = "v76";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -308,6 +308,10 @@ const WORD_BANK = {
     "תותים"
   ]
 };
+const NIKKUD_MAP = {
+  // אפשר להוסיף ניקוד בהדרגה: "מילה": "מִלָּה"
+};
+
 const LOGOS = ["logo1.png", "logo2.png", "logo3.png", "logo4.png", "logo5.png", "logo6.png"];
 const BOSSES = {"א": "boss_01_א.png", "ב": "boss_02_ב.png", "ג": "boss_03_ג.png", "ד": "boss_04_ד.png", "ה": "boss_05_ה.png", "ו": "boss_06_ו.png", "ז": "boss_07_ז.png", "ח": "boss_08_ח.png", "ט": "boss_09_ט.png", "י": "boss_10_י.png", "כ": "boss_11_כ.png", "ל": "boss_12_ל.png", "מ": "boss_13_מ.png", "נ": "boss_14_נ.png", "ס": "boss_15_ס.png", "ע": "boss_16_ע.png", "פ": "boss_17_פ.png", "צ": "boss_18_צ.png", "ק": "boss_19_ק.png", "ר": "boss_20_ר.png", "ש": "boss_21_ש.png", "ת": "boss_22_ת.png"};
 const BOSS_NAMES = {"ס": "ספידי", "ר": "רובו", "ט": "טורנדו", "כ": "כדורון", "א": "אלוף", "ב": "בומבו", "ג": "גליץ'", "ד": "דינוז", "ה": "הדסון", "ו": "וולט", "ז": "זינג", "ח": "חייזר", "י": "יויו", "ל": "לפידון", "מ": "מגנטו", "נ": "נינג'ה", "ע": "ענן", "פ": "פיצוץ", "צ": "ציקלון", "ק": "קפיץ", "ש": "שומר", "ת": "תותחן"};
@@ -351,8 +355,14 @@ const els = {
   lettersModeText: document.getElementById("lettersModeText"),
   wordMasked: document.getElementById("wordMasked"),
   answers: document.getElementById("answers"),
-  rewardBox: document.getElementById("rewardBox"),
-  rewardText: document.getElementById("rewardText"),
+  // reward overlay
+  rewardOverlay: document.getElementById("rewardOverlay"),
+  rewardHint: document.getElementById("rewardHint"),
+  rewardCoinsText: document.getElementById("rewardCoinsText"),
+  rewardSub: document.getElementById("rewardSub"),
+
+  streakPill: document.getElementById("streakPill"),
+  scorePill: document.getElementById("scorePill"),
   howBody: document.getElementById("howBody"),
 
   lettersDialog: document.getElementById("lettersDialog"),
@@ -370,6 +380,7 @@ const els = {
   playerSelect: document.getElementById("playerSelect"),
 
   settingsDialog: document.getElementById("settingsDialog"),
+  nikkudToggle: document.getElementById("nikkudToggle"),
   debugToggle: document.getElementById("debugToggle"),
 
   debugPanel: document.getElementById("debugPanel"),
@@ -432,6 +443,10 @@ function settingsLoad(){
       unlockedLogos: Math.max(defaults.initialUnlockedLogos, 1),
       usedWords: {}, // letter->set array
       howHidden: false,
+      score: 0,
+      streak: 0,
+      bestStreak: 0,
+      showNikkud: true,
     };
     const s = JSON.parse(raw);
     // migrations / safety
@@ -441,6 +456,10 @@ function settingsLoad(){
     if(typeof s.unlockedLogos!=="number") s.unlockedLogos=Math.max(defaults.initialUnlockedLogos,1);
     if(!s.usedWords || typeof s.usedWords!=="object") s.usedWords={};
     if(typeof s.howHidden!=="boolean") s.howHidden=false;
+    if(typeof s.score!=="number") s.score=0;
+    if(typeof s.streak!=="number") s.streak=0;
+    if(typeof s.bestStreak!=="number") s.bestStreak=0;
+    if(typeof s.showNikkud!=="boolean") s.showNikkud=true;
     if(!s.logo) s.logo = LOGOS[0] || "logo1.png";
     return s;
   }catch(e){
@@ -454,6 +473,10 @@ function settingsLoad(){
       unlockedLogos: Math.max(defaults.initialUnlockedLogos, 1),
       usedWords: {},
       howHidden: false,
+      score: 0,
+      streak: 0,
+      bestStreak: 0,
+      showNikkud: true,
     };
   }
 }
@@ -485,22 +508,57 @@ function renderStats(){
   els.coinsNum.textContent = String(state.settings.coins || 0);
   const logoPath = `assets/logos/${state.settings.logo}`;
   els.logoImg.src = logoPath;
+
+  if(els.streakPill){
+    els.streakPill.textContent = `🔥 סופר: ${state.settings.streak || 0}`;
+  }
+  if(els.scorePill){
+    els.scorePill.textContent = `✅ מילים: ${state.settings.score || 0}`;
+  }
 }
 
 function renderLettersMode(){
   if(state.settings.mode==="all") {
     els.lettersModeText.textContent = "מצב אותיות: כל האותיות (א–ת)";
   } else {
+    state.settings.streak = 0;
     els.lettersModeText.textContent = `מצב אותיות: מיקוד (${state.settings.selectedLetters.length})`;
   }
 }
 
 function hideReward(){
-  els.rewardBox.classList.add("hidden");
+  els.rewardOverlay.classList.add("hidden");
 }
-function showReward(text){
-  els.rewardText.textContent = text;
-  els.rewardBox.classList.remove("hidden");
+function showRewardOverlay(hintText, addCoins=0){
+  els.rewardHint.textContent = hintText || "כל הכבוד!";
+  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "";
+  els.rewardSub.textContent = "לחץ על הכוכב לקבל מטבעות";
+  els.rewardOverlay.classList.remove("hidden");
+}
+function getWordDisplay(word){
+  if(state.settings.showNikkud && NIKKUD_MAP[word]) return NIKKUD_MAP[word];
+  return word;
+}
+
+function renderWord(){
+  if(!state.currentWord) return;
+  const w = getWordDisplay(state.currentWord);
+  els.word.textContent = w;
+}
+
+function animateNumber(el, from, to, stepMs=18){
+  return new Promise((resolve)=>{
+    if(from===to){ el.textContent=String(to); return resolve(); }
+    const dir = to>from ? 1 : -1;
+    let cur = from;
+    const tick = ()=>{
+      cur += dir;
+      el.textContent = String(cur);
+      if(cur===to) return resolve();
+      setTimeout(tick, stepMs);
+    };
+    tick();
+  });
 }
 
 function maskWord(word){
@@ -569,6 +627,10 @@ function buildOptions(correct){
 }
 
 function newQuestion(){
+  state.attempts = 0;
+  state.eliminated = new Set();
+  state.hadMistake = false;
+
   hideReward();
   state.answered=false;
   state.revealed=false;
@@ -584,6 +646,7 @@ function newQuestion(){
     state.correctLetter=t2;
     state.currentWord=pickWordForLetter(t2) || "מילה";
   } else {
+    state.settings.streak = 0;
     state.correctLetter = target;
     state.currentWord = word;
   }
@@ -607,62 +670,177 @@ function renderAnswers(){
   });
 }
 
-function chooseAnswer(letter, btnEl){
+function chooseAnswer(letter){
   if(state.answered) return;
-  state.answered=true;
+
   const correct = (letter === state.correctLetter);
-  // style
-  const buttons = [...els.answers.querySelectorAll(".answerBtn")];
-  buttons.forEach(b=>{
-    const l=b.getAttribute("data-letter");
-    if(l===state.correctLetter) b.classList.add("good");
-    else if(l===letter) b.classList.add("bad");
-    b.disabled=true;
-  });
+
   if(correct){
-    state.settings.stars += 1;
+    state.answered = true;
+
+    // Words solved counter
+    state.settings.score = (state.settings.score || 0) + 1;
+
+    // Streak only counts words solved with no mistakes
+    if(!state.hadMistake){
+      state.settings.streak = (state.settings.streak || 0) + 1;
+      state.settings.bestStreak = Math.max(state.settings.bestStreak || 0, state.settings.streak);
+      // בוסט לסופר: כל 40 ברצף
+      if((state.settings.streak % defaults.superBonusEvery) === 0){
+        state.pendingSuperBonus = true;
+      }
+    }
+
     settingsSave();
     renderStats();
-    showReward("כל הכבוד! לחץ על הכוכב לקבל מטבעות 🪙");
+
+    // Coins are awarded on claim; amount depends on attempts/mistakes
+    showRewardOverlay("ניצחת! ⭐", 0);
   } else {
-    // wrong: auto next after small delay
-    setTimeout(()=>{
-      newQuestion();
-    }, 650);
+    // Wrong: keep same question, remove this option, let the child try again
+    state.hadMistake = true;
+    state.settings.streak = 0;
+    state.attempts = (state.attempts || 0) + 1;
+    state.eliminated.add(letter);
+
+    settingsSave();
+    renderStats();
+
+    // Update UI: disable wrong option
+    const btn = els.answers.querySelector(`[data-letter="${letter}"]`);
+    if(btn){ btn.disabled = true; btn.classList.add("disabled"); }
+
+    // Small feedback
+    toast("לא נכון — נסה שוב 🙂");
+
+    // If only one option left (forced correct), allow click but zero coins later
+    const enabled = [...els.answers.querySelectorAll("button.answerBtn:not([disabled])")];
+    if(enabled.length === 1){
+      toast("נשארה תשובה אחת… נסה אותה!");
+    }
   }
 }
-
-function claimReward(){
-  if(!state.answered) return; // only after a correct answer we show reward
-  if(els.rewardBox.classList.contains("hidden")) return;
-  // coins reward
-  const add = randInt(defaults.coinsPerWinMin, defaults.coinsPerWinMax);
-  state.settings.coins += add;
-  // goal check: if reached/exceeded, give a bonus star and wrap coins back? We'll keep coins capped at goal and bonus star.
-  let bonus = false;
-  if(state.settings.coins >= defaults.goalCoins){
-    state.settings.coins = state.settings.coins - defaults.goalCoins;
-    state.settings.stars += 1; // bonus star, no coins
-    bonus = true;
-  }
-  // logo unlock every 100 stars: each threshold adds one unlocked logo
-  const unlockCount = Math.min(LOGOS.length, 1 + Math.floor(state.settings.stars / defaults.starsToUnlockStep));
-  if(unlockCount > state.settings.unlockedLogos) {
-    state.settings.unlockedLogos = unlockCount;
-    settingsSave();
-    renderStats();
-    openLogo(true);
-    return;
-  }
+function grantStarsBonus(starsAdd, title){
+  state.settings.stars = (state.settings.stars || 0) + starsAdd;
+  const unlockCount = Math.min(LOGOS.length, 1 + Math.floor((state.settings.stars || 0) / defaults.starsToUnlockStep));
+  if(unlockCount > (state.settings.unlockedLogos || 1)) state.settings.unlockedLogos = unlockCount;
   settingsSave();
   renderStats();
-  showReward(`קיבלת ${add} מטבעות!${bonus ? " ⭐ קיבלת גם כוכב מתנה!" : ""}`);
-  // next question after short delay
-  setTimeout(()=>{
-    newQuestion();
-  }, 550);
+
+  showRewardOverlay(title || "הפתעה! ⭐", 0);
+  els.rewardCoinsText.textContent = `+${starsAdd} ⭐`;
+  els.rewardSub.textContent = "קיבלת כוכבים!";
+  els.starsNum.textContent = String(state.settings.stars || 0);
+
+  // End game: all logos unlocked
+  if((state.settings.unlockedLogos || 1) >= LOGOS.length){
+    els.rewardHint.textContent = "🎆 כל הכבוד! סיימת את המשחק 🎆";
+    els.rewardSub.textContent = "פתחת את כל הלוגואים!";
+  }
 }
 
+async function claimReward(){
+  if(!state.answered) return;
+  if(els.rewardOverlay.classList.contains("hidden")) return;
+
+  els.rewardSub.textContent = "מקבל פרס…";
+
+  // If the child needed multiple attempts and the last remaining option was correct -> 0 coins
+  const enabledCount = [...els.answers.querySelectorAll("button.answerBtn:not([disabled])")].length;
+  let addCoins = 0;
+
+  if(state.hadMistake){
+    // If mistakes until forced (only correct left)
+    if(enabledCount === 1){
+      addCoins = 0;
+    } else {
+      addCoins = randInt(defaults.coinsReducedMin, defaults.coinsReducedMax);
+    }
+  } else {
+    addCoins = randInt(defaults.coinsPerWinMin, defaults.coinsPerWinMax);
+  }
+
+  const from = state.settings.coins || 0;
+  state.settings.coins = from + addCoins;
+
+  // Update overlay text
+  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "0 🪙";
+  els.rewardHint.textContent = addCoins ? "כל הכבוד! 🪙" : "ניסית יפה! הפעם בלי מטבעות 🙂";
+
+  // Animate coins count
+  const to = state.settings.coins;
+  await animateNumber(els.coinsNum, from, to, 14);
+
+  // If reached 1000 coins => open surprise chest: give random stars (3-13), subtract 1000
+  if(state.settings.coins >= defaults.goalCoins){
+    state.settings.coins = state.settings.coins - defaults.goalCoins;
+    const starsAdd = randInt(defaults.chestStarsMin, defaults.chestStarsMax);
+    state.settings.stars = (state.settings.stars || 0) + starsAdd;
+
+    // Unlock logos by stars thresholds (every 100 stars => +1 logo)
+    const unlockCount = Math.min(LOGOS.length, 1 + Math.floor((state.settings.stars || 0) / defaults.starsToUnlockStep));
+    if(unlockCount > (state.settings.unlockedLogos || 1)){
+      state.settings.unlockedLogos = unlockCount;
+    }
+
+    settingsSave();
+    renderStats();
+
+    hideReward();
+
+    // Show surprise overlay (reuse reward overlay)
+    showRewardOverlay("הפתעה! ⭐", 0);
+    els.rewardCoinsText.textContent = `+${starsAdd} ⭐`;
+    els.rewardSub.textContent = "קיבלת כוכבים!";
+
+    // Animate stars number update visually
+    els.starsNum.textContent = String(state.settings.stars || 0);
+    els.coinsNum.textContent = String(state.settings.coins || 0);
+
+    // If unlocked all logos -> fireworks end screen
+    if((state.settings.unlockedLogos || 1) >= LOGOS.length){
+      els.rewardHint.textContent = "🎆 כל הכבוד! סיימת את המשחק 🎆";
+      els.rewardSub.textContent = "פתחת את כל הלוגואים!";
+      // Disable answering further
+      els.answers.innerHTML = "";
+      return;
+    }
+
+    // Offer to choose newly unlocked logo, if any
+    if(unlockCount > 1 && (state.settings.stars % defaults.starsToUnlockStep) <= defaults.chestStarsMax){
+      // open logo picker after closing overlay
+      setTimeout(()=>{ hideReward(); openLogo(true); }, 900);
+      return;
+    }
+
+    // Continue game
+    setTimeout(()=>{ hideReward(); newQuestion(); }, 900);
+
+    if(state.pendingSuperBonus){
+      state.pendingSuperBonus = false;
+      const sAdd2 = randInt(defaults.superBonusStarsMin, defaults.superBonusStarsMax);
+      setTimeout(()=>{ grantStarsBonus(sAdd2, "🔥 בוסט סופר! 🔥"); }, 950);
+      setTimeout(()=>{ hideReward(); newQuestion(); }, 1900);
+    }
+    return;
+  }
+
+  settingsSave();
+  renderStats();
+
+  hideReward();
+
+  if(state.pendingSuperBonus){
+    state.pendingSuperBonus = false;
+    const sAdd = randInt(defaults.superBonusStarsMin, defaults.superBonusStarsMax);
+    // Show bonus overlay briefly, then continue
+    grantStarsBonus(sAdd, "🔥 בוסט סופר! 🔥");
+    setTimeout(()=>{ hideReward(); newQuestion(); }, 950);
+    return;
+  }
+
+  setTimeout(()=>{ newQuestion(); }, 120);
+}
 function openLetters(){
   renderLettersGrid();
   els.lettersDialog.showModal();
@@ -805,6 +983,7 @@ function onPlayerSelectChange(){
 }
 
 function openSettings(){
+  els.nikkudToggle.value = (state.settings.showNikkud ? "on" : "off");
   els.debugToggle.value = debugIsOn() ? "on" : "off";
   els.settingsDialog.showModal();
 }
@@ -896,7 +1075,14 @@ function attachDelegation(){
     handleAction(action, btn);
   });
   els.playerSelect.addEventListener("change", onPlayerSelectChange);
-  els.debugToggle.addEventListener("change", ()=> debugSet(els.debugToggle.value==="on"));
+  els.nikkudToggle.addEventListener("change", ()=>{
+  state.settings.showNikkud = (els.nikkudToggle.value==="on");
+  settingsSave();
+  // re-render current word
+  renderWord();
+});
+
+els.debugToggle.addEventListener("change", ()=> { debugSet(els.debugToggle.value==="on"); if(debugIsOn()){ els.debugPanel.classList.remove("hidden"); dbg("Debug enabled"); } else { els.debugPanel.classList.add("hidden"); } });
 }
 
 function boot(){

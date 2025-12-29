@@ -9,9 +9,7 @@
   <meta name="theme-color" content="#0b0f24" />
 </head>
 <body>
-  <div id="buildBanner">✅ BUILD v73</div>
-
-  <header class="topbar">
+<header class="topbar">
     <button class="iconBtn" type="button" data-action="openSettings" aria-label="הגדרות">⚙️</button>
     <button class="iconBtn" type="button" data-action="openPlayers" aria-label="שחקנים">👤</button>
     <div class="brand">
@@ -43,12 +41,17 @@
           <div class="statNum" id="starsNum">0</div>
           <div class="statLbl">⭐ כוכבים</div>
         </div>
-        <button class="logoBtn" type="button" data-action="openLogo" aria-label="לוגו">
-          <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
-        </button>
+
+        <div class="midColumn">
+          <button class="logoBtn" type="button" data-action="openLogo" aria-label="לוגו">
+            <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
+          </button>
+          <div class="streakPill" id="streakPill">🔥 סופר: 0</div>
+        </div>
+
         <div class="stat">
           <div class="statNum" id="coinsNum">0</div>
-          <div class="statLbl">🪙 מטבעות</div>
+          <div class="statLbl">🪙 מטבעות זהב</div>
         </div>
       </div>
 
@@ -56,6 +59,7 @@
 
       <div class="rowBetween">
         <button class="btn" type="button" data-action="openLetters">👨‍👩‍👦 בחירת אותיות (הורה)</button>
+        <div class="scorePill" id="scorePill">✅ מילים: 0</div>
         <div class="muted" id="lettersModeText">מצב אותיות: כל האותיות (א–ת)</div>
       </div>
 
@@ -70,9 +74,16 @@
 
       <div class="answers" id="answers"></div>
 
-      <div class="reward hidden" id="rewardBox">
-        <div class="rewardHint">ניצחת! לחץ על הכוכב לקבל מטבעות</div>
-        <button class="starBig" type="button" data-action="claimReward" aria-label="קבל פרס">⭐</button>
+      
+      <div class="rewardOverlay hidden" id="rewardOverlay" role="dialog" aria-modal="true">
+        <div class="rewardCard">
+          <div class="rewardHint" id="rewardHint">כל הכבוד!</div>
+          <button class="starBig" type="button" data-action="claimReward" aria-label="קבל פרס">⭐</button>
+          <div class="rewardCoins" id="rewardCoinsText">+0 🪙</div>
+          <div class="muted" id="rewardSub">לחץ על הכוכב לקבל מטבעות</div>
+        </div>
+      </div>
+<button class="starBig" type="button" data-action="claimReward" aria-label="קבל פרס">⭐</button>
         <div class="muted" id="rewardText"></div>
       </div>
     </section>
@@ -127,6 +138,7 @@
   <!-- Settings -->
   <dialog id="settingsDialog" class="dialog">
     <h2>הגדרות</h2>
+    <div class="muted">גרסה: v74</div>
     <label class="rowBetween">
       <span class="muted">Debug</span>
       <select id="debugToggle" class="select">
