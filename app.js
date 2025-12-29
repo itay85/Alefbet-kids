@@ -1,4 +1,4 @@
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=34"); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=37"); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -347,9 +347,7 @@ const els = {
   btnParentToggle: document.getElementById("btnParentToggle"),
   lettersDialog: document.getElementById("lettersDialog"),
   btnCloseLetters: document.getElementById("btnCloseLetters"),
-
-  btnSound: document.getElementById("btnSound"),
-  btnSettings: document.getElementById("btnSettings"),
+btnSettings: document.getElementById("btnSettings"),
   btnLogo: document.getElementById("btnLogo"),
   btnReset: document.getElementById("btnReset"),
   logoModal: document.getElementById("logoModal"),
@@ -871,16 +869,13 @@ els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
 els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
-els.btnOpenBrawlers.addEventListener("click", openBrawlers);
-els.btnChangeBrawler.addEventListener("click", openBrawlers);
 els.btnTryAgain.addEventListener("click", tryAgain);
 
 els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
 els.btnStar.addEventListener("click", claimReward);
 
-els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
 els.btnSettings.addEventListener("click", openSettings);
-if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
+if(els.btnParentToggle) els.btnParentToggle.addEventListener("click", openLetters);
 if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
 if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
 if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
@@ -1010,4 +1005,19 @@ function bindRepeatButton(){
   btn.addEventListener("click", () => {
     if(state.currentWord) speak(state.currentWord);
   });
+}
+
+function bindHowToToggle(){
+  const btn = document.getElementById("btnToggleHowTo");
+  const content = document.getElementById("howToContent");
+  if(!btn || !content) return;
+  let hidden = false;
+  try{ hidden = localStorage.getItem("howToHidden")==="1"; }catch(e){}
+  const apply = () => {
+    content.style.display = hidden ? "none" : "";
+    btn.textContent = hidden ? "הצג" : "הסתר";
+    try{ localStorage.setItem("howToHidden", hidden ? "1" : "0"); }catch(e){}
+  };
+  apply();
+  btn.addEventListener("click", () => { hidden = !hidden; apply(); });
 }

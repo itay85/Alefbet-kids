@@ -341,3 +341,6 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 }
 
 .logoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+
+.howToPanel{margin-bottom:12px;}
+.howToTitle{margin:0;font-size:18px;}

@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAWL LETTERS – קרב האותיות</title>
   <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="./manifest.webmanifest?v=37">
+  <link rel="stylesheet" href="./styles.css?v=37">
 </head>
 <body>
   <header class="top">
@@ -18,13 +18,13 @@
       </div>
     </div>
 
+    
     <div class="controls">
-      <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
-      <button id="btnLogo" class="btn" type="button" title="לוגו שלי">🧩</button>
-      <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
+      <button id="btnParentToggle" class="btn" type="button" title="הורה: בחירת אותיות">👨‍👩‍👦</button>
+      <button id="btnLogo" class="btn" type="button" title="הלוגו שלי"></button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
-      <button id="btnReset" class="btn" type="button" title="איפוס">🔄</button>
     </div>
+
   </header>
 
   <main class="wrap">
@@ -47,13 +47,6 @@
         <div class="tiny" id="homeLettersHint"></div>
       </div>
 
-      <div class="panel">
-        <h2>איך מנצחים?</h2>
-        <p class="muted">
-          כל ניחוש נכון נותן ⭐. תלחץ על הכוכב כדי לקבל 🪙 מטבעות זהב רנדומליים.
-          מגיעים ל-<strong>1000</strong> מטבעות? ניצחת!
-        </p>
-        <div class="tiny">טיפ: כדי “להתקין” באייפון/אייפד: Share → Add to Home Screen.</div>
       </div>
     </section>
 <section id="screenSelect" class="screen hidden"></section>
@@ -61,11 +54,26 @@
 
 
     <section id="screenFight" class="screen" hidden>
+      
+      <div class="panel howToPanel" id="howToPanel">
+        <div class="rowBetween">
+          <h2 class="howToTitle">איך מנצחים?</h2>
+          <button id="btnToggleHowTo" class="btn small" type="button">הסתר</button>
+        </div>
+        <div id="howToContent">
+          <p class="muted">
+            כל ניחוש נכון נותן ⭐. תלחץ על הכוכב כדי לקבל 🪙 מטבעות זהב רנדומליים.
+            מגיעים ל-<strong>1000</strong> מטבעות? ניצחת!
+          </p>
+          <div class="tiny">טיפ: אפשר תמיד ללחוץ 🔊 כדי לשמוע שוב את המילה.</div>
+        </div>
+      </div>
+
+
       <div class="panel fightTop">
         <div class="rowBetween">
           <div class="pill" id="bossPill"></div>
-  <div class="pill" id="currentBrawlerPill">בחר בראולר</div>
-          <div class="fightStats">
+<div class="fightStats">
             <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
           </div>
@@ -156,7 +164,11 @@
         <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
       </label>
 
-      <menu class="menu">
+      <div class="rowBetween" style="margin:10px 0 2px;">
+  <button id="btnReset" class="btn" type="button">🔄 איפוס משחק</button>
+</div>
+
+<menu class="menu">
         <button class="btn" value="cancel">סגור</button>
         <button class="btn primary" id="btnSaveSettings" value="default">שמור</button>
       </menu>
@@ -177,7 +189,7 @@
     </div>
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="./app.js?v=37"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js");
