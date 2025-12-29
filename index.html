@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v62 ✅
+    BUILD v63 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -25,8 +25,8 @@
 
     <div class="controls">
       <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
-<button id="btnPlayers" class="btn" type="button" title="החלף שחקן">👤</button>
-      <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
+<button id="btnPlayers" class="btn" type="button" title="שחקנים" data-action="openPlayers">👤</button>
+      <button id="btnSettings" class="btn" type="button" title="הגדרות" data-action="openSettings">⚙️</button>
 </div>
   </header>
 
@@ -44,8 +44,8 @@
         </div>
 
         <div class="homeBtns">
-          <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()">🎮 התחל משחק</button>
-          <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
+          <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()" data-action="startGame">🎮 התחל משחק</button>
+          <button id="btnOpenBrawlers" class="btn big" type="button" data-action="openLetters">🦸 בחירת בראולר</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
@@ -78,8 +78,8 @@
 
         <div class="wordWrap">
           <div class="word" id="wordMasked">_</div>
-          <button id="btnRepeat" class="btn small" type="button">🔊 השמע מילה</button>
-          <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
+          <button id="btnRepeat" class="btn small" type="button" data-action="repeatWord">🔊 השמע מילה</button>
+          <button id="btnReveal" class="btn small" type="button" data-action="toggleReveal">👀 גלה אות</button>
         </div>
 
         <div class="choices" id="choices"></div>
@@ -87,13 +87,13 @@
         <div class="feedback" id="feedback" aria-live="polite"></div>
 
         <div class="reward" id="reward" hidden>
-          <button id="btnStar" class="starBtn" type="button" aria-label="קבל מטבעות" disabled>⭐</button>
+          <button id="btnStar" class="starBtn" type="button" aria-label="קבל מטבעות" disabled data-action="claimReward">⭐</button>
           <div class="rewardText" id="rewardText">לחץ על הכוכב!</div>
           <div class="coinsPop" id="coinsPop" hidden>+100 🪙</div>
         </div>
 
         <div class="fightFooter">
-          <button id="btnTryAgain" class="btn" type="button" hidden>נסה שוב</button>
+          <button id="btnTryAgain" class="btn" type="button" hidden data-action="tryAgain">נסה שוב</button>
           <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
         </div>
       </div>
@@ -123,13 +123,13 @@
     <div class="dialog">
       <div class="rowBetween">
         <h2 style="margin:0">בחירת אותיות להתמקדות</h2>
-        <button id="btnCloseLetters" class="btn" type="button">סגור</button>
+        <button id="btnCloseLetters" class="btn" type="button" data-action="closeLetters">סגור</button>
       </div>
       <p class="muted" style="margin-top:10px">לחצו על אות כדי לסמן/לבטל. סגור = שומר וחוזר למשחק.</p>
 
       <div class="pickerToolbar">
-        <button class="btn" id="btnPickAll" type="button">בחר הכל</button>
-        <button class="btn" id="btnPickNone" type="button">נקה</button>
+        <button class="btn" id="btnPickAll" type="button" data-action="pickAll">בחר הכל</button>
+        <button class="btn" id="btnPickNone" type="button" data-action="pickNone">נקה</button>
         <button class="btn" id="btnPresetNadav" type="button">נדב: ס כ ר ט</button>
       </div>
 
@@ -159,10 +159,21 @@
         <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
       </label>
 
+      
+      <div class="hr"></div>
+      <h3 class="subTitle">כלים</h3>
+      <label class="row">
+        <span>מצב Debug</span>
+        <select id="debugToggle">
+          <option value="off" selected>כבוי</option>
+          <option value="on">דלוק</option>
+        </select>
+      </label>
+
       <menu class="menu">
-        <button id="btnReset" class="btn danger" type="button">איפוס משחק</button>
+        <button id="btnReset" class="btn danger" type="button" data-action="resetGame">איפוס משחק</button>
         <button class="btn" value="cancel">סגור</button>
-        <button class="btn primary" id="btnSaveSettings" value="default">שמור</button>
+        <button class="btn primary" id="btnSaveSettings" value="default" data-action="saveSettings">שמור</button>
       </menu>
 
       <p class="tiny">הערה: הקראה תלויה בקול עברי במכשיר.</p>
@@ -174,8 +185,8 @@
       <h2>🎉 ניצחת!</h2>
       <p class="muted">הגעת ל-1000 מטבעות זהב 🪙</p>
       <div class="rowBetween">
-        <button id="btnKeepPlaying" class="btn primary" type="button">להמשיך לשחק</button>
-        <button id="btnResetCoins" class="btn" type="button">איפוס מטבעות</button>
+        <button id="btnKeepPlaying" class="btn primary" type="button" data-action="keepPlaying">להמשיך לשחק</button>
+        <button id="btnResetCoins" class="btn" type="button" data-action="resetCoins">איפוס מטבעות</button>
       </div>
       <p class="tiny">טיפ: אפשר להחליף אותיות עם 👨‍👩‍👦 למעלה.</p>
     </div>
@@ -228,6 +239,18 @@
   </script>
 
 
+  <dialog id="firstPlayerDialog" class="dialog">
+    <h2>בוא נתחיל 🎮</h2>
+    <p class="muted">מה שם השחקן הראשון?</p>
+    <label class="row">
+      <span>שם</span>
+      <input id="firstPlayerName" type="text" placeholder="למשל: נדב" />
+    </label>
+    <menu class="menu">
+      <button id="btnCreateFirstPlayer" class="btn primary" type="button" data-action="createFirstPlayer">המשך</button>
+    </menu>
+  </dialog>
+
   <dialog id="playersDialog" class="dialog">
     <h2>שחקנים</h2>
 
@@ -237,12 +260,12 @@
     </label>
 
     <div class="rowBetween">
-      <button id="btnAddPlayer" class="btn" type="button">➕ הוסף שחקן</button>
-      <button id="btnRenamePlayer" class="btn" type="button">✏️ שנה שם</button>
+      <button id="btnAddPlayer" class="btn" type="button" data-action="addPlayer">➕ הוסף</button>
+      <button id="btnRenamePlayer" class="btn" type="button" data-action="renamePlayer">✏️ שנה שם</button>
     </div>
 
     <menu class="menu">
-      <button id="btnClosePlayers" class="btn" type="button">סגור</button>
+      <button id="btnClosePlayers" class="btn" type="button" data-action="closePlayers">סגור</button>
     </menu>
   </dialog>
 

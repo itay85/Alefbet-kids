@@ -361,10 +361,7 @@ const WORD_BANK = {
   ]
 };
 
-const KEY_SETTINGS_BASE = "brawl_letters_settings_v5";
-const KEY_PLAYERS = "bl_players_v1";
-const KEY_CURRENT_PLAYER = "bl_current_player_v1";
-const KEY_DEBUG = "bl_debug";
+const KEY_SETTINGS = "brawl_letters_settings_v5";
 
 const SPECIAL_BRAWLERS = {
   "ס": { name:"ספידי", desc:"רץ מהר ויורה סוכריות", img:"assets/brawlers/speedy.svg" },
@@ -455,42 +452,42 @@ const els = {
   btnResetCoins: document.getElementById("btnResetCoins"),
 };
 
-function safeJsonParse(raw, fallback){ try{ return JSON.parse(raw); }catch(_){ return fallback; } }
+// ===== PROFILES_STORE_V63 =====
+const KEY_SETTINGS_BASE = "brawl_letters_settings_v5";
+const KEY_PLAYERS = "bl_players_v1";
+const KEY_CURRENT_PLAYER = "bl_current_player_v1";
+const KEY_DEBUG = "bl_debug";
 
+function safeJsonParse(raw, fallback){ try{ return JSON.parse(raw); }catch(_){ return fallback; } }
 function getPlayers(){
   const raw = localStorage.getItem(KEY_PLAYERS);
   const arr = safeJsonParse(raw, null);
-  if(Array.isArray(arr) && arr.length) return arr;
-  return [];
+  return Array.isArray(arr) ? arr : [];
 }
-function savePlayers(players){
-  try{ localStorage.setItem(KEY_PLAYERS, JSON.stringify(players)); }catch(_){}
-}
+function savePlayers(players){ try{ localStorage.setItem(KEY_PLAYERS, JSON.stringify(players)); }catch(_){ } }
 function getCurrentPlayerId(){
   try{ const id = localStorage.getItem(KEY_CURRENT_PLAYER); if(id) return id; }catch(_){}
+  const p = getPlayers()[0];
+  if(p){ try{ localStorage.setItem(KEY_CURRENT_PLAYER, p.id); }catch(_){ } return p.id; }
+  return null;
+}
+function setCurrentPlayerId(id){ try{ localStorage.setItem(KEY_CURRENT_PLAYER, id); }catch(_){ } }
+function settingsKey(){
+  const pid = getCurrentPlayerId() || "p1";
+  return `${KEY_SETTINGS_BASE}__${pid}`;
+}
+function isDebugEnabled(){ try{ return localStorage.getItem(KEY_DEBUG)==="1"; }catch(_){ return false; } }
+function setDebugEnabled(on){
+  try{ localStorage.setItem(KEY_DEBUG, on ? "1":"0"); }catch(_){}
+  try{ if(window.__DBGSHOW) window.__DBGSHOW(on); }catch(_){}
+}
+function ensureFirstPlayerFlow(){
   const players = getPlayers();
-  const id = players[0]?.id || null;
-  if(id){ try{ localStorage.setItem(KEY_CURRENT_PLAYER, id); }catch(_){} }
-  return id;
-}
-function setCurrentPlayerId(id){ try{ localStorage.setItem(KEY_CURRENT_PLAYER, id); }catch(_){} }
-function getSettingsKey(){
-  const pid = getCurrentPlayerId();
-  return pid ? `${KEY_SETTINGS_BASE}__${pid}` : `${KEY_SETTINGS_BASE}__p1`;
-}
-
-function ensureFirstPlayer(){
-  let players = getPlayers();
   if(players.length) return;
-  let name = "";
-  try{ name = prompt("שם השחקן הראשון:", "שחקן 1") || ""; }catch(_){}
-  name = (name || "שחקן 1").trim();
-  const p = {id: "p1", name};
-  players = [p];
-  savePlayers(players);
-  setCurrentPlayerId(p.id);
+  const dlg = document.getElementById("firstPlayerDialog");
+  if(!dlg) return;
+  try{ dlg.showModal(); }catch(_){}
 }
-
 function setHeaderPlayerName(){
   const el = document.getElementById("currentPlayerName");
   if(!el) return;
@@ -499,7 +496,25 @@ function setHeaderPlayerName(){
   const p = players.find(x=>x.id===id) || players[0];
   el.textContent = p?.name || "שחקן";
 }
-
+function renderPlayersSelect(){
+  const sel = document.getElementById("playerSelect");
+  if(!sel) return;
+  const players = getPlayers();
+  const id = getCurrentPlayerId();
+  sel.innerHTML = "";
+  players.forEach(p=>{
+    const opt=document.createElement("option");
+    opt.value=p.id;
+    opt.textContent=p.name;
+    if(p.id===id) opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+function loadForCurrentPlayer(){
+  try{ load(); }catch(_){}
+  try{ renderStats(); }catch(_){}
+  setHeaderPlayerName();
+}
 
 
 const state = {
@@ -554,7 +569,7 @@ function speak(text){
 }
 
 function save(){
-  localStorage.setItem(getSettingsKey(), JSON.stringify({
+  localStorage.setItem(settingsKey(), JSON.stringify({
     lettersMode: state.lettersMode,
     selectedLetters: state.lettersMode === "custom" ? state.selectedLetters : [],
     autospeak: state.autospeak,
@@ -568,7 +583,7 @@ function save(){
 
 function load(){
   try{
-    const raw = localStorage.getItem(getSettingsKey());
+    const raw = localStorage.getItem(settingsKey());
     if(!raw) return;
     const s = JSON.parse(raw);
     if(typeof s.autospeak === "boolean") state.autospeak = s.autospeak;
@@ -964,30 +979,47 @@ function resetGame(){
 function resetCoins(){ state.coins = 0; save(); setUI(); }
 
 // Events
+els.btnParentToggle && 
 els.btnParentToggle.addEventListener("click", toggleLetters);
+els.btnCloseLetters && 
 els.btnCloseLetters.addEventListener("click", closeLetters);
+els.btnPickAll && 
 els.btnPickAll.addEventListener("click", pickerSelectAll);
+els.btnPickNone && 
 els.btnPickNone.addEventListener("click", pickerSelectNone);
+els.btnPresetNadav && 
 els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
+els.lettersDialog && 
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
+els.btnPlay && 
 els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
+els.btnOpenBrawlers && 
 els.btnOpenBrawlers.addEventListener("click", openBrawlers);
+els.btnChangeBrawler && 
 els.btnChangeBrawler.addEventListener("click", openBrawlers);
+els.btnTryAgain && 
 els.btnTryAgain.addEventListener("click", tryAgain);
 
+els.btnReveal && 
 els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
+els.btnStar && 
 els.btnStar.addEventListener("click", claimReward);
 
-if(els.btnSound) els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
+els.btnSound && 
+els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
+els.btnSettings && 
 els.btnSettings.addEventListener("click", openSettings);
-if(els.btnLogo) if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
-if(els.btnReset) if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
+if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
+if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
 if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
 if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
+els.btnSaveSettings && 
 els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
 
+els.btnKeepPlaying && 
 els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
+els.btnResetCoins && 
 els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
@@ -1112,69 +1144,112 @@ function checkGiftStar(){
   }
 }
 
-function bindPlayersDialog(){
-  const dlg = document.getElementById("playersDialog");
-  const btnOpen = document.getElementById("btnPlayers");
-  const btnClose = document.getElementById("btnClosePlayers");
-  const sel = document.getElementById("playerSelect");
-  const btnAdd = document.getElementById("btnAddPlayer");
-  const btnRename = document.getElementById("btnRenamePlayer");
-  if(!dlg || !btnOpen || !sel) return;
 
-  function render(){
-    const players = getPlayers();
-    const current = getCurrentPlayerId() || players[0]?.id;
-    sel.innerHTML = "";
-    players.forEach(p=>{
-      const opt=document.createElement("option");
-      opt.value=p.id;
-      opt.textContent=p.name;
-      if(p.id===current) opt.selected=true;
-      sel.appendChild(opt);
-    });
-  }
-
-  btnOpen.addEventListener("click", ()=>{
-    render();
-    dlg.showModal();
-  });
-  if(btnClose) btnClose.addEventListener("click", ()=>dlg.close());
-
-  sel.addEventListener("change", ()=>{
-    setCurrentPlayerId(sel.value);
-    load();
+// ===== ACTIONS_DELEGATION_V63 =====
+const actions = {
+  openSettings(){
+    try{ els.settingsDialog && els.settingsDialog.showModal(); }catch(_){}
+    const dbg = document.getElementById("debugToggle");
+    if(dbg) dbg.value = isDebugEnabled() ? "on":"off";
+  },
+  closeSettings(){ try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){ } },
+  saveSettings(){
+    // also apply debug toggle
+    const dbg = document.getElementById("debugToggle");
+    if(dbg) setDebugEnabled(dbg.value==="on");
+    try{ save(); }catch(_){}
+    try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){}
+  },
+  resetGame(){
+    if(!confirm("לאפס את המשחק לשחקן הנוכחי?")) return;
+    try{ localStorage.removeItem(settingsKey()); }catch(_){}
+    location.reload();
+  },
+  resetCoins(){ try{ resetCoins(); }catch(_){ } },
+  startGame(){ try{ startGame(); }catch(_){ } },
+  openLetters(){ try{ openLetters(); }catch(_){ } },
+  closeLetters(){ try{ closeLetters(); }catch(_){ } },
+  pickAll(){ try{ pickAll(); }catch(_){ } },
+  pickNone(){ try{ pickNone(); }catch(_){ } },
+  repeatWord(){
+    try{
+      if(state && state.currentWord && typeof speak==="function") speak(state.currentWord);
+    }catch(_){}
+  },
+  claimReward(){ try{ claimReward(); }catch(_){ } },
+  toggleReveal(){ try{ toggleReveal(); }catch(_){ } },
+  tryAgain(){ try{ tryAgain(); }catch(_){ } },
+  keepPlaying(){ try{ keepPlaying(); }catch(_){ } },
+  openPlayers(){ 
+    const dlg=document.getElementById("playersDialog");
+    if(!dlg) return;
+    renderPlayersSelect();
+    try{ dlg.showModal(); }catch(_){}
+  },
+  closePlayers(){ try{ document.getElementById("playersDialog")?.close(); }catch(_){ } },
+  createFirstPlayer(){
+    const input=document.getElementById("firstPlayerName");
+    let name=(input?.value || "שחקן 1").trim();
+    if(!name) name="שחקן 1";
+    const p={id:"p1", name};
+    savePlayers([p]);
+    setCurrentPlayerId("p1");
+    try{ document.getElementById("firstPlayerDialog")?.close(); }catch(_){}
+    loadForCurrentPlayer();
+  },
+  addPlayer(){
+    const players=getPlayers();
+    const name=(prompt("שם השחקן החדש:", `שחקן ${players.length+1}`) || "").trim();
+    if(!name) return;
+    const id="p"+Date.now().toString(36);
+    players.push({id, name});
+    savePlayers(players);
+    setCurrentPlayerId(id);
+    renderPlayersSelect();
+    loadForCurrentPlayer();
+  },
+  renamePlayer(){
+    const players=getPlayers();
+    const id=getCurrentPlayerId();
+    const p=players.find(x=>x.id===id);
+    if(!p) return;
+    const name=(prompt("שם חדש:", p.name) || "").trim();
+    if(!name) return;
+    p.name=name;
+    savePlayers(players);
+    renderPlayersSelect();
     setHeaderPlayerName();
-    try{ renderStats(); }catch(_){}
-  });
-
-  if(btnAdd){
-    btnAdd.addEventListener("click", ()=>{
-      const players = getPlayers();
-      const name = (prompt("שם השחקן החדש:", `שחקן ${players.length+1}`) || "").trim();
-      if(!name) return;
-      const id = "p" + Date.now().toString(36);
-      players.push({id, name});
-      savePlayers(players);
-      setCurrentPlayerId(id);
-      render();
-      load();
-      setHeaderPlayerName();
-      try{ renderStats(); }catch(_){}
-    });
+  },
+  switchPlayer(e, el){
+    const sel=document.getElementById("playerSelect");
+    if(!sel) return;
+    setCurrentPlayerId(sel.value);
+    loadForCurrentPlayer();
   }
+};
 
-  if(btnRename){
-    btnRename.addEventListener("click", ()=>{
-      const players = getPlayers();
-      const id = getCurrentPlayerId();
-      const p = players.find(x=>x.id===id);
-      if(!p) return;
-      const name = (prompt("שם חדש לשחקן:", p.name) || "").trim();
-      if(!name) return;
-      p.name = name;
-      savePlayers(players);
-      render();
-      setHeaderPlayerName();
-    });
-  }
-}
+document.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-action]");
+  if(!btn) return;
+  const act = btn.dataset.action;
+  if(!act) return;
+  // special: switching player is on select change
+  if(actions[act]){ e.preventDefault(); actions[act](e, btn); }
+});
+
+document.addEventListener("change", (e)=>{
+  const sel = e.target.closest("#playerSelect");
+  if(!sel) return;
+  setCurrentPlayerId(sel.value);
+  loadForCurrentPlayer();
+});
+
+// prevent legacy clicks from doing wrong things when no players yet
+document.addEventListener("DOMContentLoaded", ()=>{
+  // show first-player dialog if needed
+  ensureFirstPlayerFlow();
+  // set header name if exists
+  setHeaderPlayerName();
+  // set debug visibility
+  setDebugEnabled(isDebugEnabled());
+});
