@@ -1,3 +1,4 @@
+const USE_LEGACY_BINDINGS = false;
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1;i>0;i--){
@@ -452,71 +453,6 @@ const els = {
   btnResetCoins: document.getElementById("btnResetCoins"),
 };
 
-// ===== PROFILES_STORE_V63 =====
-const KEY_SETTINGS_BASE = "brawl_letters_settings_v5";
-const KEY_PLAYERS = "bl_players_v1";
-const KEY_CURRENT_PLAYER = "bl_current_player_v1";
-const KEY_DEBUG = "bl_debug";
-
-function safeJsonParse(raw, fallback){ try{ return JSON.parse(raw); }catch(_){ return fallback; } }
-function getPlayers(){
-  const raw = localStorage.getItem(KEY_PLAYERS);
-  const arr = safeJsonParse(raw, null);
-  return Array.isArray(arr) ? arr : [];
-}
-function savePlayers(players){ try{ localStorage.setItem(KEY_PLAYERS, JSON.stringify(players)); }catch(_){ } }
-function getCurrentPlayerId(){
-  try{ const id = localStorage.getItem(KEY_CURRENT_PLAYER); if(id) return id; }catch(_){}
-  const p = getPlayers()[0];
-  if(p){ try{ localStorage.setItem(KEY_CURRENT_PLAYER, p.id); }catch(_){ } return p.id; }
-  return null;
-}
-function setCurrentPlayerId(id){ try{ localStorage.setItem(KEY_CURRENT_PLAYER, id); }catch(_){ } }
-function settingsKey(){
-  const pid = getCurrentPlayerId() || "p1";
-  return `${KEY_SETTINGS_BASE}__${pid}`;
-}
-function isDebugEnabled(){ try{ return localStorage.getItem(KEY_DEBUG)==="1"; }catch(_){ return false; } }
-function setDebugEnabled(on){
-  try{ localStorage.setItem(KEY_DEBUG, on ? "1":"0"); }catch(_){}
-  try{ if(window.__DBGSHOW) window.__DBGSHOW(on); }catch(_){}
-}
-function ensureFirstPlayerFlow(){
-  const players = getPlayers();
-  if(players.length) return;
-  const dlg = document.getElementById("firstPlayerDialog");
-  if(!dlg) return;
-  try{ dlg.showModal(); }catch(_){}
-}
-function setHeaderPlayerName(){
-  const el = document.getElementById("currentPlayerName");
-  if(!el) return;
-  const players = getPlayers();
-  const id = getCurrentPlayerId();
-  const p = players.find(x=>x.id===id) || players[0];
-  el.textContent = p?.name || "שחקן";
-}
-function renderPlayersSelect(){
-  const sel = document.getElementById("playerSelect");
-  if(!sel) return;
-  const players = getPlayers();
-  const id = getCurrentPlayerId();
-  sel.innerHTML = "";
-  players.forEach(p=>{
-    const opt=document.createElement("option");
-    opt.value=p.id;
-    opt.textContent=p.name;
-    if(p.id===id) opt.selected=true;
-    sel.appendChild(opt);
-  });
-}
-function loadForCurrentPlayer(){
-  try{ load(); }catch(_){}
-  try{ renderStats(); }catch(_){}
-  setHeaderPlayerName();
-}
-
-
 const state = {
   giftStarAt1000: false,
 
@@ -569,7 +505,7 @@ function speak(text){
 }
 
 function save(){
-  localStorage.setItem(settingsKey(), JSON.stringify({
+  localStorage.setItem(KEY_SETTINGS, JSON.stringify({
     lettersMode: state.lettersMode,
     selectedLetters: state.lettersMode === "custom" ? state.selectedLetters : [],
     autospeak: state.autospeak,
@@ -583,7 +519,7 @@ function save(){
 
 function load(){
   try{
-    const raw = localStorage.getItem(settingsKey());
+    const raw = localStorage.getItem(KEY_SETTINGS);
     if(!raw) return;
     const s = JSON.parse(raw);
     if(typeof s.autospeak === "boolean") state.autospeak = s.autospeak;
@@ -979,47 +915,30 @@ function resetGame(){
 function resetCoins(){ state.coins = 0; save(); setUI(); }
 
 // Events
-els.btnParentToggle && 
 els.btnParentToggle.addEventListener("click", toggleLetters);
-els.btnCloseLetters && 
 els.btnCloseLetters.addEventListener("click", closeLetters);
-els.btnPickAll && 
 els.btnPickAll.addEventListener("click", pickerSelectAll);
-els.btnPickNone && 
 els.btnPickNone.addEventListener("click", pickerSelectNone);
-els.btnPresetNadav && 
 els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
-els.lettersDialog && 
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
-els.btnPlay && 
 els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
-els.btnOpenBrawlers && 
 els.btnOpenBrawlers.addEventListener("click", openBrawlers);
-els.btnChangeBrawler && 
 els.btnChangeBrawler.addEventListener("click", openBrawlers);
-els.btnTryAgain && 
 els.btnTryAgain.addEventListener("click", tryAgain);
 
-els.btnReveal && 
 els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
-els.btnStar && 
 els.btnStar.addEventListener("click", claimReward);
 
-els.btnSound && 
 els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
-els.btnSettings && 
 els.btnSettings.addEventListener("click", openSettings);
 if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
 if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
 if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
 if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
-els.btnSaveSettings && 
 els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
 
-els.btnKeepPlaying && 
 els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
-els.btnResetCoins && 
 els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
@@ -1145,128 +1064,26 @@ function checkGiftStar(){
 }
 
 
-// ===== ACTIONS_DELEGATION_V63 =====
-const actions = {
-  openSettings(){
-    try{ els.settingsDialog && els.settingsDialog.showModal(); }catch(_){}
-    const dbg = document.getElementById("debugToggle");
-    if(dbg) dbg.value = isDebugEnabled() ? "on":"off";
-  },
-  closeSettings(){ try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){ } },
-  saveSettings(){
-    // also apply debug toggle
-    const dbg = document.getElementById("debugToggle");
-    if(dbg) setDebugEnabled(dbg.value==="on");
-    try{ save(); }catch(_){}
-    try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){}
-  },
-  resetGame(){
-    if(!confirm("לאפס את המשחק לשחקן הנוכחי?")) return;
-    try{ localStorage.removeItem(settingsKey()); }catch(_){}
-    location.reload();
-  },
-  resetCoins(){ try{ resetCoins(); }catch(_){ } },
-  startGame(){ try{ startGame(); }catch(_){ } },
-  openLetters(){ try{ openLetters(); }catch(_){ } },
-  closeLetters(){ try{ closeLetters(); }catch(_){ } },
-  pickAll(){ try{ pickAll(); }catch(_){ } },
-  pickNone(){ try{ pickNone(); }catch(_){ } },
-  repeatWord(){
-    try{
-      if(state && state.currentWord && typeof speak==="function") speak(state.currentWord);
-    }catch(_){}
-  },
-  claimReward(){ try{ claimReward(); }catch(_){ } },
-  toggleReveal(){ try{ toggleReveal(); }catch(_){ } },
-  tryAgain(){ try{ tryAgain(); }catch(_){ } },
-  keepPlaying(){ try{ keepPlaying(); }catch(_){ } },
-  openPlayers(){ 
-    const dlg=document.getElementById("playersDialog");
-    if(!dlg) return;
-    renderPlayersSelect();
-    try{ dlg.showModal(); }catch(_){}
-  },
-  closePlayers(){ try{ document.getElementById("playersDialog")?.close(); }catch(_){ } },
-  createFirstPlayer(){
-    const input=document.getElementById("firstPlayerName");
-    let name=(input?.value || "שחקן 1").trim();
-    if(!name) name="שחקן 1";
-    const p={id:"p1", name};
-    savePlayers([p]);
-    setCurrentPlayerId("p1");
-    try{ document.getElementById("firstPlayerDialog")?.close(); }catch(_){}
-    loadForCurrentPlayer();
-  },
-  addPlayer(){
-    const players=getPlayers();
-    const name=(prompt("שם השחקן החדש:", `שחקן ${players.length+1}`) || "").trim();
-    if(!name) return;
-    const id="p"+Date.now().toString(36);
-    players.push({id, name});
-    savePlayers(players);
-    setCurrentPlayerId(id);
-    renderPlayersSelect();
-    loadForCurrentPlayer();
-  },
-  renamePlayer(){
-    const players=getPlayers();
-    const id=getCurrentPlayerId();
-    const p=players.find(x=>x.id===id);
-    if(!p) return;
-    const name=(prompt("שם חדש:", p.name) || "").trim();
-    if(!name) return;
-    p.name=name;
-    savePlayers(players);
-    renderPlayersSelect();
-    setHeaderPlayerName();
-  },
-  switchPlayer(e, el){
-    const sel=document.getElementById("playerSelect");
-    if(!sel) return;
-    setCurrentPlayerId(sel.value);
-    loadForCurrentPlayer();
-  }
-};
+// ===== v66 Delegation core =====
+function initDelegation(){
+  const actions = {
+    startGame: () => { try{ startGame(); }catch(e){} },
+    openLetters: () => { try{ openLetters(); }catch(e){} },
+    openLogo: () => { try{ openLogoModal ? openLogoModal() : (els.logoDialog && els.logoDialog.showModal && els.logoDialog.showModal()); }catch(e){} },
+    openSettings: () => { try{ els.settingsDialog && els.settingsDialog.showModal(); }catch(e){} },
+    saveSettings: () => { try{ save(); }catch(e){}; try{ els.settingsDialog && els.settingsDialog.close(); }catch(e){} },
+    closeSettings: () => { try{ els.settingsDialog && els.settingsDialog.close(); }catch(e){} },
+    repeatWord: () => { try{ if(state && state.currentWord && typeof speak==="function") speak(state.currentWord); }catch(e){} },
+  };
 
-document.addEventListener("click", (e)=>{
-  const btn = e.target.closest("[data-action]");
-  if(!btn) return;
-  const act = btn.dataset.action;
-  if(!act) return;
-  // special: switching player is on select change
-  if(actions[act]){ e.preventDefault(); actions[act](e, btn); }
-});
-
-document.addEventListener("change", (e)=>{
-  const sel = e.target.closest("#playerSelect");
-  if(!sel) return;
-  setCurrentPlayerId(sel.value);
-  loadForCurrentPlayer();
-});
-
-// prevent legacy clicks from doing wrong things when no players yet
-document.addEventListener("DOMContentLoaded", ()=>{
-  // show first-player dialog if needed
-  ensureFirstPlayerFlow();
-  // set header name if exists
-  setHeaderPlayerName();
-  // set debug visibility
-  setDebugEnabled(isDebugEnabled());
-});
-
-
-// ===== V65_PATCH =====
-(function(){
-  function intercept(id){
-    document.addEventListener("click", function(e){
-      var btn = e.target && e.target.closest ? e.target.closest("#"+id) : null;
-      if(!btn) return;
-      // prevent legacy handlers
-      e.preventDefault();
-      e.stopPropagation();
-      try{ e.stopImmediatePropagation(); }catch(_){}
-      try{ if(typeof openLetters==="function") openLetters(); }catch(_){}
-    }, true); // capture
-  }
-  intercept("btnOpenBrawlers");
-})();
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest && e.target.closest("[data-action]");
+    if(!btn) return;
+    const act = btn.getAttribute("data-action");
+    if(!act || !actions[act]) return;
+    e.preventDefault();
+    e.stopPropagation();
+    try{ e.stopImmediatePropagation(); }catch(_){}
+    actions[act]();
+  }, true);
+}
