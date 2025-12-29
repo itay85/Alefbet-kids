@@ -717,10 +717,12 @@ els.choices.innerHTML = "";
   letters.forEach(letter => {
     const c = document.createElement("div");
     c.className = "choiceCard";
-    const br = brawlerForLetter(letter);
+    let br;
+    try{ br = brawlerForLetter(letter); }catch(e){ br = null; }
+    if(!br) br = { name: `אות ${letter}`, img: "" };
     c.innerHTML = `
       <div class="choiceLeft">
-        <div class="choiceAvatar"><img src="${br.img}" alt="${br.name}"></div>
+        <div class="choiceAvatar">${br.img ? `<img src="${br.img}" alt="${br.name}">` : `<div class="noImg">${letter}</div>`}</div>
         <div>
           <div class="choiceName">${br.name}</div>
           <div class="choiceHint">בחר את הבראולר שמתחיל באות הנכונה</div>
