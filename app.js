@@ -1254,13 +1254,19 @@ document.addEventListener("DOMContentLoaded", ()=>{
   setDebugEnabled(isDebugEnabled());
 });
 
-// ===== V64_PATCH =====
+
+// ===== V65_PATCH =====
 (function(){
-  // ensure the bottom button (btnChangeBrawler) always opens letters chooser
-  const b = document.getElementById("btnChangeBrawler");
-  if(b){
-    b.addEventListener("click", (e)=>{
+  function intercept(id){
+    document.addEventListener("click", function(e){
+      var btn = e.target && e.target.closest ? e.target.closest("#"+id) : null;
+      if(!btn) return;
+      // prevent legacy handlers
+      e.preventDefault();
+      e.stopPropagation();
+      try{ e.stopImmediatePropagation(); }catch(_){}
       try{ if(typeof openLetters==="function") openLetters(); }catch(_){}
-    }, true);
+    }, true); // capture
   }
+  intercept("btnOpenBrawlers");
 })();
