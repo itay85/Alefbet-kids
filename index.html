@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v45 ✅
+    BUILD v46 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -24,11 +24,7 @@
     </div>
 
     <div class="controls">
-      <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
-      <button id="btnLogo" class="btn" type="button" title="לוגו שלי">🧩</button>
-      <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
-      <button id="btnReset" class="btn" type="button" title="איפוס">🔄</button>
     </div>
   </header>
 
@@ -47,18 +43,11 @@
 
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()">🎮 התחל משחק</button>
-          <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
+          <button id="btnOpenLettersHome" class="btn big" type="button">👨‍👩‍👦 בחירת אותיות (הורה)</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
 
-      <div class="panel">
-        <h2>איך מנצחים?</h2>
-        <p class="muted">
-          כל ניחוש נכון נותן ⭐. תלחץ על הכוכב כדי לקבל 🪙 מטבעות זהב רנדומליים.
-          מגיעים ל-<strong>1000</strong> מטבעות? ניצחת!
-        </p>
-        <div class="tiny">טיפ: כדי “להתקין” באייפון/אייפד: Share → Add to Home Screen.</div>
       </div>
     </section>
 <section id="screenSelect" class="screen hidden"></section>
@@ -66,12 +55,28 @@
 
 
     <section id="screenFight" class="screen" hidden>
+      
+      <div class="panel howToPanel" id="howToPanel">
+        <div class="rowBetween">
+          <h2 class="howToTitle">איך מנצחים?</h2>
+          <button id="btnToggleHowTo" class="btn small" type="button">הסתר</button>
+        </div>
+        <div id="howToContent">
+          <p class="muted">כל תשובה נכונה נותנת ⭐. מגיעים ל־<strong>1000</strong> מטבעות? מנצחים!</p>
+          <div class="tiny">טיפ: אפשר ללחוץ 🔊 כדי לשמוע שוב את המילה.</div>
+        </div>
+      </div>
+
+
       <div class="panel fightTop">
         <div class="rowBetween">
           <div class="pill" id="bossPill"></div>
   <div class="pill" id="currentBrawlerPill">בחר בראולר</div>
           <div class="fightStats">
-            <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
+            <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong>
+            <button id="btnRepeat" class="btn small" type="button" title="השמע מילה">🔊</button>
+            <button id="btnLogoHud" class="logoBtn" type="button" title="הלוגו שלי"></button>
+</div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
           </div>
         </div>
@@ -80,8 +85,7 @@
 
         <div class="wordWrap">
           <div class="word" id="wordMasked">_</div>
-          <button id="btnRepeat" class="btn small" type="button">🔊 השמע מילה</button>
-          <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
+<button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
         </div>
 
         <div class="choices" id="choices"></div>
@@ -96,8 +100,7 @@
 
         <div class="fightFooter">
           <button id="btnTryAgain" class="btn" type="button" hidden>נסה שוב</button>
-          <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
-        </div>
+</div>
       </div>
     </section>
   </main>

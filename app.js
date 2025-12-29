@@ -386,6 +386,11 @@ function getLogoById(id){
 
 
 const els = {
+  btnOpenLettersHome: document.getElementById("btnOpenLettersHome"),
+  btnLogoHud: document.getElementById("btnLogoHud"),
+  btnToggleHowTo: document.getElementById("btnToggleHowTo"),
+  howToContent: document.getElementById("howToContent"),
+
   modalUnlock: document.getElementById("modalUnlock"),
   unlockGrid: document.getElementById("unlockGrid"),
   unlockStars: document.getElementById("unlockStars"),
@@ -1060,4 +1065,38 @@ function checkGiftStar(){
     state.stars = (state.stars || 0) + 1; // gift star only
     try{ localStorage.setItem("giftStarAt1000","1"); }catch(e){}
   }
+}
+
+function bindRepeatButton(){
+  const btn = document.getElementById("btnRepeat");
+  if(!btn) return;
+  btn.addEventListener("click", () => {
+    if(state.currentWord) speak(state.currentWord);
+  });
+}
+
+function bindHowToToggle(){
+  const btn = document.getElementById("btnToggleHowTo");
+  const content = document.getElementById("howToContent");
+  if(!btn || !content) return;
+  let hidden = false;
+  try{ hidden = localStorage.getItem("howToHidden")==="1"; }catch(e){}
+  const apply = () => {
+    content.style.display = hidden ? "none" : "";
+    btn.textContent = hidden ? "הצג" : "הסתר";
+    try{ localStorage.setItem("howToHidden", hidden ? "1" : "0"); }catch(e){}
+  };
+  apply();
+  btn.addEventListener("click", () => { hidden = !hidden; apply(); });
+}
+
+function renderLogoHud(){
+  const btn = document.getElementById("btnLogoHud");
+  if(!btn) return;
+  btn.innerHTML = "";
+  const id = state.selectedLogo || "logo1";
+  const img = document.createElement("img");
+  img.src = `assets/logos/${id}.png`;
+  img.alt = "logo";
+  btn.appendChild(img);
 }
