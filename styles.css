@@ -19,7 +19,7 @@ body{
   color:var(--text);
 }
 .top{
-  position:sticky; top:0; z-index:10;
+  position:sticky; top:0; z-index: 999999;
   display:flex; align-items:center; justify-content:space-between;
   padding:14px;
   border-bottom:1px solid var(--border);
@@ -262,7 +262,7 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 
 /* v9: logo popup + reset */
 .modal.hidden{ display:none; }
-.modal{ position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; }
+.modal{ position:fixed; inset:0; z-index: 999999; display:flex; align-items:center; justify-content:center; }
 .modalBackdrop{ position:absolute; inset:0; background: rgba(0,0,0,.6); }
 .modalCard{
   position:relative;
@@ -314,7 +314,7 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
   left: 12px;
   right: 12px;
   bottom: 12px;
-  z-index: 9999;
+  z-index: 999999;
   padding: 12px 14px;
   border-radius: 14px;
   background: rgba(0,0,0,.75);
@@ -325,3 +325,5 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 }
 
 .versionBadge{font-size:12px;opacity:.7;margin-inline-start:6px;}
+
+.debugPanel{pointer-events:none;}

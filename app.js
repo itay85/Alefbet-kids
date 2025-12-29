@@ -1,3 +1,4 @@
+function showDebug(msg){try{const el=document.getElementById('debugPanel'); if(el) el.textContent=msg;}catch(e){}}
 // BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
 const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
 
@@ -877,11 +878,7 @@ els.btnPickNone.addEventListener("click", pickerSelectNone);
 els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
-els.btnPlay.addEventListener("click", () => {
-  showDebug("START clicked (v24)");
-  if(!state.chosenLogoId) openBrawlers();
-  else startNewQuestion();
-});
+els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
 els.btnOpenBrawlers.addEventListener("click", openBrawlers);
 els.btnChangeBrawler.addEventListener("click", openBrawlers);
 els.btnTryAgain.addEventListener("click", tryAgain);
@@ -902,3 +899,21 @@ els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.
 
 // init
 load(); setUI(); renderLogoButton(); show(els.home);
+
+
+// v25: hard fallback start hook (works even if addEventListener wiring fails)
+window.__startGame = function(){
+  try{
+    showDebug("START via __startGame ✅");
+    // emulate the normal play click
+    if(typeof startNewQuestion === "function"){
+      // ensure we are in fight screen
+      try{ showScreen && showScreen("fight"); }catch(e){}
+      try{ startNewQuestion(); }catch(e){ showDebug("startNewQuestion error: " + (e.message||e)); }
+    }else{
+      showDebug("startNewQuestion missing ❌");
+    }
+  }catch(e){
+    showDebug("START error: " + (e.message||e));
+  }
+};

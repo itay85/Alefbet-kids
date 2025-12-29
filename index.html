@@ -41,7 +41,7 @@
         </div>
 
         <div class="homeBtns">
-          <button id="btnPlay" class="btn primary big" type="button">🎮 התחל משחק</button>
+          <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()">🎮 התחל משחק</button>
           <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
@@ -183,6 +183,6 @@
     }
   </script>
 
-  <div id="debugPanel" class="debugPanel hidden"></div>
+  <div id="debugPanel" class="debugPanel"></div>
 </body>
 </html>
