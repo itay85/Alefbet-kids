@@ -1,15 +1,71 @@
-const CACHE_NAME = "brawl-letters-v27";
-const ASSETS = [
-  "assets/bosses/boss_01_א.png","assets/bosses/boss_02_ב.png","assets/bosses/boss_03_ג.png","assets/bosses/boss_04_ד.png","assets/bosses/boss_05_ה.png","assets/bosses/boss_06_ו.png","assets/bosses/boss_07_ז.png","assets/bosses/boss_08_ח.png","assets/bosses/boss_09_ט.png","assets/bosses/boss_10_י.png","assets/bosses/boss_11_כ.png","assets/bosses/boss_12_ל.png","assets/bosses/boss_13_מ.png","assets/bosses/boss_14_נ.png","assets/bosses/boss_15_ס.png","assets/bosses/boss_16_ע.png","assets/bosses/boss_17_פ.png","assets/bosses/boss_18_צ.png","assets/bosses/boss_19_ק.png","assets/bosses/boss_20_ר.png","assets/bosses/boss_21_ש.png","assets/bosses/boss_22_ת.png",
-  "assets/logos/logo1.png","assets/logos/logo2.png","assets/logos/logo3.png","assets/logos/logo4.png","assets/logos/logo5.png","assets/logos/logo6.png","./","./index.html","./styles.css","./app.js","./manifest.webmanifest"];
+// Brawl Letters Service Worker (v28)
+const VERSION = "v28";
+const CACHE = `brawl-letters-${VERSION}`;
+
+// Precache core files (assets will still be cache-first when fetched)
+const CORE = [
+  "./",
+  "./index.html?v=28",
+  "./styles.css?v=28",
+  "./app.js?v=28",
+  "./manifest.webmanifest?v=28",
+];
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
-});
-self.addEventListener("activate", (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+    caches.open(CACHE).then((c) => c.addAll(CORE))
   );
 });
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
+
 self.addEventListener("fetch", (event) => {
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Only handle same-origin
+  if(url.origin !== location.origin) return;
+
+  // Network-first for navigations / HTML so updates take effect immediately
+  if (req.mode === "navigate" || url.pathname.endsWith(".html")) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(req, { cache: "no-store" });
+        const cache = await caches.open(CACHE);
+        cache.put(req, fresh.clone());
+        return fresh;
+      } catch (e) {
+        const cached = await caches.match(req);
+        return cached || caches.match("./");
+      }
+    })());
+    return;
+  }
+
+  // For JS/CSS, prefer network but fall back to cache
+  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".webmanifest")) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(req, { cache: "no-store" });
+        const cache = await caches.open(CACHE);
+        cache.put(req, fresh.clone());
+        return fresh;
+      } catch (e) {
+        return (await caches.match(req)) || fetch(req);
+      }
+    })());
+    return;
+  }
+
+  // Cache-first for everything else (images, icons, etc.)
+  event.respondWith(
+    caches.match(req).then((cached) => cached || fetch(req))
+  );
 });

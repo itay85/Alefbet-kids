@@ -1,3 +1,4 @@
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=28"); }
 
 function shuffle(arr){
   const a = arr.slice();
