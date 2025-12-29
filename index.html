@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v61 ✅
+    BUILD v62 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -25,11 +25,9 @@
 
     <div class="controls">
       <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
-      <button id="btnLogo" class="btn" type="button" title="לוגו שלי">🧩</button>
-      <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
+<button id="btnPlayers" class="btn" type="button" title="החלף שחקן">👤</button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
-      <button id="btnReset" class="btn" type="button" title="איפוס">🔄</button>
-    </div>
+</div>
   </header>
 
   <main class="wrap">
@@ -148,20 +146,6 @@
     <form method="dialog" class="dialog">
       <h2>הגדרות</h2>
 
-      <div class="hr"></div>
-      <h3 class="subTitle">שחקן</h3>
-
-      <label class="row">
-        <span>בחר שחקן</span>
-        <select id="playerSelect"></select>
-      </label>
-
-      <div class="rowBetween">
-        <button id="btnAddPlayer" class="btn" type="button">➕ הוסף שחקן</button>
-        <button id="btnRenamePlayer" class="btn" type="button">✏️ שנה שם</button>
-      </div>
-
-
       <label class="row">
         <span>הקראה אוטומטית</span>
         <select id="autospeakSelect">
@@ -175,20 +159,8 @@
         <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
       </label>
 
-      
-      <div class="hr"></div>
-      <h3 class="subTitle">כלים</h3>
-
-      <label class="row">
-        <span>מצב Debug</span>
-        <select id="debugToggle">
-          <option value="off" selected>כבוי</option>
-          <option value="on">דלוק</option>
-        </select>
-      </label>
-      <p class="tiny muted">כשדלוק, תופיע תיבת DEBUG למטה (לפתרון תקלות).</p>
-
       <menu class="menu">
+        <button id="btnReset" class="btn danger" type="button">איפוס משחק</button>
         <button class="btn" value="cancel">סגור</button>
         <button class="btn primary" id="btnSaveSettings" value="default">שמור</button>
       </menu>
@@ -246,8 +218,6 @@
     const logEl = document.getElementById("dbgLog");
     function log(msg){ try{ logEl.textContent += msg + "\n"; }catch(e){} }
     window.__DBGLOG = log;
-    window.__DBGSHOW = function(show){ try{ root.style.display = show ? "" : "none"; }catch(e){} };
-
     log("[BOOT] early debug script ran ✅");
     window.addEventListener("error", (e)=>{ log("[ERROR] " + e.message + " @" + e.filename + ":" + e.lineno + ":" + e.colno); });
     window.addEventListener("unhandledrejection", (e)=>{ log("[PROMISE] " + (e.reason && (e.reason.stack||e.reason.message||e.reason))); });
@@ -256,6 +226,25 @@
     document.getElementById("dbgHide").addEventListener("click", ()=>{ document.getElementById("earlyDebug").style.display="none"; });
   })();
   </script>
+
+
+  <dialog id="playersDialog" class="dialog">
+    <h2>שחקנים</h2>
+
+    <label class="row">
+      <span>בחר שחקן</span>
+      <select id="playerSelect"></select>
+    </label>
+
+    <div class="rowBetween">
+      <button id="btnAddPlayer" class="btn" type="button">➕ הוסף שחקן</button>
+      <button id="btnRenamePlayer" class="btn" type="button">✏️ שנה שם</button>
+    </div>
+
+    <menu class="menu">
+      <button id="btnClosePlayers" class="btn" type="button">סגור</button>
+    </menu>
+  </dialog>
 
 </body>
 </html>

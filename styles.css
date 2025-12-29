@@ -342,6 +342,5 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
 
 .logoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 
-.hr{height:1px;background:rgba(255,255,255,.12);margin:14px 0;}
-.subTitle{margin:10px 0 8px;font-size:14px;opacity:.9}
+.playerName{font-weight:800;font-size:14px;opacity:.95;margin-top:2px}
 .rowBetween{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
