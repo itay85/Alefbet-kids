@@ -554,7 +554,7 @@ function setUI(){
 
   if(state.chosenLogoId){
     const l = getLogoById(state.chosenLogoId);
-    els.currentBrawlerPill.innerHTML = `לוגו: ${l.name} <img class="logoMini" src="${l.img}" alt="לוגו">`;
+    els.currentBrawlerPill.textContent = `לוגו: ${l.name}`;
   } else {
     els.currentBrawlerPill.textContent = "בחר לוגו";
   }
@@ -1269,22 +1269,15 @@ document.addEventListener("click", (e)=>{
 (function(){
   function safe(fn){ try{ fn(); }catch(e){ try{ if(window.__DBGLOG) window.__DBGLOG(String(e)); }catch(_){} } }
   const A = {
-    startGame: ()=> safe(()=> startGame()),
+    startGame: ()=> safe(()=> (window.__startGame ? window.__startGame() : (typeof startNewQuestion==="function" ? startNewQuestion() : null))) ,
     openLetters: ()=> safe(()=> openLetters()),
     closeLetters: ()=> safe(()=> closeLetters()),
     pickAll: ()=> safe(()=> pickAll()),
     pickNone: ()=> safe(()=> pickNone()),
     presetNadav: ()=> safe(()=> (typeof presetNadav==="function" ? presetNadav() : null)),
-    openSettings: ()=> safe(()=> (els.settingsDialog && els.settingsDialog.showModal())),
-    closeSettings: ()=> safe(()=> (els.settingsDialog && els.settingsDialog.close())),
-    saveSettings: ()=> safe(()=> { 
-      try{
-        const t=document.getElementById("debugToggle");
-        if(t && typeof debugSet==="function") debugSet(t.value==="on");
-      }catch(_){}
-      if(typeof saveV67==="function") saveV67(); else if(typeof save==="function") save();
-      (els.settingsDialog && els.settingsDialog.close && els.settingsDialog.close());
-    }),
+    openSettings: ()=> safe(()=> (typeof openSettings==="function" ? openSettings() : null)) ,
+    closeSettings: ()=> safe(()=> { try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } }) ,
+    saveSettings: ()=> safe(()=> { try{ const t=document.getElementById("debugToggle"); if(t && typeof debugSet==="function") debugSet(t.value==="on"); }catch(_){ } try{ if(typeof saveSettingsFromDialog==="function") saveSettingsFromDialog(); }catch(_){ } try{ if(typeof saveV67==="function") saveV67(); else if(typeof save==="function") save(); }catch(_){ } try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } }) ,
     resetGame: ()=> safe(()=> {
       if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
       try{
@@ -1347,6 +1340,13 @@ document.addEventListener("click", (e)=>{
     dbgCopy: ()=> safe(()=> { const t=document.getElementById("debugLog")?.textContent||""; navigator.clipboard?.writeText(t); }),
     dbgClear: ()=> safe(()=> { const el=document.getElementById("debugLog"); if(el) el.textContent=""; }),
     dbgHide: ()=> safe(()=> { const p=document.getElementById("debugPanel"); if(p) p.classList.add("hidden"); }),
+    toggleHowTo: ()=> safe(()=> {
+      const panel=document.getElementById("howToPanel");
+      const btn=document.getElementById("btnToggleHowTo");
+      if(!panel) return;
+      const nowCollapsed = panel.classList.toggle("collapsed");
+      if(btn) btn.textContent = nowCollapsed ? "הצג" : "הסתר";
+    }),
   };
 
   // capture phase to cancel legacy listeners
