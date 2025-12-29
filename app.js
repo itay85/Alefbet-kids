@@ -1,4 +1,4 @@
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=40"); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=41"); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -397,6 +397,9 @@ btnReset: document.getElementById("btnReset"),
   btnKeepPlaying: document.getElementById("btnKeepPlaying"),
   btnResetCoins: document.getElementById("btnResetCoins"),
 };
+
+function on(el, ev, fn){ if(el) el.addEventListener(ev, fn); }
+
 
 const state = {
   giftStarAt1000: false,
