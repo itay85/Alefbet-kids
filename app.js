@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v81";
+const BUILD = "v82";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -1081,7 +1081,11 @@ async function claimReward(){
 
 function openLetters(){
   renderLettersGrid();
-  els.lettersDialog.showModal();
+  const d = els.lettersDialog;
+  try{
+    if(d && typeof d.showModal === "function") d.showModal();
+    else { d?.setAttribute?.("open",""); d?.classList?.add("forceOpen"); }
+  }catch(e){ d?.setAttribute?.("open",""); d?.classList?.add("forceOpen"); }
 }
 function closeLetters(){
   // validate
@@ -1157,7 +1161,10 @@ function openLogo(fromUnlock=false){
   els.logoDialog.showModal();
 }
 function closeLogo(){
-  els.logoDialog.close();
+  const d = els.logoDialog;
+  try{ if(d && typeof d.close === "function") d.close(); }catch(e){}
+  d?.removeAttribute?.("open");
+  d?.classList?.remove("forceOpen");
 }
 function pickLogo(fn){
   state.settings.logo = fn;
@@ -1168,10 +1175,17 @@ function pickLogo(fn){
 
 function openPlayers(){
   renderPlayersSelect();
-  els.playersDialog.showModal();
+  const d = els.playersDialog;
+  try{
+    if(d && typeof d.showModal === "function") d.showModal();
+    else { d?.setAttribute?.("open",""); d?.classList?.add("forceOpen"); }
+  }catch(e){ d?.setAttribute?.("open",""); d?.classList?.add("forceOpen"); }
 }
 function closePlayers(){
-  els.playersDialog.close();
+  const d = els.playersDialog;
+  try{ if(d && typeof d.close === "function") d.close(); }catch(e){}
+  d?.removeAttribute?.("open");
+  d?.classList?.remove("forceOpen");
 }
 function renderPlayersSelect(){
   const ps = playersGet();
@@ -1223,10 +1237,17 @@ function onPlayerSelectChange(){
 function openSettings(){
   els.nikkudToggle.value = (state.settings.showNikkud ? "on" : "off");
   els.debugToggle.value = debugIsOn() ? "on" : "off";
-  els.settingsDialog.showModal();
+  const d = els.settingsDialog;
+  try{
+    if(d && typeof d.showModal === "function") d.showModal();
+    else { d?.setAttribute?.("open",""); d?.classList?.add("forceOpen"); }
+  }catch(e){ d?.setAttribute?.("open",""); d?.classList?.add("forceOpen"); }
 }
 function closeSettings(){
-  els.settingsDialog.close();
+  const d = els.settingsDialog;
+  try{ if(d && typeof d.close === "function") d.close(); }catch(e){}
+  d?.removeAttribute?.("open");
+  d?.classList?.remove("forceOpen");
 }
 function resetGame(){
   if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
