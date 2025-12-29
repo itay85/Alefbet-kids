@@ -1,21 +1,319 @@
-const USE_LEGACY_BINDINGS = false;
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
-function showDebug(msg){try{const el=document.getElementById('debugPanel'); if(el) el.textContent=msg;}catch(e){}}
-// BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
-const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
+/**
+ * Brawl Letters v73
+ * Clean architecture: single source of truth, no legacy listeners.
+ */
+const BUILD = "v73";
+const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
+const WORD_BANK = {
+  "א": [
+    "אבא",
+    "אמא",
+    "אופניים",
+    "אריה",
+    "אבן",
+    "אגס",
+    "אור",
+    "אוזן",
+    "ארנב",
+    "אוהל",
+    "אוכל",
+    "אבטיח"
+  ],
+  "ב": [
+    "בובה",
+    "בלון",
+    "בננה",
+    "בית",
+    "ברווז",
+    "ביסקוויט",
+    "בקבוק",
+    "ברזל",
+    "בגדים",
+    "בוץ",
+    "במבה",
+    "במיה"
+  ],
+  "ג": [
+    "גלידה",
+    "גמל",
+    "גינה",
+    "גביע",
+    "גשר",
+    "גרב",
+    "גזר",
+    "גיטרה",
+    "גג",
+    "גדר",
+    "גולה",
+    "גבינה"
+  ],
+  "ד": [
+    "דג",
+    "דלת",
+    "דבש",
+    "דינוזאור",
+    "דובי",
+    "דשא",
+    "דף",
+    "דוד",
+    "דודה",
+    "דגל",
+    "דוד שמש",
+    "דלעת"
+  ],
+  "ה": [
+    "הר",
+    "הגה",
+    "הודו",
+    "היפופוטם",
+    "הגדה",
+    "הדבקה",
+    "הדפס",
+    "הפסקה",
+    "הצגה",
+    "הפתעה",
+    "הסעה",
+    "הדלקה"
+  ],
+  "ו": [
+    "וילון",
+    "ורד",
+    "וופל",
+    "ווקי-טוקי",
+    "ווקי",
+    "וופלים",
+    "וילונות",
+    "וופלייה",
+    "ורדים"
+  ],
+  "ז": [
+    "זברה",
+    "זית",
+    "זנב",
+    "זחל",
+    "זהב",
+    "זיקית",
+    "זבוב",
+    "זוג",
+    "זכוכית",
+    "זיפ?"
+  ],
+  "ח": [
+    "חול",
+    "חבל",
+    "חלב",
+    "חבר",
+    "חתול",
+    "חיפושית",
+    "חולצה",
+    "חגורה",
+    "חלון",
+    "חציל",
+    "חנוכייה",
+    "חמסה"
+  ],
+  "ט": [
+    "טלוויזיה",
+    "טיסה",
+    "טבעת",
+    "טיגון",
+    "טיפת",
+    "טיפה",
+    "טיגריס",
+    "טיל",
+    "טלפון",
+    "טוסט",
+    "טירה",
+    "טניס"
+  ],
+  "י": [
+    "ילד",
+    "ים",
+    "יד",
+    "יונה",
+    "ירח",
+    "יער",
+    "יוגורט",
+    "יומן",
+    "יען",
+    "יאכטה",
+    "ינשוף",
+    "ימין"
+  ],
+  "כ": [
+    "כדור",
+    "כובע",
+    "כפית",
+    "כוכב",
+    "כיסא",
+    "כרית",
+    "כינור",
+    "כדורגל",
+    "כפכף",
+    "כפפה",
+    "כפיר?",
+    "כפוף"
+  ],
+  "ל": [
+    "לוח",
+    "לחמניה",
+    "לביאה",
+    "לפיד",
+    "לבן",
+    "לשון",
+    "להבה",
+    "לול",
+    "לימון",
+    "ליצן",
+    "לב",
+    "לחם"
+  ],
+  "מ": [
+    "מיטה",
+    "מפתח",
+    "מטוס",
+    "מים",
+    "ממתק",
+    "מראה",
+    "מכונית",
+    "מגבת",
+    "מזלג",
+    "מנורה",
+    "מוזיקה",
+    "מגרש"
+  ],
+  "נ": [
+    "נמר",
+    "נר",
+    "נעל",
+    "נחש",
+    "נוצה",
+    "נעליים",
+    "נייר",
+    "נמלה",
+    "נקר",
+    "נגר",
+    "נחל",
+    "נשיקה"
+  ],
+  "ס": [
+    "סוכר",
+    "סבון",
+    "סוס",
+    "סירה",
+    "ספר",
+    "סנדוויץ'",
+    "סלון",
+    "ספל",
+    "סוכריה",
+    "סלט",
+    "סולם",
+    "סינר"
+  ],
+  "ע": [
+    "עוגה",
+    "עכבר",
+    "ענן",
+    "עץ",
+    "עין",
+    "עגלה",
+    "עט",
+    "עיפרון",
+    "עגבנייה",
+    "עוף",
+    "עיר",
+    "עורב"
+  ],
+  "פ": [
+    "פיל",
+    "פיתה",
+    "פרח",
+    "פנס",
+    "פיצה",
+    "פופקורן",
+    "פטיש",
+    "פינגווין",
+    "פנקייק",
+    "פרפר",
+    "פעמון",
+    "פסנתר"
+  ],
+  "צ": [
+    "ציפור",
+    "ציפורן",
+    "צלחת",
+    "צבע",
+    "צוללת",
+    "צחוק",
+    "צמר",
+    "צמיד",
+    "צוות",
+    "צ'יפס",
+    "צל",
+    "צפרדע"
+  ],
+  "ק": [
+    "קוף",
+    "קשת",
+    "קובייה",
+    "קופסה",
+    "קיץ",
+    "קרח",
+    "קערה",
+    "קקטוס",
+    "קינוח",
+    "קולנוע",
+    "קוקוס"
+  ],
+  "ר": [
+    "רכבת",
+    "רמזור",
+    "רופא",
+    "רובוט",
+    "רימון",
+    "רדיו",
+    "רגל",
+    "רשת",
+    "ריח",
+    "רעש",
+    "רוקד?",
+    "רעיון"
+  ],
+  "ש": [
+    "שמש",
+    "שולחן",
+    "שוקולד",
+    "שיער",
+    "שמלה",
+    "שפם",
+    "שעון",
+    "שבלול",
+    "שוקו",
+    "שקית",
+    "שלט",
+    "שוק"
+  ],
+  "ת": [
+    "תות",
+    "תפוח",
+    "תמונה",
+    "תינוק",
+    "תנור",
+    "תרנגול",
+    "תיק",
+    "תוף",
+    "תולעת",
+    "תיאטרון",
+    "תותים"
+  ]
+};
+const LOGOS = ["logo1.png", "logo2.png", "logo3.png", "logo4.png", "logo5.png", "logo6.png"];
+const BOSSES = {"א": "boss_01_א.png", "ב": "boss_02_ב.png", "ג": "boss_03_ג.png", "ד": "boss_04_ד.png", "ה": "boss_05_ה.png", "ו": "boss_06_ו.png", "ז": "boss_07_ז.png", "ח": "boss_08_ח.png", "ט": "boss_09_ט.png", "י": "boss_10_י.png", "כ": "boss_11_כ.png", "ל": "boss_12_ל.png", "מ": "boss_13_מ.png", "נ": "boss_14_נ.png", "ס": "boss_15_ס.png", "ע": "boss_16_ע.png", "פ": "boss_17_פ.png", "צ": "boss_18_צ.png", "ק": "boss_19_ק.png", "ר": "boss_20_ר.png", "ש": "boss_21_ש.png", "ת": "boss_22_ת.png"};
+const BOSS_NAMES = {"ס": "ספידי", "ר": "רובו", "ט": "טורנדו", "כ": "כדורון", "א": "אלוף", "ב": "בומבו", "ג": "גליץ'", "ד": "דינוז", "ה": "הדסון", "ו": "וולט", "ז": "זינג", "ח": "חייזר", "י": "יויו", "ל": "לפידון", "מ": "מגנטו", "נ": "נינג'ה", "ע": "ענן", "פ": "פיצוץ", "צ": "ציקלון", "ק": "קפיץ", "ש": "שומר", "ת": "תותחן"};
 
-
-
-// v29: similar-sound confusion pairs to increase difficulty
-const CONFUSION_MAP = {
+// Difficulty confusions: correct -> confusing
+const CONFUSIONS = {
   "ס": "ש",
   "ש": "ס",
   "כ": "ק",
@@ -23,1354 +321,603 @@ const CONFUSION_MAP = {
   "ת": "ט",
   "ט": "ת",
   "א": "ה",
-  "ה": "א"
+  "ה": "א",
 };
 
-// v13: Letter bosses (explicit mapping to existing filenames)
-const LETTER_BOSS_INDEX = {
-  "א": "01",
-  "ב": "02",
-  "ג": "03",
-  "ד": "04",
-  "ה": "05",
-  "ו": "06",
-  "ז": "07",
-  "ח": "08",
-  "ט": "09",
-  "י": "10",
-  "כ": "11",
-  "ל": "12",
-  "מ": "13",
-  "נ": "14",
-  "ס": "15",
-  "ע": "16",
-  "פ": "17",
-  "צ": "18",
-  "ק": "19",
-  "ר": "20",
-  "ש": "21",
-  "ת": "22",
+const STORAGE = {
+  players: "bl_players_v2",
+  currentPlayer: "bl_current_player_v2",
+  debug: "bl_debug_v2",
+  // per player:
+  settingsPrefix: "bl_settings_v2__",
 };
 
-
-function bossForLetter(ch){
-  const idx = LETTER_BOSS_INDEX[ch];
-  const nm = LETTER_BOSS_NAMES[ch] || `בוס ${ch}`;
-  if(!idx){
-    return { name: nm, img: null };
-  }
-  return { name: nm, img: `assets/bosses/boss_${idx}_${ch}.png` };
-}
-
-
-const WORD_BANK = {
-  "א": [
-    "אָבָּא",
-    "אִמָּא",
-    "אוֹפַנַּיִם",
-    "אֲרִיֵּה",
-    "אֹכֶל",
-    "אֲוִיר",
-    "אֲרוֹן",
-    "אֲבָנִים",
-    "אֲרִיזָה",
-    "אֲפֵרוֹחַ",
-    "אֲגָס",
-    "אֲנָנָס",
-    "אֲרֻבָּה",
-    "אֲרָנָב",
-    "אֲמְבַּטְיָה"
-  ],
-  "ב": [
-    "בַּיִת",
-    "בָּנָנָה",
-    "בַּלּוֹן",
-    "בּוּבָּה",
-    "בְּקָבוּק",
-    "בִּגְדִּים",
-    "בֵּיצָה",
-    "בְּרֵיכָה",
-    "בִּיסְקוֹט",
-    "בַּרְוָז",
-    "בּוֹקֶר",
-    "בַּצֵּק",
-    "בִּנְיָן",
-    "בְּרֶז",
-    "בַּרְזֶל"
-  ],
-  "ג": [
-    "גַּן",
-    "גֶּזֶר",
-    "גְּלִידָה",
-    "גִּיטָרָה",
-    "גּוּלָה",
-    "גְּבִינָה",
-    "גֶּשֶׁם",
-    "גַּלִּים",
-    "גַּמָּל",
-    "גְּבִיעַ",
-    "גַּרְבַּיִם",
-    "גַּלְגַּל",
-    "גּוּפִיָּה",
-    "גַּנָּן"
-  ],
-  "ד": [
-    "דֶּלֶת",
-    "דְּבַשׁ",
-    "דֹּב",
-    "דֶּגֶל",
-    "דַּבֵּק",
-    "דּוֹד",
-    "דִּינוֹזָאוּר",
-    "דַּפִּים",
-    "דְּלָתוֹת",
-    "דְּיוֹ",
-    "דּוּבִּי",
-    "דּוּגְמָה"
-  ],
-  "ה": [
-    "הוֹרִים",
-    "הַר",
-    "הַצָּגָה",
-    "הַפְתָּעָה",
-    "הַפְסָקָה",
-    "הַרְפַּתְקָה"
-  ],
-  "ו": [
-    "וֶרֶד",
-    "וִילוֹן",
-    "וָפֶל",
-    "וִידֵאוֹ",
-    "וַנִיל",
-    "וָרָדִים"
-  ],
-  "ז": [
-    "זֶבְּרָה",
-    "זֶהָב",
-    "זָנָב",
-    "זַיִת",
-    "זְמַן",
-    "זָאֵב",
-    "זַחַל",
-    "זְכוּכִית",
-    "זַרְקוֹר"
-  ],
-  "ח": [
-    "חָתוּל",
-    "חָלָב",
-    "חוֹל",
-    "חֶדֶר",
-    "חַבֵּר",
-    "חַג",
-    "חַלּוֹן",
-    "חֻלְצָה",
-    "חִיבּוּק",
-    "חַלָּה",
-    "חוֹף",
-    "חִידָה",
-    "חֲבִילָה",
-    "חֲצָאִית",
-    "חֲצֵר"
-  ],
-  "ט": [
-    "טֵלֵפוֹן",
-    "טוֹסְט",
-    "טַבַּעַת",
-    "טִיפָּה",
-    "טִיסָה",
-    "טִירָה",
-    "טַבְלָה",
-    "טוֹפֶס",
-    "טֶקֶס"
-  ],
-  "י": [
-    "יֶלֶד",
-    "יְלָדִים",
-    "יוֹם",
-    "יָם",
-    "יוֹנָה",
-    "יַעַר",
-    "יָרֵחַ",
-    "יוֹגּוּרְט",
-    "יוֹמָן",
-    "יָרָקוֹת",
-    "יַלְקוּט",
-    "יָדִית",
-    "יָרֵךְ"
-  ],
-  "כ": [
-    "כַּדּוּר",
-    "כּוֹס",
-    "כִּסֵּא",
-    "כּוֹבַע",
-    "כַּפִּית",
-    "כֶּלֶב",
-    "כּוֹכָב",
-    "כְּרִית",
-    "כַּרְטִיס",
-    "כְּלִי",
-    "כַּד",
-    "כְּנָף"
-  ],
-  "ל": [
-    "לוּחַ",
-    "לַחְמָנִיָּה",
-    "לְבִיאָה",
-    "לַפִּיד",
-    "לָבָן",
-    "לָשׁוֹן",
-    "לֶהָבָה"
-  ],
-  "מ": [
-    "מַיִם",
-    "מִטָּה",
-    "מַפְתֵּחַ",
-    "מְכוֹנִית",
-    "מַתָּנָה",
-    "מוֹרֶה",
-    "מַחְבֶּרֶת",
-    "מִשְׂחָק",
-    "מִזְלָג",
-    "מַפָּה",
-    "מִגְדָּל",
-    "מַחְשֵׁב",
-    "מַמְתָּק",
-    "מַדְבֵּקָה",
-    "מִסְפָּרַיִם"
-  ],
-  "נ": [
-    "נַעַל",
-    "נֵר",
-    "נָמֵר",
-    "נָחָשׁ",
-    "נוֹצָה",
-    "נוֹף",
-    "נֵס"
-  ],
-  "ס": [
-    "סוּס",
-    "סֵפֶר",
-    "סֻכָּר",
-    "סִירָה",
-    "סַל",
-    "סַפָּה",
-    "סַכִּין",
-    "סַבּוֹן",
-    "סִימָן",
-    "סוֹפְגָּנְיָה",
-    "סַנְדָּל",
-    "סַפָּר"
-  ],
-  "ע": [
-    "עַיִן",
-    "עוּגָה",
-    "עֵץ",
-    "עַכְבָּר",
-    "עִפָּרוֹן",
-    "עִגּוּל",
-    "עֲגָבָנִיָּה",
-    "עֵז",
-    "עוֹרֵב",
-    "עַנָּן",
-    "עֲנָבִים",
-    "עֲגִיל"
-  ],
-  "פ": [
-    "פֶּרַח",
-    "פָּנָס",
-    "פִּיל",
-    "פִּיצָה",
-    "פִּיתָה",
-    "פַּעֲמוֹן",
-    "פָּנִים",
-    "פְּסַנְתֵּר",
-    "פֶּתֶק",
-    "פּוֹפְּקוֹרְן",
-    "פֵּרוֹת",
-    "פִּיגַ׳מָה"
-  ],
-  "צ": [
-    "צִפּוֹר",
-    "צֶבַע",
-    "צַעֲצוּעַ",
-    "צְחוֹק",
-    "צְפַרְדֵּעַ",
-    "צֶמֶר",
-    "צִנּוֹר",
-    "צָמִיד",
-    "צֵל",
-    "צִפּוֹרֶן",
-    "צִיר",
-    "צִלְצוּל"
-  ],
-  "ק": [
-    "קֶשֶׁת",
-    "קֻפְסָה",
-    "קוֹף",
-    "קֶמַח",
-    "קוֹל",
-    "קַיִץ",
-    "קִיר",
-    "קֶטְשׁוֹפּ",
-    "קֻבִּיָּה",
-    "קֶרֶן",
-    "קֶרַח",
-    "קָפֶה",
-    "קִפּוֹד",
-    "קֶצֶף"
-  ],
-  "ר": [
-    "רַכֶּבֶת",
-    "רוֹבּוֹט",
-    "רוֹפֵא",
-    "רַעַשׁ",
-    "רֵיחַ",
-    "רוּחַ",
-    "רֶקֶפֶת",
-    "רִמּוֹן",
-    "רֶגֶל",
-    "רַמְקוֹל",
-    "רַמְזוֹר"
-  ],
-  "ש": [
-    "שֶׁמֶשׁ",
-    "שֻׁלְחָן",
-    "שׁוֹקוֹ",
-    "שַׁבָּת",
-    "שׁוּק",
-    "שׁוּעָל",
-    "שֵׁן",
-    "שֶׁלֶט",
-    "שׁוֹקוֹלָד",
-    "שַׁקִּית",
-    "שֵׁעָר",
-    "שָׁדֶה",
-    "שׁוֹפָר"
-  ],
-  "ת": [
-    "תַּפּוּחַ",
-    "תִּינוֹק",
-    "תּוּת",
-    "תְּמוּנָה",
-    "תִּיק",
-    "תַּרְנְגוֹל",
-    "תִּקְרָה",
-    "תַּפּוּז",
-    "תַּבְלִין",
-    "תַּלְמִיד",
-    "תָּמָר"
-  ]
+const defaults = {
+  minSelectedLetters: 4,
+  goalCoins: 1000,
+  coinsPerWinMin: 20,
+  coinsPerWinMax: 45, // ~ 5-30 wins to 1000
+  starsToUnlockStep: 100,
+  // initial unlocked logos: first 1
+  initialUnlockedLogos: 1,
 };
-
-const KEY_SETTINGS = "brawl_letters_settings_v5";
-
-const SPECIAL_BRAWLERS = {
-  "ס": { name:"ספידי", desc:"רץ מהר ויורה סוכריות", img:"assets/brawlers/speedy.svg" },
-  "כ": { name:"כדורי", desc:"זורק כדורים זהובים", img:"assets/brawlers/kadori.svg" },
-  "ר": { name:"רובו", desc:"לייזר מטורף!", img:"assets/brawlers/robo.svg" },
-  "ט": { name:"טורנדו", desc:"מערבולת על-קולית", img:"assets/brawlers/tornado.svg" },
-};
-
-// v9: Player logos (original art)
-const PLAYER_LOGOS = [
-  { id: "logo1", name: "זיקו", img: "assets/logos/logo1.png" },
-  { id: "logo2", name: "נובה", img: "assets/logos/logo2.png" },
-  { id: "logo3", name: "בּוֹלט", img: "assets/logos/logo3.png" },
-  { id: "logo4", name: "קְרִיסְטַל", img: "assets/logos/logo4.png" },
-  { id: "logo5", name: "פִּיקְסֶל", img: "assets/logos/logo5.png" },
-  { id: "logo6", name: "טוֹרְבּוֹ", img: "assets/logos/logo6.png" },
-];
-
-function getLogoById(id){
-  return PLAYER_LOGOS.find(l => l.id === id) || PLAYER_LOGOS[0];
-}
-
 
 const els = {
-  modalUnlock: document.getElementById("modalUnlock"),
-  unlockGrid: document.getElementById("unlockGrid"),
-  unlockStars: document.getElementById("unlockStars"),
-  btnUnlockLater: document.getElementById("btnUnlockLater"),
-
-  home: document.getElementById("screenHome"),
-  select: document.getElementById("screenSelect"),
-  fight: document.getElementById("screenFight"),
-
-  btnParentToggle: document.getElementById("btnParentToggle"),
-  lettersDialog: document.getElementById("lettersDialog"),
-  btnCloseLetters: document.getElementById("btnCloseLetters"),
-
-  btnSound: document.getElementById("btnSound"),
-  btnSettings: document.getElementById("btnSettings"),
-  btnLogo: document.getElementById("btnLogo"),
-  btnReset: document.getElementById("btnReset"),
-  logoModal: document.getElementById("logoModal"),
-  logoModalBackdrop: document.getElementById("logoModalBackdrop"),
-  btnCloseLogoModal: document.getElementById("btnCloseLogoModal"),
-
-  btnPlay: document.getElementById("btnPlay"),
-  btnOpenBrawlers: document.getElementById("btnOpenBrawlers"),
-  homeLettersHint: document.getElementById("homeLettersHint"),
-  coinsTotal: document.getElementById("coinsTotal"),
-  starsTotal: document.getElementById("starsTotal"),
-  streak: document.getElementById("streak"),
-
-  lettersGrid: document.getElementById("lettersGrid"),
-  btnPickAll: document.getElementById("btnPickAll"),
-  btnPickNone: document.getElementById("btnPickNone"),
-  btnPresetNadav: document.getElementById("btnPresetNadav"),
-  pickedCount: document.getElementById("pickedCount"),
-
-  brawlers: document.getElementById("brawlers"),
-  selectHint: document.getElementById("selectHint"),
-  modePill: document.getElementById("modePill"),
-
-  bossPill: document.getElementById("bossPill"),
-  currentBrawlerPill: document.getElementById("currentBrawlerPill"),
-  coinsHud: document.getElementById("coinsHud"),
-  starsRound: document.getElementById("starsRound"),
+  buildBanner: document.getElementById("buildBanner"),
+  starsNum: document.getElementById("starsNum"),
+  coinsNum: document.getElementById("coinsNum"),
+  logoImg: document.getElementById("logoImg"),
+  currentPlayerPill: document.getElementById("currentPlayerPill"),
+  lettersModeText: document.getElementById("lettersModeText"),
   wordMasked: document.getElementById("wordMasked"),
-  btnReveal: document.getElementById("btnReveal"),
-  btnRepeat: document.getElementById("btnRepeat"),
-  choices: document.getElementById("choices"),
-  feedback: document.getElementById("feedback"),
-
-  reward: document.getElementById("reward"),
-  btnStar: document.getElementById("btnStar"),
+  answers: document.getElementById("answers"),
+  rewardBox: document.getElementById("rewardBox"),
   rewardText: document.getElementById("rewardText"),
-  coinsPop: document.getElementById("coinsPop"),
+  howBody: document.getElementById("howBody"),
 
-  btnTryAgain: document.getElementById("btnTryAgain"),
-  btnChangeBrawler: document.getElementById("btnChangeBrawler"),
+  lettersDialog: document.getElementById("lettersDialog"),
+  lettersGrid: document.getElementById("lettersGrid"),
+  lettersCount: document.getElementById("lettersCount"),
 
-  dialog: document.getElementById("settingsDialog"),
-  autospeakSelect: document.getElementById("autospeakSelect"),
-  rateInput: document.getElementById("rateInput"),
-  btnSaveSettings: document.getElementById("btnSaveSettings"),
+  logoDialog: document.getElementById("logoDialog"),
+  logoUnlockText: document.getElementById("logoUnlockText"),
+  logosGrid: document.getElementById("logosGrid"),
 
-  winDialog: document.getElementById("winDialog"),
-  btnKeepPlaying: document.getElementById("btnKeepPlaying"),
-  btnResetCoins: document.getElementById("btnResetCoins"),
+  firstPlayerDialog: document.getElementById("firstPlayerDialog"),
+  firstPlayerName: document.getElementById("firstPlayerName"),
+
+  playersDialog: document.getElementById("playersDialog"),
+  playerSelect: document.getElementById("playerSelect"),
+
+  settingsDialog: document.getElementById("settingsDialog"),
+  debugToggle: document.getElementById("debugToggle"),
+
+  debugPanel: document.getElementById("debugPanel"),
+  debugLog: document.getElementById("debugLog"),
 };
 
 const state = {
-  giftStarAt1000: false,
-
-  MIN_SELECTED_LETTERS: 4,
-
-  unlockedLogos: [],
-  logoLocked: true,
-  lastUnlockAtStars: 0,
-
-  debugEnabled: false,
-
-  lettersMode: "all",
-  selectedLetters: [...ALL_LETTERS],
-
-  autospeak: true,
-  rate: 0.95,
-
-  coins: 0,
-  starsTotal: 0,
-  streak: 0,
-
-  chosenLogoId: "logo1", // player logo
-
-  currentWord: "",
-  currentFirstLetter: "",
+  // runtime
+  currentWord: null,
+  correctLetter: null,
+  options: [],
+  answered: false,
   revealed: false,
-  locked: false,
-  rewardClaimed: false,
-  roundStars: 0,
-  wrongAttemptsThisWord: 0,
-
-  // non-repeat queues per letter
-  queues: {}, // { "א": [word,word,...] }
+  lastSpoken: "",
+  // player
+  player: null,
+  settings: null,
 };
 
-function randInt(n){ return Math.floor(Math.random()*n); }
-function pick(arr){
-  if(!arr || !arr.length) return ALL_LETTERS[Math.floor(Math.random()*ALL_LETTERS.length)];
-  return arr[Math.floor(Math.random()*arr.length)];
+function dbg(msg){
+  if(!debugIsOn()) return;
+  const line = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  els.debugLog.textContent = (els.debugLog.textContent ? els.debugLog.textContent + "\n" : "") + line;
+  els.debugPanel.classList.remove("hidden");
 }
 
-function speak(text){
+function debugIsOn(){
+  return localStorage.getItem(STORAGE.debug) === "1";
+}
+function debugSet(on){
+  localStorage.setItem(STORAGE.debug, on ? "1" : "0");
+  if(!on) els.debugPanel.classList.add("hidden");
+}
+
+function playersGet(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE.players) || "[]"); }catch{ return []; }
+}
+function playersSave(arr){
+  localStorage.setItem(STORAGE.players, JSON.stringify(arr));
+}
+function playerIdGet(){
+  return localStorage.getItem(STORAGE.currentPlayer);
+}
+function playerIdSet(id){
+  localStorage.setItem(STORAGE.currentPlayer, id);
+}
+function settingsKey(){
+  const id = playerIdGet() || "p1";
+  return STORAGE.settingsPrefix + id;
+}
+function settingsLoad(){
   try{
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "he-IL";
-    u.rate = state.rate;
-    window.speechSynthesis.speak(u);
-  }catch(_){}
-}
-
-function save(){
-  localStorage.setItem(KEY_SETTINGS, JSON.stringify({
-    lettersMode: state.lettersMode,
-    selectedLetters: state.lettersMode === "custom" ? state.selectedLetters : [],
-    autospeak: state.autospeak,
-    rate: state.rate,
-    coins: state.coins,
-    starsTotal: state.starsTotal,
-    streak: state.streak,
-    chosenLogoId: state.chosenLogoId
-  }));
-}
-
-function load(){
-  try{
-    const raw = localStorage.getItem(KEY_SETTINGS);
-    if(!raw) return;
+    const raw = localStorage.getItem(settingsKey());
+    if(!raw) return {
+      selectedLetters: [...HEB_LETTERS],
+      mode: "all", // all | focus
+      stars: 0,
+      coins: 0,
+      logo: LOGOS[0] || "logo1.png",
+      unlockedLogos: Math.max(defaults.initialUnlockedLogos, 1),
+      usedWords: {}, // letter->set array
+      howHidden: false,
+    };
     const s = JSON.parse(raw);
-    if(typeof s.autospeak === "boolean") state.autospeak = s.autospeak;
-    if(typeof s.rate === "number") state.rate = s.rate;
-
-    if(s.lettersMode === "custom" && Array.isArray(s.selectedLetters) && s.selectedLetters.length){
-      state.lettersMode = "custom";
-      state.selectedLetters = s.selectedLetters.filter(x => ALL_LETTERS.includes(x));
-      if(!state.selectedLetters.length) state.selectedLetters = [...ALL_LETTERS];
-    } else {
-      state.lettersMode = "all";
-      state.selectedLetters = [...ALL_LETTERS];
-    }
-
-    if(typeof s.coins === "number") state.coins = s.coins;
-    if(typeof s.starsTotal === "number") state.starsTotal = s.starsTotal;
-    if(typeof s.streak === "number") state.streak = s.streak;
-    if(typeof s.chosenLogoId === "string") state.chosenLogoId = s.chosenLogoId;
-  }catch(_){}
-}
-
-function setUI(){
-  els.coinsTotal.textContent = String(state.coins);
-  els.coinsHud.textContent = String(state.coins);
-  els.starsTotal.textContent = String(state.starsTotal);
-  els.streak.textContent = String(state.streak);
-  els.autospeakSelect.value = state.autospeak ? "on" : "off";
-  els.rateInput.value = String(state.rate);
-
-  els.homeLettersHint.textContent =
-    (state.lettersMode === "all") ? "מצב אותיות: כל האותיות (א–ת)" : `מצב אותיות: פוקוס על (${state.selectedLetters.join(" ")})`;
-
-  if(state.chosenLogoId){
-    const l = getLogoById(state.chosenLogoId);
-    els.currentBrawlerPill.textContent = `לוגו: ${l.name}`;
-  } else {
-    els.currentBrawlerPill.textContent = "בחר לוגו";
-  }
-}
-
-function show(screen){ [els.home, els.fight].forEach(s => { if(s) s.hidden=true; }); screen.hidden=false; }
-
-// Letters dialog
-function buildPicker(){
-  els.lettersGrid.innerHTML = "";
-  const selected = new Set(state.lettersMode === "custom" ? state.selectedLetters : ALL_LETTERS);
-
-  ALL_LETTERS.forEach(letter => {
-    const d = document.createElement("div");
-    d.className = "letterChip" + (selected.has(letter) ? " selected" : "");
-    d.textContent = letter;
-    d.addEventListener("click", () => {
-      state.lettersMode = "custom";
-      const set = new Set(state.selectedLetters);
-      if(set.has(letter)) { set.delete(letter); d.classList.remove("selected"); }
-      else { set.add(letter); d.classList.add("selected"); }
-      state.selectedLetters = Array.from(set).filter(x => ALL_LETTERS.includes(x));
-      updatePickedCount();
-      // reset queues when changing focus so you get fresh no-repeat behavior
-      state.queues = {};
-    });
-    els.lettersGrid.appendChild(d);
-  });
-
-  if(state.lettersMode === "all") state.selectedLetters = [...ALL_LETTERS];
-  updatePickedCount();
-}
-
-function updatePickedCount(){
-  els.pickedCount.textContent = (state.selectedLetters.length === 0)
-    ? "בחר לפחות 4 אותיות"
-    : `נבחרו: ${state.selectedLetters.length} אותיות`;
-}
-
-function normalizeLettersMode(){
-  if(state.selectedLetters.length === 0) state.selectedLetters = ["א"];
-  const set = new Set(state.selectedLetters);
-  state.lettersMode = (set.size === ALL_LETTERS.length) ? "all" : "custom";
-  if(state.lettersMode === "all") state.selectedLetters = [...ALL_LETTERS];
-}
-
-function openLetters(){ buildPicker(); try{ els.lettersDialog.showModal(); }catch(_ ){} }
-function closeLetters(){ normalizeLettersMode(); save(); setUI(); try{ els.lettersDialog.close(); }catch(_ ){} }
-function toggleLetters(){ if(els.lettersDialog.open) closeLetters(); else openLetters(); }
-
-function pickerSelectAll(){ state.lettersMode="all"; state.selectedLetters=[...ALL_LETTERS]; state.queues={}; buildPicker(); }
-function pickerSelectNone(){ state.lettersMode="custom"; state.selectedLetters=[]; state.queues={}; buildPicker(); }
-function pickerPresetNadav(){ state.lettersMode="custom"; state.selectedLetters=["ס","כ","ר","ט"]; state.queues={}; buildPicker(); }
-
-// Brawlers (skin)
-function brawlerForLetter(letter){
-  // v15: backward-compat — "brawler" cards should show the letter boss
-  return bossForLetter(letter);
-}
-
-
-
-function buildLogos(){
-  els.brawlers.innerHTML = "";
-  PLAYER_LOGOS.forEach((logo) => {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "brawler";
-    const selected = (state.chosenLogoId === logo.id);
-    card.innerHTML = `
-      <div class="bLeft">
-        <div class="bAvatar"><img class="logoAvatar" src="${logo.img}" alt="${logo.name}"></div>
-        <div class="bText">
-          <div class="bName">${logo.name}</div>
-          <div class="bDesc">הלוגו שלך</div>
-        </div>
-      </div>
-      ${selected ? '<div class="bBadge">נבחר</div>' : '<div class="bBadge ghost">בחר</div>'}
-    `;
-    card.addEventListener("click", () => {
-      state.chosenLogoId = logo.id;
-      save();
-      renderLogoButton();
-      closeLogoModal();
-      renderCurrent();
-      // אם אנחנו בבית – מתחילים משחק
-      if(!els.fight || els.fight.hidden) startNewQuestion();
-    });
-    els.brawlers.appendChild(card);
-  });
-}
-
-
-
-
-function renderLogoButton(){
-  if(!els.btnLogo) return;
-  const logo = getLogoById(state.chosenLogoId);
-  els.btnLogo.innerHTML = `<img id="btnLogoLogoImg" src="${logo.img}" alt="${logo.name}">`;
-}
-function openLogoModal(){
-  if(!els.logoModal) return;
-  buildLogos();
-  els.logoModal.classList.remove("hidden");
-}
-function closeLogoModal(){
-  if(!els.logoModal) return;
-  els.logoModal.classList.add("hidden");
-}
-
-function openBrawlers(){ openLogoModal(); }
-
-// Niqqud-safe masking
-const COMBINING = /[\u0591-\u05C7]/;
-function splitFirstCluster(word){
-  if(!word) return ["",""];
-  let i=1;
-  while(i<word.length && COMBINING.test(word[i])) i++;
-  return [word.slice(0,i), word.slice(i)];
-}
-function maskFirstLetter(word){ const [, rest] = splitFirstCluster(word); return "_" + rest; }
-
-// Non-repeat picker per letter
-function getQueue(letter){
-  if(!state.queues[letter] || state.queues[letter].length === 0){
-    const arr = WORD_BANK[letter] ? WORD_BANK[letter].slice() : [];
-    state.queues[letter] = shuffle(arr);
-  }
-  return state.queues[letter];
-}
-
-function pickWord(){
-  const allowedLetters = (state.lettersMode === "custom" && Array.isArray(state.selectedLetters) && state.selectedLetters.length)
-    ? state.selectedLetters.slice()
-    : ALL_LETTERS.slice();
-
-  // Try several times to get a real word (non-empty, 2+ chars)
-  for(let tries=0; tries<80; tries++){
-    const letter = pick(allowedLetters);
-    const q = getQueue(letter).pop();
-    const w = (q || "").trim();
-    if(w && w.length >= 2 && w[0] === letter) return w;
-    // If the queue is empty or word invalid, keep trying.
-  }
-
-  // Hard fallback: a generic kid-friendly word (should almost never happen)
-  return "טלפון";
-}
-
-function buildChoices(correctLetter){
-  const pool = ALL_LETTERS;
-
-  if(!correctLetter){
-    return shuffle([...pool]).slice(0,4);
-  }
-
-  const choices = new Set([correctLetter]);
-
-  // Always include a "confusing" similar-sound letter when defined (raises difficulty)
-  const confuse = CONFUSION_MAP[correctLetter];
-  if(confuse) choices.add(confuse);
-
-  let guard = 0;
-  while(choices.size < 4 && guard < 600){
-    choices.add(pick(pool));
-    guard++;
-  }
-
-  const out = shuffle(Array.from(choices));
-  if(out.length < 4){
-    const add = shuffle(pool.filter(x => !out.includes(x)));
-    while(out.length < 4 && add.length) out.push(add.shift());
-  }
-  return out.slice(0,4);
-}
-
-function resetRoundUI(){
-  els.feedback.textContent = "";
-  els.starsRound.textContent = "0";
-
-  els.reward.hidden = true;
-  els.btnStar.disabled = true;
-  els.coinsPop.hidden = true;
-
-  els.btnTryAgain.hidden = true;
-
-  state.roundStars = 0;
-  state.revealed = false;
-  state.locked = false;
-  state.rewardClaimed = false;
-  state.wrongAttemptsThisWord = 0;
-
-  els.btnReveal.textContent = "👀 גלה אות";
-}
-
-function startNewQuestion(){
-  if(!state.chosenLogoId) return openBrawlers();
-
-  resetRoundUI();
-  const w = pickWord();
-  state.currentWord = w;
-  state.currentFirstLetter = w[0];
-
-  els.wordMasked.textContent = maskFirstLetter(w);
-
-  
-els.choices.innerHTML = "";
-  els.choices.classList.add("arena");
-
-  let letters = buildChoices(state.currentFirstLetter);
-  if(!letters || !letters.length){
-    // last-resort fallback: show 4 random letters so the UI never goes blank
-    letters = shuffle([...ALL_LETTERS]).slice(0,4);
-  }
-
-  letters.forEach(letter => {
-    const c = document.createElement("div");
-    c.className = "choiceCard";
-    let br;
-    try{ br = brawlerForLetter(letter); }catch(e){ br = null; }
-    if(!br) br = { name: `אות ${letter}`, img: "" };
-    c.innerHTML = `
-      <div class="choiceLeft">
-        <div class="choiceAvatar">${br.img ? `<img src="${br.img}" alt="${br.name}">` : `<div class="noImg">${letter}</div>`}</div>
-        <div>
-          <div class="choiceName">${br.name}</div>
-          <div class="choiceHint">שומר האות ${letter}</div>
-        </div>
-      </div>
-      <div class="choiceLetter">${letter}</div>
-    `;
-    c.addEventListener("click", () => answer(letter, c));
-    els.choices.appendChild(c);
-  });
-
-  show(els.fight);
-  if(state.autospeak) setTimeout(() => speak(w), 120);
-}
-
-function revealFirstLetter(){
-  if(state.revealed) return;
-  state.revealed = true;
-  els.wordMasked.textContent = state.currentWord;
-  els.btnReveal.textContent = "🙈 הסתר";
-}
-function hideFirstLetter(){
-  state.revealed = false;
-  els.wordMasked.textContent = maskFirstLetter(state.currentWord);
-  els.btnReveal.textContent = "👀 גלה אות";
-}
-
-// Answers
-function answer(letter, btn){
-  if(state.locked) return;
-
-  if(letter === state.currentFirstLetter){
-    btn.classList.add("correct");
-    state.roundStars += 1;
-    state.starsTotal += 1;
-    state.streak += 1;
-
-    els.starsRound.textContent = String(state.roundStars);
-    els.feedback.textContent = "💥 ניצחת בזירה! לחץ על ⭐ כדי לקבל מטבעות 🪙";
-state.locked = true;
-    Array.from(els.choices.querySelectorAll(".choiceCard")).forEach(b => b.classList.add("disabled"));
-
-    els.reward.hidden = false;
-    els.btnStar.disabled = false;
-    els.rewardText.textContent = "לחץ על הכוכב!";
-    els.coinsPop.hidden = true;
-
-    setUI(); save();
-  } else {
-    btn.classList.add("wrong");
-    state.streak = 0;
-    state.wrongAttemptsThisWord += 1;
-    els.feedback.textContent = "😅 לא הפעם. נסה שוב או החלף בראולר.";
-els.btnTryAgain.hidden = false;
-
-    els.reward.hidden = true;
-    els.btnStar.disabled = true;
-
-    setUI(); save();
-  }
-}
-
-function randomCoinsBase(){ return 20 + randInt(161); } // 20..180
-
-function claimReward(){
-  if(state.rewardClaimed) return;
-  if(!state.locked) return;
-  state.rewardClaimed = true;
-
-  const base = randomCoinsBase();
-  const coins = Math.max(5, base - state.wrongAttemptsThisWord * 25);
-
-  state.coins += coins;
-  if(state.coins > 9999) state.coins = 9999;
-
-  els.btnStar.classList.add("burst");
-  setTimeout(() => els.btnStar.classList.remove("burst"), 520);
-
-  els.coinsPop.textContent = `+${coins} 🪙`;
-  els.coinsPop.hidden = false;
-
-  els.rewardText.textContent = "יאללה! שאלה הבאה…";
-  els.btnStar.disabled = true;
-
-  setUI(); save();
-
-  if(state.coins >= 1000) {
-    try{ els.winDialog.showModal(); }catch(_ ){}
-    return;
-  }
-
-  setTimeout(() => startNewQuestion(), 850);
-}
-
-function tryAgain(){
-  Array.from(els.choices.querySelectorAll(".choiceCard")).forEach(b => b.classList.remove("wrong"));
-  els.feedback.textContent = "נסה שוב 🙂";
-  els.btnTryAgain.hidden = true;
-}
-
-// Settings
-function openSettings(){ els.dialog.showModal(); }
-function saveSettingsFromDialog(){
-  state.autospeak = els.autospeakSelect.value === "on";
-  state.rate = parseFloat(els.rateInput.value || "0.95");
-  save(); setUI(); els.dialog.close();
-}
-
-function resetGame(){
-  const ok = confirm("לאפס את המשחק ולהתחיל מהתחלה?");
-  if(!ok) return;
-  localStorage.removeItem(KEY_SETTINGS);
-  // reset core
-  state.lettersMode = "all";
-  state.selectedLetters = [...ALL_LETTERS];
-  state.coins = 0;
-  state.starsTotal = 0;
-  state.streak = 0;
-  state.chosenLogoId = "logo1";
-  state.used = {};
-  state.currentWord = "";
-  state.currentFirstLetter = "";
-  state.revealed = false;
-  state.locked = false;
-  state.rewardClaimed = false;
-  state.roundStars = 0;
-  state.wrongAttemptsThisWord = 0;
-  save();
-  setUI();
-  renderLogoButton();
-  show(els.home);
-}
-
-function resetCoins(){ state.coins = 0; save(); setUI(); }
-
-// Events
-els.btnParentToggle && 
-els.btnParentToggle.addEventListener("click", toggleLetters);
-els.btnCloseLetters && 
-els.btnCloseLetters.addEventListener("click", closeLetters);
-els.btnPickAll && 
-els.btnPickAll.addEventListener("click", pickerSelectAll);
-els.btnPickNone && 
-els.btnPickNone.addEventListener("click", pickerSelectNone);
-els.btnPresetNadav && 
-els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
-els.lettersDialog && 
-els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
-
-els.btnPlay && 
-els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
-els.btnOpenBrawlers && 
-els.btnOpenBrawlers.addEventListener("click", openBrawlers);
-els.btnChangeBrawler && 
-els.btnChangeBrawler.addEventListener("click", openBrawlers);
-els.btnTryAgain && 
-els.btnTryAgain.addEventListener("click", tryAgain);
-
-els.btnReveal && 
-els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
-els.btnStar && 
-els.btnStar.addEventListener("click", claimReward);
-
-els.btnSound && 
-els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
-els.btnSettings && 
-els.btnSettings.addEventListener("click", openSettings);
-if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
-if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
-if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
-if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
-els.btnSaveSettings && 
-els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
-
-els.btnKeepPlaying && 
-els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
-els.btnResetCoins && 
-els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
-
-// init
-load(); setUI(); renderLogoButton(); show(els.home);
-
-
-// v25: hard fallback start hook (works even if addEventListener wiring fails)
-window.__startGame = function(){
-  if(!validateLettersSelection()) return;
-  try{
-    showDebug("START via __startGame ✅");
-    // emulate the normal play click
-    if(typeof startNewQuestion === "function"){
-      // ensure we are in fight screen
-      try{ showScreen && showScreen("fight"); }catch(e){}
-      try{ startNewQuestion(); }catch(e){ showDebug("startNewQuestion error: " + (e.message||e)); }
-    }else{
-      showDebug("startNewQuestion missing ❌");
-    }
+    // migrations / safety
+    if(!Array.isArray(s.selectedLetters) || s.selectedLetters.length===0) s.selectedLetters=[...HEB_LETTERS];
+    if(typeof s.stars!=="number") s.stars=0;
+    if(typeof s.coins!=="number") s.coins=0;
+    if(typeof s.unlockedLogos!=="number") s.unlockedLogos=Math.max(defaults.initialUnlockedLogos,1);
+    if(!s.usedWords || typeof s.usedWords!=="object") s.usedWords={};
+    if(typeof s.howHidden!=="boolean") s.howHidden=false;
+    if(!s.logo) s.logo = LOGOS[0] || "logo1.png";
+    return s;
   }catch(e){
-    showDebug("START error: " + (e.message||e));
-  }
-};
-
-const LOGOS = Array.from({length:6},(_,i)=>({id:`logo${i+1}`, name:`לוגו ${i+1}`, img:`assets/logos/logo${i+1}.png`}));
-
-function loadProgress(){
-  try{
-    const ul = JSON.parse(localStorage.getItem("unlockedLogos")||"[]");
-    if(Array.isArray(ul) && ul.length) state.unlockedLogos = ul;
-  }catch(e){}
-  try{ state.lastUnlockAtStars = parseInt(localStorage.getItem("lastUnlockAtStars")||"0",10) || 0; }catch(e){}
-  // if no unlocked yet, start with current logo (or default logo1)
-  if(!state.unlockedLogos.length){
-    const cur = state.selectedLogo || "logo1";
-    state.unlockedLogos = [cur];
-  }else{
-    // ensure selected logo is in unlocked
-    if(state.selectedLogo && !state.unlockedLogos.includes(state.selectedLogo)){
-      state.selectedLogo = state.unlockedLogos[0];
-    }
-  }
-  try{ localStorage.setItem("unlockedLogos", JSON.stringify(state.unlockedLogos)); }catch(e){}
-}
-function saveProgress(){
-  try{ localStorage.setItem("unlockedLogos", JSON.stringify(state.unlockedLogos)); }catch(e){}
-  try{ localStorage.setItem("lastUnlockAtStars", String(state.lastUnlockAtStars||0)); }catch(e){}
-}
-
-function availableNewLogos(){
-  return LOGOS.filter(l => !state.unlockedLogos.includes(l.id));
-}
-function setSelectedLogo(id){
-  state.selectedLogo = id;
-  try{ localStorage.setItem("selectedLogo", id); }catch(e){}
-  // update UI badge if function exists
-  try{ renderSelectedLogo && renderSelectedLogo(); }catch(e){}
-}
-function showUnlockModal(stars){
-  if(!els.modalUnlock || !els.unlockGrid) return;
-  state.logoLocked = true; // lock switching normally
-  els.unlockStars.textContent = String(stars);
-  els.unlockGrid.innerHTML = "";
-  const candidates = availableNewLogos();
-  if(!candidates.length){
-    // nothing to unlock
-    els.modalUnlock.classList.add("hidden");
-    return;
-  }
-  candidates.forEach(l => {
-    const tile = document.createElement("div");
-    tile.className = "logoTile";
-    tile.innerHTML = `
-      <img src="${l.img}" alt="${l.name}">
-      <div class="logoName">${l.name}</div>
-      <button class="btn primary" type="button">בחר</button>
-    `;
-    tile.querySelector("button").addEventListener("click", () => {
-      state.unlockedLogos.push(l.id);
-      setSelectedLogo(l.id);
-      state.lastUnlockAtStars = stars;
-      saveProgress();
-      els.modalUnlock.classList.add("hidden");
-    });
-    els.unlockGrid.appendChild(tile);
-  });
-  els.modalUnlock.classList.remove("hidden");
-}
-if(els.btnUnlockLater){
-  els.btnUnlockLater.addEventListener("click", () => {
-    if(els.modalUnlock) els.modalUnlock.classList.add("hidden");
-  });
-}
-
-function checkLogoUnlock(){
-  const s = state.stars || 0;
-  const milestone = Math.floor(s/100)*100;
-  if(milestone >= 100 && milestone > (state.lastUnlockAtStars||0)){
-    // only if there is something new to unlock
-    if(availableNewLogos().length){
-      showUnlockModal(milestone);
-    }
+    dbg("settingsLoad error: "+e);
+    return {
+      selectedLetters: [...HEB_LETTERS],
+      mode: "all",
+      stars: 0,
+      coins: 0,
+      logo: LOGOS[0] || "logo1.png",
+      unlockedLogos: Math.max(defaults.initialUnlockedLogos, 1),
+      usedWords: {},
+      howHidden: false,
+    };
   }
 }
+function settingsSave(){
+  localStorage.setItem(settingsKey(), JSON.stringify(state.settings));
+}
 
-function validateLettersSelection(){
-  if(state.lettersMode === "custom"){
-    const n = (state.selectedLetters || []).length;
-    if(n < state.MIN_SELECTED_LETTERS){
-      alert(`בחר לפחות ${state.MIN_SELECTED_LETTERS} אותיות כדי להתחיל`);
-      return false;
-    }
+function ensurePlayer(){
+  const ps = playersGet();
+  if(ps.length===0){
+    els.firstPlayerDialog.showModal();
+    return false;
   }
+  let id = playerIdGet();
+  if(!id || !ps.find(p=>p.id===id)) {
+    id = ps[0].id;
+    playerIdSet(id);
+  }
+  state.player = ps.find(p=>p.id===id);
   return true;
 }
 
-function checkGiftStar(){
-  if(state.coins >= 1000 && !state.giftStarAt1000){
-    state.giftStarAt1000 = true;
-    state.stars = (state.stars || 0) + 1; // gift star only
-    try{ localStorage.setItem("giftStarAt1000","1"); }catch(e){}
+function renderPlayerPill(){
+  els.currentPlayerPill.textContent = state.player ? `שחקן: ${state.player.name}` : "שחקן: —";
+}
+
+function renderStats(){
+  els.starsNum.textContent = String(state.settings.stars || 0);
+  els.coinsNum.textContent = String(state.settings.coins || 0);
+  const logoPath = `assets/logos/${state.settings.logo}`;
+  els.logoImg.src = logoPath;
+}
+
+function renderLettersMode(){
+  if(state.settings.mode==="all") {
+    els.lettersModeText.textContent = "מצב אותיות: כל האותיות (א–ת)";
+  } else {
+    els.lettersModeText.textContent = `מצב אותיות: מיקוד (${state.settings.selectedLetters.length})`;
   }
 }
 
-// ===== PROFILES_V67 =====
-const KEY_SETTINGS_BASE_V67 = "brawl_letters_settings_v5";
-const KEY_PLAYERS_V67 = "bl_players_v1";
-const KEY_CURRENT_PLAYER_V67 = "bl_current_player_v1";
-const KEY_DEBUG_V67 = "bl_debug";
+function hideReward(){
+  els.rewardBox.classList.add("hidden");
+}
+function showReward(text){
+  els.rewardText.textContent = text;
+  els.rewardBox.classList.remove("hidden");
+}
 
-function _json(raw, fallback){ try{ return JSON.parse(raw); }catch(_){ return fallback; } }
-function playersGet(){ return _json(localStorage.getItem(KEY_PLAYERS_V67), []) || []; }
-function playersSave(arr){ try{ localStorage.setItem(KEY_PLAYERS_V67, JSON.stringify(arr)); }catch(_){ } }
-function playerIdGet(){ try{ return localStorage.getItem(KEY_CURRENT_PLAYER_V67); }catch(_){ return null; } }
-function playerIdSet(id){ try{ localStorage.setItem(KEY_CURRENT_PLAYER_V67, id); }catch(_){ } }
-function settingsKeyV67(){
-  const id = playerIdGet() || "p1";
-  return `${KEY_SETTINGS_BASE_V67}__${id}`;
+function maskWord(word){
+  if(!word) return "—";
+  const first = word[0];
+  return state.revealed ? word : ("_" + word.slice(1));
 }
-function debugIsOn(){ try{ return localStorage.getItem(KEY_DEBUG_V67)==="1"; }catch(_){ return false; } }
-function debugSet(on){
-  try{ localStorage.setItem(KEY_DEBUG_V67, on ? "1":"0"); }catch(_){}
-  try{ if(window.__DBGSHOW) window.__DBGSHOW(on); }catch(_){}
+
+function speak(text){
+  if(!text) return;
+  state.lastSpoken = text;
+  try{
+    if(!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "he-IL";
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  }catch(e){ dbg("speak error: "+e); }
 }
-function headerPlayerNameSet(){
-  const el=document.getElementById("currentPlayerName");
-  if(!el) return;
-  const id=playerIdGet();
-  const p=playersGet().find(x=>x.id===id) || playersGet()[0];
-  el.textContent = p?.name ? `שחקן: ${p.name}` : "";
+
+function randInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
 }
-function playersSelectRender(){
-  const sel=document.getElementById("playerSelect");
-  if(!sel) return;
-  const ps=playersGet();
-  const id=playerIdGet();
-  sel.innerHTML="";
+function shuffle(a){
+  const arr=[...a];
+  for(let i=arr.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function pickWordForLetter(letter){
+  const words = WORD_BANK[letter] || [];
+  if(words.length===0) return null;
+  const used = state.settings.usedWords[letter] || [];
+  // If all used, reset used list
+  const available = words.filter(w=>!used.includes(w));
+  const pool = available.length ? available : words;
+  const word = pool[randInt(0,pool.length-1)];
+  // mark used
+  const newUsed = available.length ? [...used, word] : [word];
+  state.settings.usedWords[letter] = newUsed.slice(-200);
+  settingsSave();
+  return word;
+}
+
+function buildOptions(correct){
+  // options can include any letters, but must include correct + confusion letter (if exists) to raise difficulty
+  const opts = new Set();
+  opts.add(correct);
+  const conf = CONFUSIONS[correct];
+  if(conf) opts.add(conf);
+
+  const selected = state.settings.mode==="focus" ? state.settings.selectedLetters : HEB_LETTERS;
+  const pool = selected.length>=4 ? selected : HEB_LETTERS;
+  while(opts.size < 4) {
+    opts.add(pool[randInt(0,pool.length-1)]);
+  }
+  // if still <4 (edge), fill from all
+  while(opts.size < 4) {
+    opts.add(HEB_LETTERS[randInt(0,HEB_LETTERS.length-1)]);
+  }
+  return shuffle([...opts]).slice(0,4);
+}
+
+function newQuestion(){
+  hideReward();
+  state.answered=false;
+  state.revealed=false;
+
+  // choose target letter (use focus set if focus, else all)
+  const letters = state.settings.mode==="focus" ? state.settings.selectedLetters : HEB_LETTERS;
+  const target = letters[randInt(0, letters.length-1)];
+  const word = pickWordForLetter(target);
+  if(!word) {
+    // fallback: pick any existing word
+    const fallbackLetters = HEB_LETTERS.filter(l=>(WORD_BANK[l]||[]).length>0);
+    const t2 = fallbackLetters[randInt(0,fallbackLetters.length-1)];
+    state.correctLetter=t2;
+    state.currentWord=pickWordForLetter(t2) || "מילה";
+  } else {
+    state.correctLetter = target;
+    state.currentWord = word;
+  }
+  state.options = buildOptions(state.correctLetter);
+  els.wordMasked.textContent = maskWord(state.currentWord);
+  renderAnswers();
+  // Speak word immediately (your original request)
+  speak(state.currentWord);
+}
+
+function renderAnswers(){
+  els.answers.innerHTML = "";
+  state.options.forEach(letter=>{
+    const btn = document.createElement("button");
+    btn.className = "answerBtn";
+    btn.type = "button";
+    btn.textContent = letter;
+    btn.setAttribute("data-action","chooseAnswer");
+    btn.setAttribute("data-letter", letter);
+    els.answers.appendChild(btn);
+  });
+}
+
+function chooseAnswer(letter, btnEl){
+  if(state.answered) return;
+  state.answered=true;
+  const correct = (letter === state.correctLetter);
+  // style
+  const buttons = [...els.answers.querySelectorAll(".answerBtn")];
+  buttons.forEach(b=>{
+    const l=b.getAttribute("data-letter");
+    if(l===state.correctLetter) b.classList.add("good");
+    else if(l===letter) b.classList.add("bad");
+    b.disabled=true;
+  });
+  if(correct){
+    state.settings.stars += 1;
+    settingsSave();
+    renderStats();
+    showReward("כל הכבוד! לחץ על הכוכב לקבל מטבעות 🪙");
+  } else {
+    // wrong: auto next after small delay
+    setTimeout(()=>{
+      newQuestion();
+    }, 650);
+  }
+}
+
+function claimReward(){
+  if(!state.answered) return; // only after a correct answer we show reward
+  if(els.rewardBox.classList.contains("hidden")) return;
+  // coins reward
+  const add = randInt(defaults.coinsPerWinMin, defaults.coinsPerWinMax);
+  state.settings.coins += add;
+  // goal check: if reached/exceeded, give a bonus star and wrap coins back? We'll keep coins capped at goal and bonus star.
+  let bonus = false;
+  if(state.settings.coins >= defaults.goalCoins){
+    state.settings.coins = state.settings.coins - defaults.goalCoins;
+    state.settings.stars += 1; // bonus star, no coins
+    bonus = true;
+  }
+  // logo unlock every 100 stars: each threshold adds one unlocked logo
+  const unlockCount = Math.min(LOGOS.length, 1 + Math.floor(state.settings.stars / defaults.starsToUnlockStep));
+  if(unlockCount > state.settings.unlockedLogos) {
+    state.settings.unlockedLogos = unlockCount;
+    settingsSave();
+    renderStats();
+    openLogo(true);
+    return;
+  }
+  settingsSave();
+  renderStats();
+  showReward(`קיבלת ${add} מטבעות!${bonus ? " ⭐ קיבלת גם כוכב מתנה!" : ""}`);
+  // next question after short delay
+  setTimeout(()=>{
+    newQuestion();
+  }, 550);
+}
+
+function openLetters(){
+  renderLettersGrid();
+  els.lettersDialog.showModal();
+}
+function closeLetters(){
+  // validate
+  if(state.settings.mode==="focus" && state.settings.selectedLetters.length < defaults.minSelectedLetters){
+    alert(`בחר לפחות ${defaults.minSelectedLetters} אותיות.`);
+    return;
+  }
+  settingsSave();
+  renderLettersMode();
+  els.lettersDialog.close();
+}
+function renderLettersGrid(){
+  els.lettersGrid.innerHTML="";
+  const selected = new Set(state.settings.selectedLetters);
+  HEB_LETTERS.forEach(l=>{
+    const div = document.createElement("button");
+    div.type="button";
+    div.className="letterChip"+(selected.has(l) ? " sel" : "");
+    div.textContent=l;
+    div.setAttribute("data-action","toggleLetter");
+    div.setAttribute("data-letter", l);
+    els.lettersGrid.appendChild(div);
+  });
+  els.lettersCount.textContent = `נבחרו: ${state.settings.selectedLetters.length}`;
+}
+
+function toggleLetter(letter){
+  const set = new Set(state.settings.selectedLetters);
+  if(set.has(letter)) set.delete(letter); else set.add(letter);
+  state.settings.selectedLetters = [...set];
+  state.settings.mode = (state.settings.selectedLetters.length === HEB_LETTERS.length) ? "all" : "focus";
+  renderLettersMode();
+  renderLettersGrid();
+}
+
+function selectAllLetters(){
+  state.settings.selectedLetters = [...HEB_LETTERS];
+  state.settings.mode="all";
+  renderLettersMode();
+  renderLettersGrid();
+}
+function clearLetters(){
+  state.settings.selectedLetters = [];
+  state.settings.mode="focus";
+  renderLettersMode();
+  renderLettersGrid();
+}
+
+function openLogo(fromUnlock=false){
+  const unlocked = Math.max(1, Math.min(LOGOS.length, state.settings.unlockedLogos));
+  els.logoUnlockText.textContent = fromUnlock
+    ? "נפתח לך לוגו חדש! בחר לוגו נוסף 🎁"
+    : `לוגואים פתוחים: ${unlocked} / ${LOGOS.length} (כל 100 כוכבים נפתח עוד)`;
+  els.logosGrid.innerHTML="";
+  LOGOS.forEach((fn, idx)=>{
+    const locked = idx >= unlocked;
+    const card = document.createElement("button");
+    card.type="button";
+    card.className="logoPick";
+    card.disabled = locked;
+    card.setAttribute("data-action","pickLogo");
+    card.setAttribute("data-logo", fn);
+    const img = document.createElement("img");
+    img.src = `assets/logos/${fn}`;
+    img.alt = "logo";
+    const cap = document.createElement("div");
+    cap.className="muted";
+    cap.textContent = locked ? "🔒 נעול" : "בחר";
+    card.appendChild(img);
+    card.appendChild(cap);
+    els.logosGrid.appendChild(card);
+  });
+  els.logoDialog.showModal();
+}
+function closeLogo(){
+  els.logoDialog.close();
+}
+function pickLogo(fn){
+  state.settings.logo = fn;
+  settingsSave();
+  renderStats();
+  closeLogo();
+}
+
+function openPlayers(){
+  renderPlayersSelect();
+  els.playersDialog.showModal();
+}
+function closePlayers(){
+  els.playersDialog.close();
+}
+function renderPlayersSelect(){
+  const ps = playersGet();
+  els.playerSelect.innerHTML="";
   ps.forEach(p=>{
     const opt=document.createElement("option");
-    opt.value=p.id; opt.textContent=p.name;
-    if(p.id===id) opt.selected=true;
-    sel.appendChild(opt);
+    opt.value=p.id;
+    opt.textContent=p.name;
+    if(state.player && p.id===state.player.id) opt.selected=true;
+    els.playerSelect.appendChild(opt);
   });
 }
-function ensureFirstPlayerDialog(){
+function createFirstPlayer(){
+  const name = (els.firstPlayerName.value || "שחקן 1").trim() || "שחקן 1";
+  const p = {id:"p1", name};
+  playersSave([p]);
+  playerIdSet("p1");
+  els.firstPlayerDialog.close();
+  boot();
+}
+function addPlayer(){
   const ps=playersGet();
-  if(ps.length) return;
-  const dlg=document.getElementById("firstPlayerDialog");
-  if(dlg) dlg.showModal();
+  const name=(prompt("שם השחקן החדש:", `שחקן ${ps.length+1}`)||"").trim();
+  if(!name) return;
+  const id="p"+Date.now().toString(36);
+  ps.push({id,name});
+  playersSave(ps);
+  playerIdSet(id);
+  boot();
+}
+function renamePlayer(){
+  const ps=playersGet();
+  const id=playerIdGet();
+  const p=ps.find(x=>x.id===id);
+  if(!p) return;
+  const name=(prompt("שם חדש:", p.name)||"").trim();
+  if(!name) return;
+  p.name=name;
+  playersSave(ps);
+  boot();
 }
 
-// patch save/load to use per-player key by monkey-patching localStorage calls inside existing save/load
-const _orig_save = typeof save==="function" ? save : null;
-const _orig_load = typeof load==="function" ? load : null;
-
-function saveV67(){
-  // temporarily redirect KEY_SETTINGS storage by overriding localStorage.setItem calls inside save()
-  if(!_orig_save) return;
-  const _set = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(k,v){
-    if(k==="brawl_letters_settings_v5") return _set(settingsKeyV67(), v);
-    return _set(k,v);
-  };
-  try{ _orig_save(); }finally{ localStorage.setItem=_set; }
-}
-function loadV67(){
-  if(!_orig_load) return;
-  const _get = localStorage.getItem.bind(localStorage);
-  localStorage.getItem = function(k){
-    if(k==="brawl_letters_settings_v5") return _get(settingsKeyV67());
-    return _get(k);
-  };
-  try{ _orig_load(); }finally{ localStorage.getItem=_get; }
+function onPlayerSelectChange(){
+  const id = els.playerSelect.value;
+  playerIdSet(id);
+  boot();
 }
 
-// ===== ACTIONS_V67 + DELEGATION =====
-let __v67_inited=false;
-function initV67(){
-  if(__v67_inited) return;
-  __v67_inited=true;
-  const acts = {
-    startGame(){ try{ startGame(); }catch(_){ } },
-    openLetters(){ try{ openLetters(); }catch(_){ } },
-    closeLetters(){ try{ closeLetters(); }catch(_){ } },
-    openSettings(){
-      try{ els.settingsDialog && els.settingsDialog.showModal(); }catch(_){}
-      const t=document.getElementById("debugToggle");
-      if(t) t.value = debugIsOn() ? "on":"off";
-    },
-    closeSettings(){ try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){ } },
-    saveSettings(){
-      const t=document.getElementById("debugToggle");
-      if(t) debugSet(t.value==="on");
-      saveV67();
-      try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){}
-    },
-    resetGame(){
-      if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
-      try{ localStorage.removeItem(settingsKeyV67()); }catch(_){}
-      location.reload();
-    },
-    resetCoins(){ try{ resetCoins(); }catch(_){ } },
-    pickAll(){ try{ pickAll(); }catch(_){ } },
-    pickNone(){ try{ pickNone(); }catch(_){ } },
-    repeatWord(){ try{ if(state && state.currentWord && typeof speak==="function") speak(state.currentWord); }catch(_){ } },
-    claimReward(){ try{ claimReward(); }catch(_){ } },
-    toggleReveal(){ try{ toggleReveal(); }catch(_){ } },
-    tryAgain(){ try{ tryAgain(); }catch(_){ } },
-    keepPlaying(){ try{ keepPlaying(); }catch(_){ } },
-    openPlayers(){
-      const dlg=document.getElementById("playersDialog"); if(!dlg) return;
-      playersSelectRender(); dlg.showModal();
-    },
-    closePlayers(){ try{ document.getElementById("playersDialog")?.close(); }catch(_){ } },
-    createFirstPlayer(){
-      const input=document.getElementById("firstPlayerName");
-      let name=(input?.value || "שחקן 1").trim(); if(!name) name="שחקן 1";
-      const p={id:"p1", name};
-      playersSave([p]); playerIdSet("p1");
-      try{ document.getElementById("firstPlayerDialog")?.close(); }catch(_){}
-      loadV67(); headerPlayerNameSet();
-    },
-    addPlayer(){
-      const ps=playersGet();
-      const name=(prompt("שם השחקן החדש:", `שחקן ${ps.length+1}`) || "").trim();
-      if(!name) return;
-      const id="p"+Date.now().toString(36);
-      ps.push({id, name}); playersSave(ps); playerIdSet(id);
-      playersSelectRender(); loadV67(); headerPlayerNameSet();
-    },
-    renamePlayer(){
-      const ps=playersGet(); const id=playerIdGet();
-      const p=ps.find(x=>x.id===id); if(!p) return;
-      const name=(prompt("שם חדש:", p.name) || "").trim();
-      if(!name) return;
-      p.name=name; playersSave(ps);
-      playersSelectRender(); headerPlayerNameSet();
-    },
-  };
+function openSettings(){
+  els.debugToggle.value = debugIsOn() ? "on" : "off";
+  els.settingsDialog.showModal();
+}
+function closeSettings(){
+  els.settingsDialog.close();
+}
+function resetGame(){
+  if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
+  localStorage.removeItem(settingsKey());
+  boot();
+}
+function toggleHow(){
+  state.settings.howHidden = !state.settings.howHidden;
+  settingsSave();
+  applyHowVisibility();
+}
+function applyHowVisibility(){
+  els.howBody.style.display = state.settings.howHidden ? "none" : "block";
+  // update button text
+  const btn = document.querySelector('[data-action="toggleHow"]');
+  if(btn) btn.textContent = state.settings.howHidden ? "הצג" : "הסתר";
+}
 
-  document.addEventListener("click",(e)=>{
-    const btn=e.target.closest && e.target.closest("[data-action]");
+function startGame(){
+  // ensure letters selection valid
+  if(state.settings.mode==="focus" && state.settings.selectedLetters.length < defaults.minSelectedLetters){
+    alert(`בחר לפחות ${defaults.minSelectedLetters} אותיות.`);
+    openLetters();
+    return;
+  }
+  // start / next question
+  newQuestion();
+}
+
+function revealFirst(){
+  state.revealed = true;
+  els.wordMasked.textContent = maskWord(state.currentWord);
+}
+
+function repeatWord(){
+  speak(state.currentWord || state.lastSpoken);
+}
+
+function handleAction(action, target){
+  switch(action){
+    case "startGame": return startGame();
+    case "openLetters": return openLetters();
+    case "closeLetters": return closeLetters();
+    case "toggleLetter": return toggleLetter(target.getAttribute("data-letter"));
+    case "selectAllLetters": return selectAllLetters();
+    case "clearLetters": return clearLetters();
+    case "openLogo": return openLogo(false);
+    case "closeLogo": return closeLogo();
+    case "pickLogo": return pickLogo(target.getAttribute("data-logo"));
+    case "openPlayers": return openPlayers();
+    case "closePlayers": return closePlayers();
+    case "createFirstPlayer": return createFirstPlayer();
+    case "addPlayer": return addPlayer();
+    case "renamePlayer": return renamePlayer();
+    case "openSettings": return openSettings();
+    case "closeSettings": return closeSettings();
+    case "resetGame": return resetGame();
+    case "toggleHow": return toggleHow();
+    case "revealFirst": return revealFirst();
+    case "repeatWord": return repeatWord();
+    case "chooseAnswer": return chooseAnswer(target.getAttribute("data-letter"), target);
+    case "claimReward": return claimReward();
+    case "dbgCopy": {
+      navigator.clipboard?.writeText(els.debugLog.textContent || "");
+      return;
+    }
+    case "dbgClear": {
+      els.debugLog.textContent="";
+      return;
+    }
+    case "dbgHide": {
+      els.debugPanel.classList.add("hidden");
+      return;
+    }
+  }
+}
+
+function attachDelegation(){
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest("[data-action]");
     if(!btn) return;
-    const a=btn.getAttribute("data-action");
-    if(!a || !acts[a]) return;
     e.preventDefault();
-    e.stopPropagation();
-    try{ e.stopImmediatePropagation(); }catch(_){}
-    acts[a]();
-  }, true);
-
-  document.addEventListener("change",(e)=>{
-    const sel=e.target.closest && e.target.closest("#playerSelect");
-    if(!sel) return;
-    playerIdSet(sel.value);
-    loadV67();
-    headerPlayerNameSet();
+    const action = btn.getAttribute("data-action");
+    handleAction(action, btn);
   });
+  els.playerSelect.addEventListener("change", onPlayerSelectChange);
+  els.debugToggle.addEventListener("change", ()=> debugSet(els.debugToggle.value==="on"));
+}
 
-  // initial
-  debugSet(debugIsOn());
-  ensureFirstPlayerDialog();
-  loadV67();
-  headerPlayerNameSet();
+function boot(){
+  if(!ensurePlayer()) return;
+  state.player = playersGet().find(p=>p.id===playerIdGet());
+  state.settings = settingsLoad();
+  renderPlayerPill();
+  renderStats();
+  renderLettersMode();
+  applyHowVisibility();
+  hideReward();
+  els.wordMasked.textContent = "—";
+  els.answers.innerHTML = "";
+  // Debug panel visibility
+  if(!debugIsOn()) els.debugPanel.classList.add("hidden");
+  // populate player select if dialog open
+  renderPlayersSelect();
+  dbg(`[BOOT] ${BUILD} loaded for ${state.player.name}`);
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-  try{ setTimeout(()=>{ try{ initV67(); }catch(_){} }, 0); }catch(_){}
+  attachDelegation();
+  boot();
 });
-
-// ===== V69_LOGO_ACTIONS =====
-document.addEventListener("click", (e)=>{
-  const btn = e.target.closest && e.target.closest('[data-action="openLogo"]');
-  if(btn){
-    e.preventDefault(); e.stopPropagation();
-    try{ e.stopImmediatePropagation(); }catch(_){}
-    try{ if(typeof openLogoModal==="function") openLogoModal(); }catch(_){}
-  }
-}, true);
-
-document.addEventListener("click", (e)=>{
-  const btn = e.target.closest && e.target.closest('[data-action="closeLogo"]');
-  if(btn){
-    e.preventDefault(); e.stopPropagation();
-    try{ e.stopImmediatePropagation(); }catch(_){}
-    try{ if(typeof closeLogoModal==="function") closeLogoModal(); }catch(_){}
-  }
-}, true);
-
-// ===== DELEGATION_V70 (stable click routing, cancels legacy) =====
-(function(){
-  function safe(fn){ try{ fn(); }catch(e){ try{ if(window.__DBGLOG) window.__DBGLOG(String(e)); }catch(_){} } }
-  const A = {
-    startGame: ()=> safe(()=> (window.__startGame ? window.__startGame() : (typeof startNewQuestion==="function" ? startNewQuestion() : null))) ,
-    openLetters: ()=> safe(()=> openLetters()),
-    closeLetters: ()=> safe(()=> closeLetters()),
-    pickAll: ()=> safe(()=> pickAll()),
-    pickNone: ()=> safe(()=> pickNone()),
-    presetNadav: ()=> safe(()=> (typeof presetNadav==="function" ? presetNadav() : null)),
-    openSettings: ()=> safe(()=> (typeof openSettings==="function" ? openSettings() : null)) ,
-    closeSettings: ()=> safe(()=> { try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } }) ,
-    saveSettings: ()=> safe(()=> {try{ const t=document.getElementById("debugToggle"); if(t && typeof debugSet==="function") debugSet(t.value==="on"); }catch(_){ } try{ if(typeof saveSettingsFromDialog==="function") saveSettingsFromDialog(); }catch(_){ } try{ if(typeof saveV67==="function") saveV67(); else if(typeof save==="function") save(); }catch(_){ } try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } 
-      const dlg=(els && (els.settingsDialog||els.dialog)) || document.getElementById("settingsDialog") || document.getElementById("dialog");
-      try{ if(dlg && dlg.close) dlg.close(); else if(dlg && dlg.classList) dlg.classList.add("hidden"); }catch(_){ }
-    }),
-    resetGame: ()=> safe(()=> {
-      if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
-      try{
-        if(typeof settingsKeyV67==="function") localStorage.removeItem(settingsKeyV67());
-        else localStorage.removeItem("brawl_letters_settings_v5");
-      }catch(_){}
-      location.reload();
-    }),
-    resetCoins: ()=> safe(()=> resetCoins()),
-    repeatWord: ()=> safe(()=> { if(state && state.currentWord && typeof speak==="function") speak(state.currentWord); }),
-    claimReward: ()=> safe(()=> claimReward()),
-    toggleReveal: ()=> safe(()=> toggleReveal()),
-    tryAgain: ()=> safe(()=> tryAgain()),
-    keepPlaying: ()=> safe(()=> keepPlaying()),
-    openPlayers: ()=> safe(()=> { 
-      const dlg=document.getElementById("playersDialog"); if(!dlg) return;
-      if(typeof playersSelectRender==="function") playersSelectRender();
-      dlg.showModal();
-    }),
-    closePlayers: ()=> safe(()=> document.getElementById("playersDialog")?.close()),
-    createFirstPlayer: ()=> safe(()=> { if(typeof acts==="undefined" && typeof initV67==="function"){}; if(typeof actions!=="undefined"){}; if(typeof actsV70!=="undefined"){}; if(typeof A_createFirstPlayer==="function") A_createFirstPlayer(); else if(typeof actsCreateFirstPlayer==="function") actsCreateFirstPlayer(); else if(typeof actions_createFirstPlayer==="function") actions_createFirstPlayer(); else if(typeof PROFILES_V67!=="undefined"){}; 
-      // fallback to v67 action if exists
-      if(typeof initV67==="function"){ /* no-op */ }
-      if(typeof actions === "object" && actions.createFirstPlayer) actions.createFirstPlayer();
-      if(typeof acts === "object" && acts.createFirstPlayer) acts.createFirstPlayer();
-      if(typeof createFirstPlayer === "function") createFirstPlayer();
-      if(typeof playersSave==="function" && typeof playerIdSet==="function"){
-        const input=document.getElementById("firstPlayerName");
-        let name=(input?.value || "שחקן 1").trim(); if(!name) name="שחקן 1";
-        playersSave([{id:"p1", name}]); playerIdSet("p1");
-        document.getElementById("firstPlayerDialog")?.close();
-        if(typeof loadV67==="function") loadV67(); else if(typeof load==="function") load();
-        if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
-      }
-    }),
-    addPlayer: ()=> safe(()=> { 
-      if(typeof playersGet==="function" && typeof playersSave==="function" && typeof playerIdSet==="function"){
-        const ps=playersGet();
-        const name=(prompt("שם השחקן החדש:", `שחקן ${ps.length+1}`) || "").trim();
-        if(!name) return;
-        const id="p"+Date.now().toString(36);
-        ps.push({id, name}); playersSave(ps); playerIdSet(id);
-        if(typeof playersSelectRender==="function") playersSelectRender();
-        if(typeof loadV67==="function") loadV67(); else load();
-        if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
-      }
-    }),
-    renamePlayer: ()=> safe(()=> {
-      if(typeof playersGet==="function" && typeof playersSave==="function" && typeof playerIdGet==="function"){
-        const ps=playersGet(); const id=playerIdGet();
-        const p=ps.find(x=>x.id===id); if(!p) return;
-        const name=(prompt("שם חדש:", p.name) || "").trim(); if(!name) return;
-        p.name=name; playersSave(ps);
-        if(typeof playersSelectRender==="function") playersSelectRender();
-        if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
-      }
-    }),
-    openLogo: ()=> safe(()=> (typeof openLogoModal==="function" ? openLogoModal() : null)),
-    closeLogo: ()=> safe(()=> (typeof closeLogoModal==="function" ? closeLogoModal() : null)),
-    dbgCopy: ()=> safe(()=> { const t=document.getElementById("debugLog")?.textContent||""; navigator.clipboard?.writeText(t); }),
-    dbgClear: ()=> safe(()=> { const el=document.getElementById("debugLog"); if(el) el.textContent=""; }),
-    dbgHide: ()=> safe(()=> { const p=document.getElementById("debugPanel"); if(p) p.classList.add("hidden"); }),
-    toggleHowTo: ()=> safe(()=> {
-      const panel=document.getElementById("howToPanel");
-      const btn=document.getElementById("btnToggleHowTo");
-      if(!panel) return;
-      const nowCollapsed = panel.classList.toggle("collapsed");
-      if(btn) btn.textContent = nowCollapsed ? "הצג" : "הסתר";
-    }),
-  };
-
-  // capture phase to cancel legacy listeners
-  document.addEventListener("click", function(e){
-    const btn = e.target && e.target.closest ? e.target.closest("[data-action]") : null;
-    if(!btn) return;
-    const act = btn.getAttribute("data-action");
-    if(!act || !A[act]) return;
-    e.preventDefault();
-    e.stopPropagation();
-    try{ e.stopImmediatePropagation(); }catch(_){}
-    A[act]();
-  }, true);
-
-  document.addEventListener("change", function(e){
-    const sel = e.target && e.target.closest ? e.target.closest("#playerSelect") : null;
-    if(!sel) return;
-    try{
-      if(typeof playerIdSet==="function") playerIdSet(sel.value);
-      if(typeof loadV67==="function") loadV67(); else if(typeof load==="function") load();
-      if(typeof headerPlayerNameSet==="function") headerPlayerNameSet();
-    }catch(_){}
-  }, true);
-})();
