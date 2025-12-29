@@ -448,11 +448,9 @@ const state = {
 };
 
 function randInt(n){ return Math.floor(Math.random()*n); }
-function pick(arr){ return arr[randInt(arr.length)]; }
-function shuffle(a){
-  const arr = a.slice();
-  for(let i=arr.length-1;i>0;i--){ const j=randInt(i+1); [arr[i],arr[j]]=[arr[j],arr[i]]; }
-  return arr;
+function pick(arr){
+  if(!arr || !arr.length) return ALL_LETTERS[Math.floor(Math.random()*ALL_LETTERS.length)];
+  return arr[Math.floor(Math.random()*arr.length)];
 }
 
 function speak(text){
@@ -655,10 +653,26 @@ function pickWord(){
 }
 
 function buildChoices(correctLetter){
-  const basePool = (state.lettersMode === "custom") ? state.selectedLetters : ALL_LETTERS;
+  const fallback = ALL_LETTERS;
+
+  if(!correctLetter){
+    return shuffle([...fallback]).slice(0,4);
+  }
+
   const choices = new Set([correctLetter]);
-  while(choices.size < 4) choices.add(pick(basePool));
-  return shuffle(Array.from(choices));
+
+  let guard = 0;
+  while(choices.size < 4 && guard < 600){
+    choices.add(pick(fallback));
+    guard++;
+  }
+
+  const out = shuffle(Array.from(choices));
+  if(out.length < 4){
+    const add = shuffle(fallback.filter(x => !out.includes(x)));
+    while(out.length < 4 && add.length) out.push(add.shift());
+  }
+  return out.slice(0,4);
 }
 
 function resetRoundUI(){
@@ -690,9 +704,17 @@ function startNewQuestion(){
 
   els.wordMasked.textContent = maskFirstLetter(w);
 
-  els.choices.innerHTML = "";
+  
+els.choices.innerHTML = "";
   els.choices.classList.add("arena");
-  buildChoices(state.currentFirstLetter).forEach(letter => {
+
+  let letters = buildChoices(state.currentFirstLetter);
+  if(!letters || !letters.length){
+    // last-resort fallback: show 4 random letters so the UI never goes blank
+    letters = shuffle([...ALL_LETTERS]).slice(0,4);
+  }
+
+  letters.forEach(letter => {
     const c = document.createElement("div");
     c.className = "choiceCard";
     const br = brawlerForLetter(letter);
