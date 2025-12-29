@@ -646,10 +646,21 @@ function getQueue(letter){
 }
 
 function pickWord(){
-  const allowedLetters = (state.lettersMode === "custom") ? state.selectedLetters.slice() : ALL_LETTERS.slice();
-  const letter = pick(allowedLetters);
-  const q = getQueue(letter).pop();
-  return q || (letter + "...");
+  const allowedLetters = (state.lettersMode === "custom" && Array.isArray(state.selectedLetters) && state.selectedLetters.length)
+    ? state.selectedLetters.slice()
+    : ALL_LETTERS.slice();
+
+  // Try several times to get a real word (non-empty, 2+ chars)
+  for(let tries=0; tries<80; tries++){
+    const letter = pick(allowedLetters);
+    const q = getQueue(letter).pop();
+    const w = (q || "").trim();
+    if(w && w.length >= 2 && w[0] === letter) return w;
+    // If the queue is empty or word invalid, keep trying.
+  }
+
+  // Hard fallback: a generic kid-friendly word (should almost never happen)
+  return "טלפון";
 }
 
 function buildChoices(correctLetter){
