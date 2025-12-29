@@ -1,4 +1,4 @@
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=28"); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=33"); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -12,6 +12,20 @@ function shuffle(arr){
 function showDebug(msg){try{const el=document.getElementById('debugPanel'); if(el) el.textContent=msg;}catch(e){}}
 // BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
 const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
+
+
+
+// v29: similar-sound confusion pairs to increase difficulty
+const CONFUSION_MAP = {
+  "ס": "ש",
+  "ש": "ס",
+  "כ": "ק",
+  "ק": "כ",
+  "ת": "ט",
+  "ט": "ת",
+  "א": "ה",
+  "ה": "א"
+};
 
 // v13: Letter bosses (explicit mapping to existing filenames)
 const LETTER_BOSS_INDEX = {
@@ -374,6 +388,11 @@ function getLogoById(id){
 
 
 const els = {
+  modalUnlock: document.getElementById("modalUnlock"),
+  unlockGrid: document.getElementById("unlockGrid"),
+  unlockStars: document.getElementById("unlockStars"),
+  btnUnlockLater: document.getElementById("btnUnlockLater"),
+
   home: document.getElementById("screenHome"),
   select: document.getElementById("screenSelect"),
   fight: document.getElementById("screenFight"),
@@ -413,6 +432,7 @@ const els = {
   starsRound: document.getElementById("starsRound"),
   wordMasked: document.getElementById("wordMasked"),
   btnReveal: document.getElementById("btnReveal"),
+  btnRepeat: document.getElementById("btnRepeat"),
   choices: document.getElementById("choices"),
   feedback: document.getElementById("feedback"),
 
@@ -435,6 +455,14 @@ const els = {
 };
 
 const state = {
+  giftStarAt1000: false,
+
+  MIN_SELECTED_LETTERS: 3,
+
+  unlockedLogos: [],
+  logoLocked: true,
+  lastUnlockAtStars: 0,
+
   debugEnabled: false,
 
   lettersMode: "all",
@@ -678,23 +706,27 @@ function pickWord(){
 }
 
 function buildChoices(correctLetter){
-  const fallback = ALL_LETTERS;
+  const pool = ALL_LETTERS;
 
   if(!correctLetter){
-    return shuffle([...fallback]).slice(0,4);
+    return shuffle([...pool]).slice(0,4);
   }
 
   const choices = new Set([correctLetter]);
 
+  // Always include a "confusing" similar-sound letter when defined (raises difficulty)
+  const confuse = CONFUSION_MAP[correctLetter];
+  if(confuse) choices.add(confuse);
+
   let guard = 0;
   while(choices.size < 4 && guard < 600){
-    choices.add(pick(fallback));
+    choices.add(pick(pool));
     guard++;
   }
 
   const out = shuffle(Array.from(choices));
   if(out.length < 4){
-    const add = shuffle(fallback.filter(x => !out.includes(x)));
+    const add = shuffle(pool.filter(x => !out.includes(x)));
     while(out.length < 4 && add.length) out.push(add.shift());
   }
   return out.slice(0,4);
@@ -916,6 +948,7 @@ load(); setUI(); renderLogoButton(); show(els.home);
 
 // v25: hard fallback start hook (works even if addEventListener wiring fails)
 window.__startGame = function(){
+  if(!validateLettersSelection()) return;
   try{
     showDebug("START via __startGame ✅");
     // emulate the normal play click
@@ -930,3 +963,103 @@ window.__startGame = function(){
     showDebug("START error: " + (e.message||e));
   }
 };
+
+const LOGOS = Array.from({length:6},(_,i)=>({id:`logo${i+1}`, name:`לוגו ${i+1}`, img:`assets/logos/logo${i+1}.png`}));
+
+function loadProgress(){
+  try{
+    const ul = JSON.parse(localStorage.getItem("unlockedLogos")||"[]");
+    if(Array.isArray(ul) && ul.length) state.unlockedLogos = ul;
+  }catch(e){}
+  try{ state.lastUnlockAtStars = parseInt(localStorage.getItem("lastUnlockAtStars")||"0",10) || 0; }catch(e){}
+  // if no unlocked yet, start with current logo (or default logo1)
+  if(!state.unlockedLogos.length){
+    const cur = state.selectedLogo || "logo1";
+    state.unlockedLogos = [cur];
+  }else{
+    // ensure selected logo is in unlocked
+    if(state.selectedLogo && !state.unlockedLogos.includes(state.selectedLogo)){
+      state.selectedLogo = state.unlockedLogos[0];
+    }
+  }
+  try{ localStorage.setItem("unlockedLogos", JSON.stringify(state.unlockedLogos)); }catch(e){}
+}
+function saveProgress(){
+  try{ localStorage.setItem("unlockedLogos", JSON.stringify(state.unlockedLogos)); }catch(e){}
+  try{ localStorage.setItem("lastUnlockAtStars", String(state.lastUnlockAtStars||0)); }catch(e){}
+}
+
+function availableNewLogos(){
+  return LOGOS.filter(l => !state.unlockedLogos.includes(l.id));
+}
+function setSelectedLogo(id){
+  state.selectedLogo = id;
+  try{ localStorage.setItem("selectedLogo", id); }catch(e){}
+  // update UI badge if function exists
+  try{ renderSelectedLogo && renderSelectedLogo(); }catch(e){}
+}
+function showUnlockModal(stars){
+  if(!els.modalUnlock || !els.unlockGrid) return;
+  state.logoLocked = true; // lock switching normally
+  els.unlockStars.textContent = String(stars);
+  els.unlockGrid.innerHTML = "";
+  const candidates = availableNewLogos();
+  if(!candidates.length){
+    // nothing to unlock
+    els.modalUnlock.classList.add("hidden");
+    return;
+  }
+  candidates.forEach(l => {
+    const tile = document.createElement("div");
+    tile.className = "logoTile";
+    tile.innerHTML = `
+      <img src="${l.img}" alt="${l.name}">
+      <div class="logoName">${l.name}</div>
+      <button class="btn primary" type="button">בחר</button>
+    `;
+    tile.querySelector("button").addEventListener("click", () => {
+      state.unlockedLogos.push(l.id);
+      setSelectedLogo(l.id);
+      state.lastUnlockAtStars = stars;
+      saveProgress();
+      els.modalUnlock.classList.add("hidden");
+    });
+    els.unlockGrid.appendChild(tile);
+  });
+  els.modalUnlock.classList.remove("hidden");
+}
+if(els.btnUnlockLater){
+  els.btnUnlockLater.addEventListener("click", () => {
+    if(els.modalUnlock) els.modalUnlock.classList.add("hidden");
+  });
+}
+
+function checkLogoUnlock(){
+  const s = state.stars || 0;
+  const milestone = Math.floor(s/100)*100;
+  if(milestone >= 100 && milestone > (state.lastUnlockAtStars||0)){
+    // only if there is something new to unlock
+    if(availableNewLogos().length){
+      showUnlockModal(milestone);
+    }
+  }
+}
+
+function validateLettersSelection(){
+  if(state.lettersMode === "custom"){
+    const n = (state.selectedLetters || []).length;
+    if(n < state.MIN_SELECTED_LETTERS){
+      alert(`בחר לפחות ${state.MIN_SELECTED_LETTERS} אותיות כדי להתחיל`);
+      return false;
+    }
+  }
+  return true;
+}
+
+function checkGiftStar(){
+  if(state.coins >= 1000 && !state.giftStarAt1000){
+    state.giftStarAt1000 = true;
+    state.stars = (state.stars || 0) + 1; // gift star only
+    try{ localStorage.setItem("giftStarAt1000","1"); }catch(e){}
+  }
+}
