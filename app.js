@@ -915,30 +915,47 @@ function resetGame(){
 function resetCoins(){ state.coins = 0; save(); setUI(); }
 
 // Events
+els.btnParentToggle && 
 els.btnParentToggle.addEventListener("click", toggleLetters);
+els.btnCloseLetters && 
 els.btnCloseLetters.addEventListener("click", closeLetters);
+els.btnPickAll && 
 els.btnPickAll.addEventListener("click", pickerSelectAll);
+els.btnPickNone && 
 els.btnPickNone.addEventListener("click", pickerSelectNone);
+els.btnPresetNadav && 
 els.btnPresetNadav.addEventListener("click", pickerPresetNadav);
+els.lettersDialog && 
 els.lettersDialog.addEventListener("cancel", (e) => { e.preventDefault(); closeLetters(); });
 
+els.btnPlay && 
 els.btnPlay.addEventListener("click", () => { window.__startGame && window.__startGame(); });
+els.btnOpenBrawlers && 
 els.btnOpenBrawlers.addEventListener("click", openBrawlers);
+els.btnChangeBrawler && 
 els.btnChangeBrawler.addEventListener("click", openBrawlers);
+els.btnTryAgain && 
 els.btnTryAgain.addEventListener("click", tryAgain);
 
+els.btnReveal && 
 els.btnReveal.addEventListener("click", () => state.revealed ? hideFirstLetter() : revealFirstLetter());
+els.btnStar && 
 els.btnStar.addEventListener("click", claimReward);
 
+els.btnSound && 
 els.btnSound.addEventListener("click", () => { if(state.currentWord) speak(state.currentWord); });
+els.btnSettings && 
 els.btnSettings.addEventListener("click", openSettings);
 if(els.btnLogo) els.btnLogo.addEventListener("click", openBrawlers);
 if(els.btnReset) els.btnReset.addEventListener("click", resetGame);
 if(els.btnCloseLogoModal) els.btnCloseLogoModal.addEventListener("click", closeLogoModal);
 if(els.logoModalBackdrop) els.logoModalBackdrop.addEventListener("click", closeLogoModal);
+els.btnSaveSettings && 
 els.btnSaveSettings.addEventListener("click", saveSettingsFromDialog);
 
+els.btnKeepPlaying && 
 els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
+els.btnResetCoins && 
 els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
@@ -1063,27 +1080,167 @@ function checkGiftStar(){
   }
 }
 
+// ===== PROFILES_V67 =====
+const KEY_SETTINGS_BASE_V67 = "brawl_letters_settings_v5";
+const KEY_PLAYERS_V67 = "bl_players_v1";
+const KEY_CURRENT_PLAYER_V67 = "bl_current_player_v1";
+const KEY_DEBUG_V67 = "bl_debug";
 
-// ===== v66 Delegation core =====
-function initDelegation(){
-  const actions = {
-    startGame: () => { try{ startGame(); }catch(e){} },
-    openLetters: () => { try{ openLetters(); }catch(e){} },
-    openLogo: () => { try{ openLogoModal ? openLogoModal() : (els.logoDialog && els.logoDialog.showModal && els.logoDialog.showModal()); }catch(e){} },
-    openSettings: () => { try{ els.settingsDialog && els.settingsDialog.showModal(); }catch(e){} },
-    saveSettings: () => { try{ save(); }catch(e){}; try{ els.settingsDialog && els.settingsDialog.close(); }catch(e){} },
-    closeSettings: () => { try{ els.settingsDialog && els.settingsDialog.close(); }catch(e){} },
-    repeatWord: () => { try{ if(state && state.currentWord && typeof speak==="function") speak(state.currentWord); }catch(e){} },
+function _json(raw, fallback){ try{ return JSON.parse(raw); }catch(_){ return fallback; } }
+function playersGet(){ return _json(localStorage.getItem(KEY_PLAYERS_V67), []) || []; }
+function playersSave(arr){ try{ localStorage.setItem(KEY_PLAYERS_V67, JSON.stringify(arr)); }catch(_){ } }
+function playerIdGet(){ try{ return localStorage.getItem(KEY_CURRENT_PLAYER_V67); }catch(_){ return null; } }
+function playerIdSet(id){ try{ localStorage.setItem(KEY_CURRENT_PLAYER_V67, id); }catch(_){ } }
+function settingsKeyV67(){
+  const id = playerIdGet() || "p1";
+  return `${KEY_SETTINGS_BASE_V67}__${id}`;
+}
+function debugIsOn(){ try{ return localStorage.getItem(KEY_DEBUG_V67)==="1"; }catch(_){ return false; } }
+function debugSet(on){
+  try{ localStorage.setItem(KEY_DEBUG_V67, on ? "1":"0"); }catch(_){}
+  try{ if(window.__DBGSHOW) window.__DBGSHOW(on); }catch(_){}
+}
+function headerPlayerNameSet(){
+  const el=document.getElementById("currentPlayerName");
+  if(!el) return;
+  const id=playerIdGet();
+  const p=playersGet().find(x=>x.id===id) || playersGet()[0];
+  el.textContent = p?.name ? `שחקן: ${p.name}` : "";
+}
+function playersSelectRender(){
+  const sel=document.getElementById("playerSelect");
+  if(!sel) return;
+  const ps=playersGet();
+  const id=playerIdGet();
+  sel.innerHTML="";
+  ps.forEach(p=>{
+    const opt=document.createElement("option");
+    opt.value=p.id; opt.textContent=p.name;
+    if(p.id===id) opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+function ensureFirstPlayerDialog(){
+  const ps=playersGet();
+  if(ps.length) return;
+  const dlg=document.getElementById("firstPlayerDialog");
+  if(dlg) dlg.showModal();
+}
+
+// patch save/load to use per-player key by monkey-patching localStorage calls inside existing save/load
+const _orig_save = typeof save==="function" ? save : null;
+const _orig_load = typeof load==="function" ? load : null;
+
+function saveV67(){
+  // temporarily redirect KEY_SETTINGS storage by overriding localStorage.setItem calls inside save()
+  if(!_orig_save) return;
+  const _set = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(k,v){
+    if(k==="brawl_letters_settings_v5") return _set(settingsKeyV67(), v);
+    return _set(k,v);
+  };
+  try{ _orig_save(); }finally{ localStorage.setItem=_set; }
+}
+function loadV67(){
+  if(!_orig_load) return;
+  const _get = localStorage.getItem.bind(localStorage);
+  localStorage.getItem = function(k){
+    if(k==="brawl_letters_settings_v5") return _get(settingsKeyV67());
+    return _get(k);
+  };
+  try{ _orig_load(); }finally{ localStorage.getItem=_get; }
+}
+
+// ===== ACTIONS_V67 + DELEGATION =====
+function initV67(){
+  const acts = {
+    startGame(){ try{ startGame(); }catch(_){ } },
+    openLetters(){ try{ openLetters(); }catch(_){ } },
+    closeLetters(){ try{ closeLetters(); }catch(_){ } },
+    openSettings(){
+      try{ els.settingsDialog && els.settingsDialog.showModal(); }catch(_){}
+      const t=document.getElementById("debugToggle");
+      if(t) t.value = debugIsOn() ? "on":"off";
+    },
+    closeSettings(){ try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){ } },
+    saveSettings(){
+      const t=document.getElementById("debugToggle");
+      if(t) debugSet(t.value==="on");
+      saveV67();
+      try{ els.settingsDialog && els.settingsDialog.close(); }catch(_){}
+    },
+    resetGame(){
+      if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
+      try{ localStorage.removeItem(settingsKeyV67()); }catch(_){}
+      location.reload();
+    },
+    resetCoins(){ try{ resetCoins(); }catch(_){ } },
+    pickAll(){ try{ pickAll(); }catch(_){ } },
+    pickNone(){ try{ pickNone(); }catch(_){ } },
+    repeatWord(){ try{ if(state && state.currentWord && typeof speak==="function") speak(state.currentWord); }catch(_){ } },
+    claimReward(){ try{ claimReward(); }catch(_){ } },
+    toggleReveal(){ try{ toggleReveal(); }catch(_){ } },
+    tryAgain(){ try{ tryAgain(); }catch(_){ } },
+    keepPlaying(){ try{ keepPlaying(); }catch(_){ } },
+    openPlayers(){
+      const dlg=document.getElementById("playersDialog"); if(!dlg) return;
+      playersSelectRender(); dlg.showModal();
+    },
+    closePlayers(){ try{ document.getElementById("playersDialog")?.close(); }catch(_){ } },
+    createFirstPlayer(){
+      const input=document.getElementById("firstPlayerName");
+      let name=(input?.value || "שחקן 1").trim(); if(!name) name="שחקן 1";
+      const p={id:"p1", name};
+      playersSave([p]); playerIdSet("p1");
+      try{ document.getElementById("firstPlayerDialog")?.close(); }catch(_){}
+      loadV67(); headerPlayerNameSet();
+    },
+    addPlayer(){
+      const ps=playersGet();
+      const name=(prompt("שם השחקן החדש:", `שחקן ${ps.length+1}`) || "").trim();
+      if(!name) return;
+      const id="p"+Date.now().toString(36);
+      ps.push({id, name}); playersSave(ps); playerIdSet(id);
+      playersSelectRender(); loadV67(); headerPlayerNameSet();
+    },
+    renamePlayer(){
+      const ps=playersGet(); const id=playerIdGet();
+      const p=ps.find(x=>x.id===id); if(!p) return;
+      const name=(prompt("שם חדש:", p.name) || "").trim();
+      if(!name) return;
+      p.name=name; playersSave(ps);
+      playersSelectRender(); headerPlayerNameSet();
+    },
   };
 
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest && e.target.closest("[data-action]");
+  document.addEventListener("click",(e)=>{
+    const btn=e.target.closest && e.target.closest("[data-action]");
     if(!btn) return;
-    const act = btn.getAttribute("data-action");
-    if(!act || !actions[act]) return;
+    const a=btn.getAttribute("data-action");
+    if(!a || !acts[a]) return;
     e.preventDefault();
     e.stopPropagation();
     try{ e.stopImmediatePropagation(); }catch(_){}
-    actions[act]();
+    acts[a]();
   }, true);
+
+  document.addEventListener("change",(e)=>{
+    const sel=e.target.closest && e.target.closest("#playerSelect");
+    if(!sel) return;
+    playerIdSet(sel.value);
+    loadV67();
+    headerPlayerNameSet();
+  });
+
+  // initial
+  debugSet(debugIsOn());
+  ensureFirstPlayerDialog();
+  loadV67();
+  headerPlayerNameSet();
 }
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  if(!USE_LEGACY_BINDINGS){
+    try{ initV67(); }catch(_){}
+  }
+});
