@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v63 ✅
+    BUILD v64 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -24,7 +24,6 @@
     </div>
 
     <div class="controls">
-      <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
 <button id="btnPlayers" class="btn" type="button" title="שחקנים" data-action="openPlayers">👤</button>
       <button id="btnSettings" class="btn" type="button" title="הגדרות" data-action="openSettings">⚙️</button>
 </div>
@@ -45,7 +44,7 @@
 
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()" data-action="startGame">🎮 התחל משחק</button>
-          <button id="btnOpenBrawlers" class="btn big" type="button" data-action="openLetters">🦸 בחירת בראולר</button>
+          <button id="btnOpenBrawlers" class="btn big" type="button" data-action="openLetters">👨‍👩‍👦 בחירת אותיות (הורה)</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
@@ -94,7 +93,7 @@
 
         <div class="fightFooter">
           <button id="btnTryAgain" class="btn" type="button" hidden data-action="tryAgain">נסה שוב</button>
-          <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
+          <button id="btnChangeBrawler" class="btn primary" type="button" data-action="openLetters">👨‍👩‍👦 בחירת אותיות</button>
         </div>
       </div>
     </section>

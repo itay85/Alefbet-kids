@@ -1253,3 +1253,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // set debug visibility
   setDebugEnabled(isDebugEnabled());
 });
+
+// ===== V64_PATCH =====
+(function(){
+  // ensure the bottom button (btnChangeBrawler) always opens letters chooser
+  const b = document.getElementById("btnChangeBrawler");
+  if(b){
+    b.addEventListener("click", (e)=>{
+      try{ if(typeof openLetters==="function") openLetters(); }catch(_){}
+    }, true);
+  }
+})();
