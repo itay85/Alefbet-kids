@@ -1,5 +1,5 @@
 // BRAWL LETTERS v5 – 50 questions per letter + no repeats + brawler is a skin (challenge mode)
-const ALL_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
+const ALL_LETTERS = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","כ","ל","מ","נ","ס","ע","פ","צ","ק","ר","ש","ת"];
 const WORD_BANK = {
   "א": [
     "אָבָּא",
@@ -475,14 +475,14 @@ function setUI(){
     (state.lettersMode === "all") ? "מצב אותיות: כל האותיות (א–ת)" : `מצב אותיות: פוקוס על (${state.selectedLetters.join(" ")})`;
 
   if(state.chosenLogoId){
-    const b = brawlerForLetter(state.chosenLogoId);
-    els.currentBrawlerPill.textContent = `בראולר: ${b.name}`;
+    const l = getLogoById(state.chosenLogoId);
+    els.currentBrawlerPill.innerHTML = `לוגו: ${l.name} <img class="logoMini" src="${l.img}" alt="לוגו">`;
   } else {
-    els.currentBrawlerPill.textContent = "בחר בראולר";
+    els.currentBrawlerPill.textContent = "בחר לוגו";
   }
 }
 
-function show(screen){ [els.home, els.select, els.fight].forEach(s => s.hidden=true); screen.hidden=false; }
+function show(screen){ [els.home, els.fight].forEach(s => { if(s) s.hidden=true; }); screen.hidden=false; }
 
 // Letters dialog
 function buildPicker(){
@@ -538,40 +538,37 @@ function brawlerForLetter(letter){
 }
 
 
+
 function buildLogos(){
   els.brawlers.innerHTML = "";
   PLAYER_LOGOS.forEach((logo) => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "brawlerCard";
+    card.className = "brawler";
     const selected = (state.chosenLogoId === logo.id);
     card.innerHTML = `
-      <div class="brawlerImgWrap"><img class="brawlerImg" src="${logo.img}" alt="${logo.name}"></div>
-      <div class="brawlerName">${logo.name}</div>
-      <div class="brawlerDesc">הלוגו שלך</div>
-      ${selected ? '<div class="badge">נבחר</div>' : ''}
+      <div class="bLeft">
+        <div class="bAvatar"><img class="logoAvatar" src="${logo.img}" alt="${logo.name}"></div>
+        <div class="bText">
+          <div class="bName">${logo.name}</div>
+          <div class="bDesc">הלוגו שלך</div>
+        </div>
+      </div>
+      ${selected ? '<div class="bBadge">נבחר</div>' : '<div class="bBadge ghost">בחר</div>'}
     `;
     card.addEventListener("click", () => {
       state.chosenLogoId = logo.id;
       save();
       renderLogoButton();
       closeLogoModal();
-      // Keep playing: just update pill
       renderCurrent();
-      // If we're at home, start the game
-      if (!els.fight.hidden && els.fight) return;
-      start();
+      // אם אנחנו בבית – מתחילים משחק
+      if(!els.fight || els.fight.hidden) startNewQuestion();
     });
     els.brawlers.appendChild(card);
   });
-
-  if(els.selectHint){
-    els.selectHint.textContent = "אפשר להחליף לוגו בכל רגע בלחיצה על 🧩";
-  }
-  if(els.modePill){
-    els.modePill.textContent = "לוגו";
-  }
 }
+
 
 
 
@@ -702,9 +699,7 @@ function answer(letter, btn){
 
     els.starsRound.textContent = String(state.roundStars);
     els.feedback.textContent = "💥 ניצחת בזירה! לחץ על ⭐ כדי לקבל מטבעות 🪙";
-    if(state.autospeak) speak(state.currentWord);
-
-    state.locked = true;
+state.locked = true;
     Array.from(els.choices.querySelectorAll(".choiceCard")).forEach(b => b.classList.add("disabled"));
 
     els.reward.hidden = false;
@@ -718,9 +713,7 @@ function answer(letter, btn){
     state.streak = 0;
     state.wrongAttemptsThisWord += 1;
     els.feedback.textContent = "😅 לא הפעם. נסה שוב או החלף בראולר.";
-    if(state.autospeak) speak(state.currentWord);
-
-    els.btnTryAgain.hidden = false;
+els.btnTryAgain.hidden = false;
 
     els.reward.hidden = true;
     els.btnStar.disabled = true;
@@ -778,7 +771,7 @@ function saveSettingsFromDialog(){
 function resetGame(){
   const ok = confirm("לאפס את המשחק ולהתחיל מהתחלה?");
   if(!ok) return;
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(KEY_SETTINGS);
   // reset core
   state.lettersMode = "all";
   state.selectedLetters = [...ALL_LETTERS];

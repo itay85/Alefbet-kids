@@ -282,3 +282,25 @@ dialog::backdrop{background: rgba(0,0,0,.55)}
   vertical-align:middle;
   margin-inline-start:6px;
 }
+
+/* v10: logo modal grid + scroll */
+.modalBody{ max-height: 70vh; overflow:auto; }
+.brawlers{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
+@media (min-width: 520px){
+  .brawlers{ grid-template-columns: repeat(3, 1fr); }
+}
+.brawler{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px;
+}
+.bAvatar{ width:44px; height:44px; border-radius:14px; overflow:hidden; background: rgba(255,255,255,.08); box-shadow:none; }
+.logoAvatar{ width:44px; height:44px; object-fit:cover; display:block; }
+.bText{ min-width:0; text-align:start; }
+.bName{ font-weight:900; font-size:14px; }
+.bDesc{ font-size:12px; opacity:.85; }
+.bBadge{ font-weight:900; font-size:12px; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.14); }
+.bBadge.ghost{ opacity:.6; }
