@@ -84,3 +84,8 @@ h2{margin:0 0 10px 0;}
 .answerBtn.disabled{opacity:.45;filter:saturate(.6);}
 
 .wordBox{letter-spacing:0;}
+
+.controlsRow{gap:8px;flex-wrap:nowrap;}
+.btnSmall{padding:10px 10px;font-size:13px;min-width:0;flex:1;}
+@media (max-width:380px){ .btnSmall{font-size:12px;padding:9px 8px;} }
+.pillBtn{cursor:pointer;border:none;}
