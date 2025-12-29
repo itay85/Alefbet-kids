@@ -1277,7 +1277,10 @@ document.addEventListener("click", (e)=>{
     presetNadav: ()=> safe(()=> (typeof presetNadav==="function" ? presetNadav() : null)),
     openSettings: ()=> safe(()=> (typeof openSettings==="function" ? openSettings() : null)) ,
     closeSettings: ()=> safe(()=> { try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } }) ,
-    saveSettings: ()=> safe(()=> { try{ const t=document.getElementById("debugToggle"); if(t && typeof debugSet==="function") debugSet(t.value==="on"); }catch(_){ } try{ if(typeof saveSettingsFromDialog==="function") saveSettingsFromDialog(); }catch(_){ } try{ if(typeof saveV67==="function") saveV67(); else if(typeof save==="function") save(); }catch(_){ } try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } }) ,
+    saveSettings: ()=> safe(()=> {try{ const t=document.getElementById("debugToggle"); if(t && typeof debugSet==="function") debugSet(t.value==="on"); }catch(_){ } try{ if(typeof saveSettingsFromDialog==="function") saveSettingsFromDialog(); }catch(_){ } try{ if(typeof saveV67==="function") saveV67(); else if(typeof save==="function") save(); }catch(_){ } try{ (els.dialog && els.dialog.close && els.dialog.close()); }catch(_){ } 
+      const dlg=(els && (els.settingsDialog||els.dialog)) || document.getElementById("settingsDialog") || document.getElementById("dialog");
+      try{ if(dlg && dlg.close) dlg.close(); else if(dlg && dlg.classList) dlg.classList.add("hidden"); }catch(_){ }
+    }),
     resetGame: ()=> safe(()=> {
       if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
       try{
