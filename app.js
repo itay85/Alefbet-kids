@@ -1,4 +1,41 @@
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=41"); }
+
+// ===== DEBUG (v42) =====
+function dbgLine(msg){
+  const el = document.getElementById("debugLog");
+  if(!el) return;
+  const t = new Date().toISOString().split("T")[1].replace("Z","");
+  el.textContent += `[${t}] ${msg}\n`;
+  el.scrollTop = el.scrollHeight;
+}
+function dbg(msg){
+  try{ dbgLine(String(msg)); }catch(e){}
+}
+function dbgShow(){
+  const p = document.getElementById("debugPanel");
+  if(p) p.classList.remove("hidden");
+}
+function dbgHide(){
+  const p = document.getElementById("debugPanel");
+  if(p) p.classList.add("hidden");
+}
+window.addEventListener("error", (e) => {
+  dbgShow();
+  dbg(`ERROR: ${e.message} @${e.filename}:${e.lineno}:${e.colno}`);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  dbgShow();
+  dbg(`PROMISE: ${e.reason && (e.reason.stack||e.reason.message||e.reason)}`);
+});
+(function hookConsole(){
+  const origLog = console.log.bind(console);
+  const origWarn = console.warn.bind(console);
+  const origErr = console.error.bind(console);
+  console.log = (...a)=>{ try{ dbg("LOG: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origLog(...a); };
+  console.warn = (...a)=>{ try{ dbg("WARN: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origWarn(...a); };
+  console.error = (...a)=>{ try{ dbg("ERR: " + a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" ")); }catch(e){} origErr(...a); };
+})();
+
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js?v=42"); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -1023,3 +1060,21 @@ function bindHowToToggle(){
   apply();
   btn.addEventListener("click", () => { hidden = !hidden; apply(); });
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const btnCopy = document.getElementById("btnDbgCopy");
+  const btnClear = document.getElementById("btnDbgClear");
+  const btnHide = document.getElementById("btnDbgHide");
+  const logEl = document.getElementById("debugLog");
+  if(btnCopy && logEl){
+    btnCopy.addEventListener("click", async () => {
+      try{ await navigator.clipboard.writeText(logEl.textContent || ""); dbg("Copied to clipboard."); }catch(e){ dbg("Copy failed: "+e); }
+    });
+  }
+  if(btnClear && logEl){
+    btnClear.addEventListener("click", () => { logEl.textContent=""; dbg("Cleared."); });
+  }
+  if(btnHide){
+    btnHide.addEventListener("click", () => dbgHide());
+  }
+  dbg("Debug panel ready.");
+});

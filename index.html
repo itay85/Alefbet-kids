@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAWL LETTERS – קרב האותיות</title>
   <meta name="theme-color" content="#0b1020" />
-  <link rel="manifest" href="./manifest.webmanifest?v=41">
-  <link rel="stylesheet" href="./styles.css?v=41">
+  <link rel="manifest" href="./manifest.webmanifest?v=42">
+  <link rel="stylesheet" href="./styles.css?v=42">
 </head>
 <body>
   <header class="top">
@@ -187,7 +187,7 @@
     </div>
   </dialog>
 
-  <script src="./app.js?v=41"></script>
+  <script src="./app.js?v=42"></script>
   <div id="modalUnlock" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modalCard">
       <div class="modalTitle">🎁 קיבלת לוגו חדש!</div>
@@ -197,6 +197,19 @@
         <button id="btnUnlockLater" class="btn">אחר כך</button>
       </div>
     </div>
+  </div>
+
+
+  <div id="debugPanel" class="debugPanel">
+    <div class="debugHeader">
+      <strong>DEBUG</strong>
+      <div class="debugBtns">
+        <button id="btnDbgCopy" class="btn small" type="button">העתק</button>
+        <button id="btnDbgClear" class="btn small" type="button">נקה</button>
+        <button id="btnDbgHide" class="btn small" type="button">הסתר</button>
+      </div>
+    </div>
+    <pre id="debugLog" class="debugLog"></pre>
   </div>
 
 </body>

@@ -1,14 +1,14 @@
 // Brawl Letters Service Worker (v28)
-const VERSION = "v41";
+const VERSION = "v42";
 const CACHE = `brawl-letters-${VERSION}`;
 
 // Precache core files (assets will still be cache-first when fetched)
 const CORE = [
   "./",
-  "./index.html?v=41",
-  "./styles.css?v=41",
-  "./app.js?v=41",
-  "./manifest.webmanifest?v=41",
+  "./index.html?v=42",
+  "./styles.css?v=42",
+  "./app.js?v=42",
+  "./manifest.webmanifest?v=42",
 ];
 
 self.addEventListener("install", (event) => {
