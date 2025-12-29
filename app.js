@@ -1061,3 +1061,33 @@ function checkGiftStar(){
     try{ localStorage.setItem("giftStarAt1000","1"); }catch(e){}
   }
 }
+
+// v48: repeat word button (safe)
+(function(){
+  function bind(){
+    var btn = document.getElementById("btnRepeat");
+    if(!btn) return;
+    btn.addEventListener("click", function(){
+      try{
+        if(window.state && state.currentWord && typeof speak==="function") speak(state.currentWord);
+      }catch(e){}
+    });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
+})();
+
+// v48: make home "בחירת אותיות" open letters modal
+(function(){
+  function bind(){
+    var btn = document.getElementById("btnOpenBrawlers");
+    if(!btn) return;
+    btn.addEventListener("click", function(e){
+      try{
+        if(typeof openLetters==="function"){ e.preventDefault(); e.stopPropagation(); openLetters(); }
+      }catch(err){}
+    }, true);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
+})();
