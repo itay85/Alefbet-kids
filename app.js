@@ -361,7 +361,49 @@ const WORD_BANK = {
   ]
 };
 
-const KEY_SETTINGS = "brawl_letters_settings_v5";
+const KEY_SETTINGS_BASE = "brawl_letters_settings_v5";
+const KEY_PLAYERS = "bl_players_v1";
+const KEY_CURRENT_PLAYER = "bl_current_player_v1";
+const KEY_DEBUG = "bl_debug";
+
+function safeJsonParse(raw, fallback){
+  try{ return JSON.parse(raw); }catch(_){ return fallback; }
+}
+function getPlayers(){
+  const raw = localStorage.getItem(KEY_PLAYERS);
+  const arr = safeJsonParse(raw, null);
+  if(Array.isArray(arr) && arr.length) return arr;
+  // default
+  const def = [{id:"p1", name:"שחקן 1"}];
+  try{ localStorage.setItem(KEY_PLAYERS, JSON.stringify(def)); }catch(_){}
+  return def;
+}
+function savePlayers(players){
+  try{ localStorage.setItem(KEY_PLAYERS, JSON.stringify(players)); }catch(_){}
+}
+function getCurrentPlayerId(){
+  try{
+    const id = localStorage.getItem(KEY_CURRENT_PLAYER);
+    if(id) return id;
+  }catch(_){}
+  const players = getPlayers();
+  const id = players[0].id;
+  try{ localStorage.setItem(KEY_CURRENT_PLAYER, id); }catch(_){}
+  return id;
+}
+function setCurrentPlayerId(id){
+  try{ localStorage.setItem(KEY_CURRENT_PLAYER, id); }catch(_){}
+}
+function getSettingsKey(){
+  return `${KEY_SETTINGS_BASE}__${getCurrentPlayerId()}`;
+}
+function isDebugEnabled(){
+  try{ return localStorage.getItem(KEY_DEBUG)==="1"; }catch(_){ return false; }
+}
+function setDebugEnabled(on){
+  try{ localStorage.setItem(KEY_DEBUG, on ? "1":"0"); }catch(_){}
+  try{ if(window.__DBGSHOW) window.__DBGSHOW(on); }catch(_){}
+}
 
 const SPECIAL_BRAWLERS = {
   "ס": { name:"ספידי", desc:"רץ מהר ויורה סוכריות", img:"assets/brawlers/speedy.svg" },
@@ -504,7 +546,7 @@ function speak(text){
 }
 
 function save(){
-  localStorage.setItem(KEY_SETTINGS, JSON.stringify({
+  localStorage.setItem(getSettingsKey(), JSON.stringify({
     lettersMode: state.lettersMode,
     selectedLetters: state.lettersMode === "custom" ? state.selectedLetters : [],
     autospeak: state.autospeak,
@@ -518,7 +560,7 @@ function save(){
 
 function load(){
   try{
-    const raw = localStorage.getItem(KEY_SETTINGS);
+    const raw = localStorage.getItem(getSettingsKey());
     if(!raw) return;
     const s = JSON.parse(raw);
     if(typeof s.autospeak === "boolean") state.autospeak = s.autospeak;
@@ -601,7 +643,8 @@ function normalizeLettersMode(){
 }
 
 function openLetters(){ buildPicker(); try{ els.lettersDialog.showModal(); }catch(_ ){} }
-function closeLetters(){ normalizeLettersMode(); save(); setUI(); try{ els.lettersDialog.close(); }catch(_ ){} }
+function closeLetters(){ normalizeLettersMode(); try{ const dbgSel=document.getElementById("debugToggle"); if(dbgSel) setDebugEnabled(dbgSel.value==="on"); }catch(_){}
+  save(); setUI(); try{ els.lettersDialog.close(); }catch(_ ){} }
 function toggleLetters(){ if(els.lettersDialog.open) closeLetters(); else openLetters(); }
 
 function pickerSelectAll(){ state.lettersMode="all"; state.selectedLetters=[...ALL_LETTERS]; state.queues={}; buildPicker(); }
@@ -941,7 +984,9 @@ els.btnKeepPlaying.addEventListener("click", () => els.winDialog.close());
 els.btnResetCoins.addEventListener("click", () => { resetCoins(); els.winDialog.close(); });
 
 // init
-load(); setUI(); renderLogoButton(); show(els.home);
+load();
+  try{ bindProfiles(); }catch(_){}
+  try{ bindDebugToggle(); }catch(_){} setUI(); renderLogoButton(); show(els.home);
 
 
 // v25: hard fallback start hook (works even if addEventListener wiring fails)
@@ -1062,32 +1107,71 @@ function checkGiftStar(){
   }
 }
 
-// v48: repeat word button (safe)
-(function(){
-  function bind(){
-    var btn = document.getElementById("btnRepeat");
-    if(!btn) return;
-    btn.addEventListener("click", function(){
-      try{
-        if(window.state && state.currentWord && typeof speak==="function") speak(state.currentWord);
-      }catch(e){}
+function bindProfiles(){
+  const sel = document.getElementById("playerSelect");
+  const btnAdd = document.getElementById("btnAddPlayer");
+  const btnRename = document.getElementById("btnRenamePlayer");
+  if(!sel) return;
+
+  function render(){
+    const players = getPlayers();
+    const current = getCurrentPlayerId();
+    sel.innerHTML = "";
+    players.forEach(p=>{
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      if(p.id===current) opt.selected = true;
+      sel.appendChild(opt);
     });
   }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bind);
-  else bind();
-})();
 
-// v48: make home "בחירת אותיות" open letters modal
-(function(){
-  function bind(){
-    var btn = document.getElementById("btnOpenBrawlers");
-    if(!btn) return;
-    btn.addEventListener("click", function(e){
-      try{
-        if(typeof openLetters==="function"){ e.preventDefault(); e.stopPropagation(); openLetters(); }
-      }catch(err){}
-    }, true);
+  render();
+
+  sel.addEventListener("change", ()=>{
+    setCurrentPlayerId(sel.value);
+    // reload state for the new player
+    load();
+    // refresh UI
+    try{ renderStats(); }catch(_){}
+    try{ renderSelectedLogo && renderSelectedLogo(); }catch(_){}
+  });
+
+  if(btnAdd){
+    btnAdd.addEventListener("click", ()=>{
+      const name = prompt("שם השחקן החדש:", `שחקן ${getPlayers().length+1}`);
+      if(!name) return;
+      const players = getPlayers();
+      const id = "p" + Date.now().toString(36);
+      players.push({id, name: name.trim()});
+      savePlayers(players);
+      setCurrentPlayerId(id);
+      render();
+      load();
+      try{ renderStats(); }catch(_){}
+    });
   }
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", bind);
-  else bind();
-})();
+
+  if(btnRename){
+    btnRename.addEventListener("click", ()=>{
+      const players = getPlayers();
+      const id = getCurrentPlayerId();
+      const p = players.find(x=>x.id===id);
+      if(!p) return;
+      const name = prompt("שם חדש לשחקן:", p.name);
+      if(!name) return;
+      p.name = name.trim();
+      savePlayers(players);
+      render();
+    });
+  }
+}
+
+function bindDebugToggle(){
+  const sel = document.getElementById("debugToggle");
+  if(!sel) return;
+  sel.value = isDebugEnabled() ? "on" : "off";
+  sel.addEventListener("change", ()=>{
+    setDebugEnabled(sel.value==="on");
+  });
+}

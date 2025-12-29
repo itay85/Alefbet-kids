@@ -10,7 +10,7 @@
 </head>
 <body>
   <div id="buildBanner" style="position:fixed;top:0;left:0;right:0;z-index:9999999;background:#ff2d55;color:#fff;padding:8px 12px;font-weight:900;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-    BUILD v48 ✅
+    BUILD v61 ✅
   </div>
   <div style="height:44px"></div>
 
@@ -24,7 +24,10 @@
     </div>
 
     <div class="controls">
-<button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
+      <button id="btnParentToggle" class="btn" type="button" title="הורה: אותיות">👨‍👩‍👦</button>
+      <button id="btnLogo" class="btn" type="button" title="לוגו שלי">🧩</button>
+      <button id="btnSound" class="btn" type="button" title="הקרא">🔊</button>
+      <button id="btnSettings" class="btn" type="button" title="הגדרות">⚙️</button>
       <button id="btnReset" class="btn" type="button" title="איפוס">🔄</button>
     </div>
   </header>
@@ -44,7 +47,7 @@
 
         <div class="homeBtns">
           <button id="btnPlay" class="btn primary big" type="button" onclick="window.__startGame && window.__startGame()">🎮 התחל משחק</button>
-          <button id="btnOpenBrawlers" class="btn big" type="button">👨‍👩‍👦 בחירת אותיות (הורה)</button>
+          <button id="btnOpenBrawlers" class="btn big" type="button">🦸 בחירת בראולר</button>
         </div>
         <div class="tiny" id="homeLettersHint"></div>
       </div>
@@ -63,27 +66,12 @@
 
 
     <section id="screenFight" class="screen" hidden>
-      
-      <div class="panel howToPanel" id="howToPanel">
-        <div class="rowBetween">
-          <h2 class="howToTitle">איך משחקים?</h2>
-          <button id="btnToggleHowTo" class="btn small" type="button">הסתר</button>
-        </div>
-        <div id="howToContent">
-          <p class="muted">שומעים מילה, בוחרים את האות הראשונה שלה. תשובה נכונה נותנת ⭐ וכוכב נותן 🪙.</p>
-        </div>
-      </div>
-
-
       <div class="panel fightTop">
         <div class="rowBetween">
           <div class="pill" id="bossPill"></div>
   <div class="pill" id="currentBrawlerPill">בחר בראולר</div>
           <div class="fightStats">
-            <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong>
-            <button id="btnRepeat" class="btn small" type="button" title="השמע מילה">🔊 השמע מילה</button>
-            <button id="btnLogo" class="logoBtn" type="button" title="הלוגו שלי"></button>
-</div>
+            <div class="statMini"><span>🪙</span> <strong id="coinsHud">0</strong></div>
             <div class="statMini"><span>⭐</span> <strong id="starsRound">0</strong></div>
           </div>
         </div>
@@ -92,7 +80,8 @@
 
         <div class="wordWrap">
           <div class="word" id="wordMasked">_</div>
-<button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
+          <button id="btnRepeat" class="btn small" type="button">🔊 השמע מילה</button>
+          <button id="btnReveal" class="btn small" type="button">👀 גלה אות</button>
         </div>
 
         <div class="choices" id="choices"></div>
@@ -107,7 +96,8 @@
 
         <div class="fightFooter">
           <button id="btnTryAgain" class="btn" type="button" hidden>נסה שוב</button>
-</div>
+          <button id="btnChangeBrawler" class="btn primary" type="button">החלף בראולר</button>
+        </div>
       </div>
     </section>
   </main>
@@ -158,6 +148,20 @@
     <form method="dialog" class="dialog">
       <h2>הגדרות</h2>
 
+      <div class="hr"></div>
+      <h3 class="subTitle">שחקן</h3>
+
+      <label class="row">
+        <span>בחר שחקן</span>
+        <select id="playerSelect"></select>
+      </label>
+
+      <div class="rowBetween">
+        <button id="btnAddPlayer" class="btn" type="button">➕ הוסף שחקן</button>
+        <button id="btnRenamePlayer" class="btn" type="button">✏️ שנה שם</button>
+      </div>
+
+
       <label class="row">
         <span>הקראה אוטומטית</span>
         <select id="autospeakSelect">
@@ -170,6 +174,19 @@
         <span>מהירות הקראה</span>
         <input id="rateInput" type="range" min="0.7" max="1.2" step="0.05" value="0.95" />
       </label>
+
+      
+      <div class="hr"></div>
+      <h3 class="subTitle">כלים</h3>
+
+      <label class="row">
+        <span>מצב Debug</span>
+        <select id="debugToggle">
+          <option value="off" selected>כבוי</option>
+          <option value="on">דלוק</option>
+        </select>
+      </label>
+      <p class="tiny muted">כשדלוק, תופיע תיבת DEBUG למטה (לפתרון תקלות).</p>
 
       <menu class="menu">
         <button class="btn" value="cancel">סגור</button>
@@ -229,6 +246,8 @@
     const logEl = document.getElementById("dbgLog");
     function log(msg){ try{ logEl.textContent += msg + "\n"; }catch(e){} }
     window.__DBGLOG = log;
+    window.__DBGSHOW = function(show){ try{ root.style.display = show ? "" : "none"; }catch(e){} };
+
     log("[BOOT] early debug script ran ✅");
     window.addEventListener("error", (e)=>{ log("[ERROR] " + e.message + " @" + e.filename + ":" + e.lineno + ":" + e.colno); });
     window.addEventListener("unhandledrejection", (e)=>{ log("[PROMISE] " + (e.reason && (e.reason.stack||e.reason.message||e.reason))); });
@@ -237,26 +256,6 @@
     document.getElementById("dbgHide").addEventListener("click", ()=>{ document.getElementById("earlyDebug").style.display="none"; });
   })();
   </script>
-
-
-<script>
-(function(){
-  try{
-    var btn=document.getElementById("btnToggleHowTo");
-    var content=document.getElementById("howToContent");
-    if(!btn||!content) return;
-    var hidden=false;
-    try{ hidden = localStorage.getItem("howToHidden")==="1"; }catch(e){}
-    function apply(){
-      content.style.display = hidden ? "none" : "";
-      btn.textContent = hidden ? "הצג" : "הסתר";
-      try{ localStorage.setItem("howToHidden", hidden ? "1" : "0"); }catch(e){}
-    }
-    apply();
-    btn.addEventListener("click", function(){ hidden=!hidden; apply(); });
-  }catch(e){}
-})();
-</script>
 
 </body>
 </html>
