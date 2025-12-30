@@ -941,15 +941,19 @@ function shuffle(a){
 
 
 function lockScroll(){
-  document.body.classList.add("lockScroll");
+  document.body.classList.add("gameFocus");
+  const el = document.getElementById("battleCard");
+  if(el) el.classList.add("focusCard");
 }
 function unlockScroll(){
-  document.body.classList.remove("lockScroll");
+  document.body.classList.remove("gameFocus");
+  const el = document.getElementById("battleCard");
+  if(el) el.classList.remove("focusCard");
 }
 function scrollToBattle(){
   const el = document.getElementById("battleCard") || document.querySelector(".battleCard") || document.querySelector('[data-battle="1"]');
   if(el && typeof el.scrollIntoView === "function"){
-    el.scrollIntoView({behavior:"smooth", block:"start"});
+    el.scrollIntoView({behavior:"smooth", block:"center"});
   }
 }
 
