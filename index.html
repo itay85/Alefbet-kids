@@ -78,6 +78,7 @@
       <div class="rewardOverlay hidden" id="rewardOverlay" role="dialog" aria-modal="true">
         <div class="rewardCard">
           <div class="rewardHint" id="rewardHint">כל הכבוד!</div>
+          <button id="rewardMainBtn" class="rewardStarBtn" type="button" data-action="claimReward" aria-label="אסוף פרס">⭐</button>
           <div class="rewardCoins" id="rewardCoinsText">+0 🪙</div>
           <div class="muted" id="rewardSub">לחץ על הכוכב לקבל מטבעות</div>
         </div>
@@ -163,7 +164,7 @@
     <pre id="debugLog" class="debugLog"></pre>
   </div>
 
-  <script src="app.js?v=89"></script>
+  <script src="app.js?v=90"></script>
   <script>
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('./sw.js?v=73').catch(()=>{});
