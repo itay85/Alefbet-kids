@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Brawl Letters</title>
-  <link rel="manifest" href="manifest.webmanifest?v=73">
-  <link rel="stylesheet" href="styles.css?v=73">
+  <link rel="manifest" href="manifest.webmanifest?v=92.3">
+  <link rel="stylesheet" href="styles.css?v=92.3">
   <meta name="theme-color" content="#0b0f24" />
 </head>
 <body>
@@ -36,17 +36,31 @@
     <section class="card">
       <h2>קרב האותיות!</h2>
 
-      <div class="row stats">
+      <div class="row stats" id="battleStatsRow">
+        <!-- Right-to-left order: Logo, Stars, Coins, Streak, Words -->
+        <button class="logoBtn" type="button" data-action="openLogo" aria-label="לוגו">
+          <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
+        </button>
+
         <div class="stat">
           <div class="statNum" id="starsNum">0</div>
           <div class="statLbl">⭐ כוכבים</div>
         </div>
 
+        <div class="stat">
+          <div class="statNum" id="coinsNum">0</div>
+          <div class="statLbl">🪙 מטבעות</div>
+        </div>
+
+        <div class="streakPill" id="streakPill">🔥 רצף: 0</div>
+
+        <div class="scorePill" id="scorePill">✅ מילים: 0</div>
+      </div>
         <div class="midColumn">
           <button class="logoBtn" type="button" data-action="openLogo" aria-label="לוגו">
             <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
           </button>
-          <div class="streakPill" id="streakPill">🔥 סופר: 0</div>
+          <div class="streakPill" id="streakPill">🔥 רצף: 0</div>
         </div>
 
         <div class="stat">
@@ -59,8 +73,7 @@
 
       <div class="rowBetween">
         <button class="btn" type="button" data-action="openLetters">👨‍👩‍👦 בחירת אותיות (הורה)</button>
-        <div class="scorePill" id="scorePill">✅ מילים: 0</div>
-        <div class="muted" id="lettersModeText">מצב אותיות: כל האותיות (א–ת)</div>
+<div class="muted" id="lettersModeText">מצב אותיות: כל האותיות (א–ת)</div>
       </div>
 
       <div class="questionBox" id="questionBox" aria-live="polite">
@@ -172,7 +185,7 @@
     <pre id="debugLog" class="debugLog"></pre>
   </div>
 
-  <script src="app.js?v=92.2"></script>
+  <script src="app.js?v=92.3"></script>
   <script>
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('./sw.js?v=92').catch(()=>{});

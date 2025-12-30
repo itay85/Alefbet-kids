@@ -93,3 +93,29 @@ h2{margin:0 0 10px 0;}
 
 .rewardStarBtn{width:110px;height:110px;border-radius:999px;border:none;cursor:pointer;font-size:48px;margin:10px auto;background:radial-gradient(circle at 30% 30%, #fff4b2 0%, #ffd54a 45%, #ff8a00 100%);display:block;box-shadow:0 10px 30px rgba(0,0,0,.35);} 
 .rewardStarBtn:disabled{opacity:.55;cursor:not-allowed;}
+
+
+/* v92.3 battle stats row alignment */
+#battleStatsRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  direction:rtl;
+}
+#battleStatsRow .logoBtn{
+  flex:0 0 auto;
+}
+#battleStatsRow .stat{
+  flex:0 0 auto;
+  min-width:78px;
+}
+#battleStatsRow .streakPill,
+#battleStatsRow .scorePill{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
+@media (max-width: 420px){
+  #battleStatsRow .stat{ min-width:70px; }
+}
