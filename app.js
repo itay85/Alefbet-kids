@@ -824,18 +824,12 @@ function renderPlayerPill(){
 function renderStats(){
   els.starsNum.textContent = String(state.settings.stars || 0);
   els.coinsNum.textContent = String(state.settings.coins || 0);
-  const logoPath = `assets/logos/${state.settings.logo}`;
-  els.logoImg.src = logoPath;
+  els.logoImg.src = `assets/logos/${state.settings.logo}`;
 
-  if(els.streakNum){
-    els.streakNum.textContent = String(state.settings.streak || 0);
-  }
-  
-  if(els.scoreNum){ els.scoreNum.textContent = String(state.settings.score || 0); }
-if(els.scoreNum){
-    els.scoreNum.textContent = `✅ מילים: ${state.settings.score || 0}`;
-  }
+  if(els.streakNum) els.streakNum.textContent = String(state.settings.streak || 0);
+  if(els.scoreNum) els.scoreNum.textContent = String(state.settings.score || 0);
 }
+
 
 function renderLettersMode(){
   if(state.settings.mode==="all") {
@@ -921,15 +915,20 @@ function getSpeakText(word){
 function speak(text){
   if(!text) return;
   state.lastSpoken = text;
+
+  // Use niqqud for speech when available (improves pronunciation on iOS)
+  const speakText = (NIKKUD_MAP && NIKKUD_MAP[text]) ? NIKKUD_MAP[text] : text;
+
   try{
     if(!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const u = new SpeechSynthesisUtterance(speakText);
     u.lang = "he-IL";
-    u.rate = 0.85;
+    u.rate = 0.85; // ~10% slower than before
     window.speechSynthesis.speak(u);
   }catch(e){ dbg("speak error: "+e); }
 }
+
 
 function randInt(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
