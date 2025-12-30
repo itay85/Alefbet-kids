@@ -940,22 +940,9 @@ function shuffle(a){
 }
 
 
-function lockScroll(){
-  document.body.classList.add("gameFocus");
-  const el = document.getElementById("battleCard");
-  if(el) el.classList.add("focusCard");
-}
-function unlockScroll(){
-  document.body.classList.remove("gameFocus");
-  const el = document.getElementById("battleCard");
-  if(el) el.classList.remove("focusCard");
-}
-function scrollToBattle(){
-  const el = document.getElementById("battleCard") || document.querySelector(".battleCard") || document.querySelector('[data-battle="1"]');
-  if(el && typeof el.scrollIntoView === "function"){
-    el.scrollIntoView({behavior:"smooth", block:"center"});
-  }
-}
+function lockScroll(){}
+function unlockScroll(){}
+function scrollToBattle(){}
 
 
 function pickWordForLetter(letter){
@@ -1212,7 +1199,6 @@ async function claimReward(){
 
 }
 function openLetters(){
-  unlockScroll();
   renderLettersGrid();
   safeShowModal(els.lettersDialog);
 }
@@ -1225,7 +1211,6 @@ function closeLetters(){
   settingsSave();
   renderLettersMode();
   safeCloseDialog(els.lettersDialog);
-  lockScroll();
 }
 function renderLettersGrid(){
   els.lettersGrid.innerHTML="";
@@ -1301,13 +1286,11 @@ function pickLogo(fn){
 }
 
 function openPlayers(){
-  unlockScroll();
   renderPlayersSelect();
   safeShowModal(els.playersDialog);
 }
 function closePlayers(){
   safeCloseDialog(els.playersDialog);
-  lockScroll();
 }
 function renderPlayersSelect(){
   const ps = playersGet();
@@ -1357,17 +1340,14 @@ function onPlayerSelectChange(){
 }
 
 function openSettings(){
-  unlockScroll();
   if(els.nikkudToggle) els.nikkudToggle.value = (state.settings.showNikkud ? "on" : "off");
   if(els.debugToggle) els.debugToggle.value = (debugIsOn() ? "on" : "off");
   safeShowModal(els.settingsDialog);
 }
 function closeSettings(){
   safeCloseDialog(els.settingsDialog);
-  lockScroll();
 }
 function resetGame(){
-  unlockScroll();
 if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
   localStorage.removeItem(settingsKey());
   boot();
@@ -1385,8 +1365,6 @@ function applyHowVisibility(){
 }
 
 function startGame(){
-  scrollToBattle();
-  lockScroll();
 // ensure letters selection valid
   if(state.settings.mode==="focus" && state.settings.selectedLetters.length < defaults.minSelectedLetters){
     alert(`בחר לפחות ${defaults.minSelectedLetters} אותיות.`);

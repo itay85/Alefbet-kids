@@ -194,33 +194,9 @@ h2{margin:0 0 10px 0;}
 
 
 
-/* ===== Game Focus Mode (v93.3) =====
-   Goal: keep the whole game card in view (no page scrolling),
-   but allow scrolling INSIDE the game card if needed (answers/award). */
-body.gameFocus{
-  overflow: hidden;
-  height: 100vh;
-}
 
 /* battle card becomes a fixed "panel" with internal scrolling */
-#battleCard.focusCard{
-  position: fixed;
-  left: 8px;
-  right: 8px;
-  top: 72px;           /* leave room for header */
-  bottom: 10px;
-  margin: 0 auto;
-  max-width: 560px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 90px; /* make room so bottom buttons/answers aren't cut */
-  z-index: 50;
-}
 
 /* prevent hidden content under iOS home bar */
 @supports (padding: max(0px)){
-  #battleCard.focusCard{
-    bottom: max(10px, env(safe-area-inset-bottom));
-    padding-bottom: max(90px, calc(env(safe-area-inset-bottom) + 70px));
   }
-}
