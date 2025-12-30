@@ -783,14 +783,29 @@ function renderLettersMode(){
 function hideReward(){
   els.rewardOverlay.classList.add("hidden");
 }
-function 
+// --- FIX: replace the broken function that starts with `function` on its own line
+// and contains `if(starBtn){...}` with this function:
+
+function showRewardOverlay(mode, hintText, subText, coinsText=""){
+  state.rewardMode = mode; // "coins" | "chest"
+  state.rewardClaimed = false;
+  const starBtn = document.getElementById("rewardMainBtn");
   if(starBtn){ starBtn.disabled = false; }
 
   els.rewardHint.textContent = hintText || "כל הכבוד!";
-  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} מטבעות` : "";
-  els.rewardSub.textContent = "לחץ על הכוכב לקבל מטבעות";
+  els.rewardCoinsText.textContent = coinsText || "";
+  els.rewardSub.textContent = subText || "";
   els.rewardOverlay.classList.remove("hidden");
 }
+
+// And make sure you have a valid `hideReward()` that hides the overlay:
+function hideReward(){
+  state.rewardClaimed = false;
+  const starBtn = document.getElementById("rewardMainBtn");
+  if(starBtn){ starBtn.disabled = false; }
+  els.rewardOverlay.classList.add("hidden");
+}
+
 function getWordDisplay(word){
   if(state.settings.showNikkud && NIKKUD_MAP[word]) return NIKKUD_MAP[word];
   return word;
