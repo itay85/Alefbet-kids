@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v92";
+const BUILD = "v92.1";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -690,6 +690,39 @@ function dbg(msg){
   const line = `[${new Date().toLocaleTimeString()}] ${msg}`;
   els.debugLog.textContent = (els.debugLog.textContent ? els.debugLog.textContent + "\n" : "") + line;
   els.debugPanel.classList.remove("hidden");
+}
+
+// Tiny toast (mobile-friendly). No dependencies.
+function toast(msg, ms = 1200) {
+  try {
+    let el = document.getElementById("toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "toast";
+      el.style.position = "fixed";
+      el.style.left = "50%";
+      el.style.bottom = "90px";
+      el.style.transform = "translateX(-50%)";
+      el.style.padding = "10px 14px";
+      el.style.borderRadius = "14px";
+      el.style.background = "rgba(0,0,0,0.75)";
+      el.style.color = "#fff";
+      el.style.fontWeight = "800";
+      el.style.fontSize = "14px";
+      el.style.zIndex = "99999";
+      el.style.maxWidth = "85vw";
+      el.style.textAlign = "center";
+      el.style.display = "none";
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.display = "block";
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.display = "none"; }, ms);
+  } catch (_) {
+    // fallback (never crash gameplay)
+    console.log("toast:", msg);
+  }
 }
 
 function debugIsOn(){
