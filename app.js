@@ -866,13 +866,31 @@ function getWordDisplay(word){
 function renderWord(){
   if(!state.currentWord) return;
 
-  // When the first letter is hidden, show the plain word (no nikkud) to avoid
-  // tricky masking with combining marks. When revealed, we can show nikkud.
   const base = state.currentWord;
   const revealedText = getWordDisplay(base);
-  const maskedText = state.revealed ? revealedText : ("_" + base.slice(1));
 
-  if(els.wordMasked) els.wordMasked.textContent = maskedText;
+  // Revealed: show full word (with nikud if enabled)
+  if(state.revealed){
+    if(els.wordMasked) els.wordMasked.textContent = revealedText;
+    return;
+  }
+
+  // Mask: hide first letter but keep nikud on the rest.
+  let masked = "_";
+  try{
+    if(typeof Intl !== "undefined" && Intl.Segmenter){
+      const seg = new Intl.Segmenter("he", { granularity: "grapheme" });
+      const parts = Array.from(seg.segment(revealedText), x=>x.segment);
+      masked = "_" + parts.slice(1).join("");
+    } else {
+      // Fallback: best-effort (may be imperfect with combining marks)
+      masked = "_" + revealedText.slice(1);
+    }
+  }catch{
+    masked = "_" + revealedText.slice(1);
+  }
+
+  if(els.wordMasked) els.wordMasked.textContent = masked;
 }
 
 function animateNumber(el, from, to, stepMs=18){

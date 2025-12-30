@@ -138,19 +138,55 @@ h2{margin:0 0 10px 0;}
 
 /* v92.6 streak as stat */
 #battleStatsRow{ gap:6px !important; }
-#battleStatsRow .statCompact{ min-width:64px !important; }
 
+/* v92.8 – compact one-line stats + better nikkud rendering */
+#battleStatsRow{
+  flex-wrap:nowrap !important;
+  justify-content:space-between;
+  gap:4px !important;
+}
+#battleStatsRow .stat{
+  min-width:0 !important;
+  padding:6px 6px !important;
+  border-radius:14px !important;
+  flex:1 1 0;
+}
+#battleStatsRow .statNum{ font-size:15px !important; margin-bottom:2px !important; }
+#battleStatsRow .statLbl{ font-size:10px !important; white-space:nowrap; }
+#battleStatsRow .logoPickBtn{ width:40px !important; height:40px !important; border-radius:14px !important; }
+#battleStatsRow .logoPickBtn img{ width:32px !important; height:32px !important; }
 
-/* v92.7 compact stats to fit words on same row */
-#battleStatsRow{ gap:4px !important; }
-#battleStatsRow .stat{ min-width:56px !important; }
-#battleStatsRow .statNum{ font-size:15px; }
-#battleStatsRow .statLbl{ font-size:10.5px; }
-#battleStatsRow .logoImg{ width:32px; height:32px; }
-#battleStatsRow{ flex-wrap:nowrap; }
-@media (max-width: 420px){
-  #battleStatsRow{ flex-wrap:wrap; } /* fallback if too tight */
+/* Word with nikkud needs a bit more line-height and a Hebrew-friendly font */
+#wordMasked{
+  font-family: "Noto Sans Hebrew", "Heebo", "Assistant", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  line-height:1.25;
+  letter-spacing:0;
 }
 
-/* push letters button slightly down to avoid collision on phone */
-.lettersBtn{ margin-top:6px !important; }
+/* Make sure "בחירת אותיות" never sits on top of start on mobile */
+.lettersRow{ margin-top:14px !important; }
+.startBtn{ margin-bottom:4px !important; }
+
+@media (max-width: 420px){
+  #battleStatsRow{ gap:3px !important; }
+  #battleStatsRow .stat{ padding:5px 5px !important; }
+  #battleStatsRow .statNum{ font-size:14px !important; }
+  #battleStatsRow .statLbl{ font-size:9.5px !important; }
+  #battleStatsRow .logoPickBtn{ width:38px !important; height:38px !important; }
+}
+#battleStatsRow .statCompact{ min-width:64px !important; }
+
+/* --- v92.8 mobile layout fixes --- */
+#battleStatsRow{justify-content:flex-start !important;gap:4px !important;flex-wrap:nowrap !important;}
+#battleStatsRow .logoImg{width:32px !important;height:32px !important;margin-left:2px !important;}
+#battleStatsRow .stat{min-width:60px !important;padding:7px 8px !important;border-radius:14px !important;}
+#battleStatsRow .statNum{font-size:16px !important;}
+#battleStatsRow .statLbl{font-size:11px !important;gap:4px !important;}
+#battleStatsRow .statLbl .mini{font-size:16px !important;}
+
+/* reduce vertical clutter between Start and letter selection */
+.rowBetween{margin-top:12px !important;}
+.rowBetween .muted{margin-top:2px;}
+
+/* score/words tile: keep on one line inside the label */
+#scoreStat .statLbl{white-space:nowrap !important;}
