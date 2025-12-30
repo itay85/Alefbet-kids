@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v92.1";
+const BUILD = "v92.2";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -863,8 +863,14 @@ function getWordDisplay(word){
 
 function renderWord(){
   if(!state.currentWord) return;
-  const w = getWordDisplay(state.currentWord);
-  els.word.textContent = w;
+
+  // When the first letter is hidden, show the plain word (no nikkud) to avoid
+  // tricky masking with combining marks. When revealed, we can show nikkud.
+  const base = state.currentWord;
+  const revealedText = getWordDisplay(base);
+  const maskedText = state.revealed ? revealedText : ("_" + base.slice(1));
+
+  if(els.wordMasked) els.wordMasked.textContent = maskedText;
 }
 
 function animateNumber(el, from, to, stepMs=18){
@@ -972,7 +978,7 @@ function newQuestion(){
     state.currentWord = word;
   }
   state.options = buildOptions(state.correctLetter);
-  els.wordMasked.textContent = maskWord(state.currentWord);
+  renderWord();
   renderAnswers();
   // Speak word immediately (your original request)
   speak(state.currentWord);
@@ -1345,7 +1351,7 @@ function startGame(){
 
 function revealFirst(){
   state.revealed = true;
-  els.wordMasked.textContent = maskWord(state.currentWord);
+  renderWord();
 }
 
 function repeatWord(){
