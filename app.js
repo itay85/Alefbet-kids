@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v92.9";
+const BUILD = "v93.2";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -939,6 +939,21 @@ function shuffle(a){
   return arr;
 }
 
+
+function lockScroll(){
+  document.body.classList.add("lockScroll");
+}
+function unlockScroll(){
+  document.body.classList.remove("lockScroll");
+}
+function scrollToBattle(){
+  const el = document.getElementById("battleCard") || document.querySelector(".battleCard") || document.querySelector('[data-battle="1"]');
+  if(el && typeof el.scrollIntoView === "function"){
+    el.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+}
+
+
 function pickWordForLetter(letter){
   const words = WORD_BANK[letter] || [];
   if(words.length===0) return null;
@@ -1193,6 +1208,7 @@ async function claimReward(){
 
 }
 function openLetters(){
+  unlockScroll();
   renderLettersGrid();
   safeShowModal(els.lettersDialog);
 }
@@ -1205,6 +1221,7 @@ function closeLetters(){
   settingsSave();
   renderLettersMode();
   safeCloseDialog(els.lettersDialog);
+  lockScroll();
 }
 function renderLettersGrid(){
   els.lettersGrid.innerHTML="";
@@ -1280,11 +1297,13 @@ function pickLogo(fn){
 }
 
 function openPlayers(){
+  unlockScroll();
   renderPlayersSelect();
   safeShowModal(els.playersDialog);
 }
 function closePlayers(){
   safeCloseDialog(els.playersDialog);
+  lockScroll();
 }
 function renderPlayersSelect(){
   const ps = playersGet();
@@ -1334,15 +1353,18 @@ function onPlayerSelectChange(){
 }
 
 function openSettings(){
+  unlockScroll();
   if(els.nikkudToggle) els.nikkudToggle.value = (state.settings.showNikkud ? "on" : "off");
   if(els.debugToggle) els.debugToggle.value = (debugIsOn() ? "on" : "off");
   safeShowModal(els.settingsDialog);
 }
 function closeSettings(){
   safeCloseDialog(els.settingsDialog);
+  lockScroll();
 }
 function resetGame(){
-  if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
+  unlockScroll();
+if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
   localStorage.removeItem(settingsKey());
   boot();
 }
@@ -1359,7 +1381,9 @@ function applyHowVisibility(){
 }
 
 function startGame(){
-  // ensure letters selection valid
+  scrollToBattle();
+  lockScroll();
+// ensure letters selection valid
   if(state.settings.mode==="focus" && state.settings.selectedLetters.length < defaults.minSelectedLetters){
     alert(`בחר לפחות ${defaults.minSelectedLetters} אותיות.`);
     openLetters();
