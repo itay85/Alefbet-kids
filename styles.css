@@ -134,3 +134,8 @@ h2{margin:0 0 10px 0;}
   font-size:12px;
 }
 #battleStatsRow .logoImg{ width:34px; height:34px; }
+
+
+/* v92.6 streak as stat */
+#battleStatsRow{ gap:6px !important; }
+#battleStatsRow .statCompact{ min-width:64px !important; }
