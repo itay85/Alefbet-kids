@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v82";
+const BUILD = "v83";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -787,8 +787,7 @@ function renderLettersMode(){
 function hideReward(){
   els.rewardOverlay.classList.add("hidden");
 }
-function showRewardOverlay(hintText, addCoins=0){
-  const starBtn = els.rewardOverlay?.querySelector?.('[data-action="claimReward"]');
+function 
   if(starBtn){ starBtn.disabled = false; }
 
   els.rewardHint.textContent = hintText || "כל הכבוד!";
@@ -957,7 +956,7 @@ function chooseAnswer(letter){
     renderStats();
 
     // Coins are awarded on claim; amount depends on attempts/mistakes
-    showRewardOverlay("coins","ניצחת! ⭐","לחץ על הכוכב לקבל מטבעות","⭐","");
+    
   } else {
     // Wrong: keep same question, remove this option, let the child try again
     state.hadMistake = true;
@@ -989,7 +988,7 @@ function grantStarsBonus(starsAdd, title){
   settingsSave();
   renderStats();
 
-  showRewardOverlay(title || "הפתעה! ⭐", 0);
+  
   els.rewardCoinsText.textContent = `+${starsAdd} ⭐`;
   els.rewardSub.textContent = "קיבלת כוכבים!";
   els.starsNum.textContent = String(state.settings.stars || 0);
