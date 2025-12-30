@@ -192,7 +192,8 @@ h2{margin:0 0 10px 0;}
 #scoreStat .statLbl{white-space:nowrap !important;}
 
 
-/* v93: words stat = number only + tighter spacing */
+/* v93.1: words stat label under number (no emoji/colon) + tighter spacing */
 #battleStatsRow{ gap:4px !important; align-items:center; }
-#battleStatsRow .stat{ min-width:42px !important; padding:2px 4px !important; }
+#battleStatsRow .stat{ min-width:44px !important; padding:2px 4px !important; }
 #battleStatsRow .statNum{ font-size:15px; line-height:1; }
+#battleStatsRow .statLbl{ font-size:10.5px; line-height:1.1; }
