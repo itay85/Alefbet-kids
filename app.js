@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v93.2";
+const BUILD = "v93.5";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -914,6 +914,10 @@ function maskWord(word){
   return state.revealed ? word : ("_" + word.slice(1));
 }
 
+function getSpeakText(word){
+  return (typeof NIKKUD_MAP !== 'undefined' && NIKKUD_MAP[word]) ? NIKKUD_MAP[word] : word;
+}
+
 function speak(text){
   if(!text) return;
   state.lastSpoken = text;
@@ -922,7 +926,7 @@ function speak(text){
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = "he-IL";
-    u.rate = 0.95;
+    u.rate = 0.85;
     window.speechSynthesis.speak(u);
   }catch(e){ dbg("speak error: "+e); }
 }
@@ -1007,7 +1011,7 @@ function newQuestion(){
   renderWord();
   renderAnswers();
   // Speak word immediately (your original request)
-  speak(state.currentWord);
+  speak(getSpeakText(state.currentWord));
 }
 
 function renderAnswers(){
@@ -1381,7 +1385,7 @@ function revealFirst(){
 }
 
 function repeatWord(){
-  speak(state.currentWord || state.lastSpoken);
+  speak(getSpeakText(state.currentWord || state.lastSpoken));
 }
 
 function handleAction(action, target){
