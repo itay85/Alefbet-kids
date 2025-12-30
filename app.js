@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v86";
+const BUILD = "v87";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -763,23 +763,11 @@ function renderStats(){
   if(els.starsNum) els.starsNum.textContent = String(state.settings.stars || 0);
   if(els.coinsNum) els.coinsNum.textContent = String(state.settings.coins || 0);
 
-  // logo
   const logoFile = state.settings.logo || "logo1.png";
-  if(els.logoImg) els.logoImg.src = `assets/logos/${logoFile}`;
-
-  // streak
-  if(els.streakPill){
-    els.streakPill.textContent = ` סופר: ${state.settings.streak || 0}`;
-  }
-}
-`;
-  els.logoImg.src = logoPath;
+  if(els.logoImg) els.logoImg.src = "assets/logos/" + logoFile;
 
   if(els.streakPill){
-    els.streakPill.textContent = ` סופר: ${state.settings.streak || 0}`;
-  }
-  if(els.scorePill){
-    els.scorePill.textContent = ` מילים: ${state.settings.score || 0}`;
+    els.streakPill.textContent = "סופר: " + String(state.settings.streak || 0);
   }
 }
 
