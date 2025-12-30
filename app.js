@@ -3,7 +3,7 @@
  * Brawl Letters v73
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v85";
+const BUILD = "v86";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -769,17 +769,17 @@ function renderStats(){
 
   // streak
   if(els.streakPill){
-    els.streakPill.textContent = `🔥 סופר: ${state.settings.streak || 0}`;
+    els.streakPill.textContent = ` סופר: ${state.settings.streak || 0}`;
   }
 }
 `;
   els.logoImg.src = logoPath;
 
   if(els.streakPill){
-    els.streakPill.textContent = `🔥 סופר: ${state.settings.streak || 0}`;
+    els.streakPill.textContent = ` סופר: ${state.settings.streak || 0}`;
   }
   if(els.scorePill){
-    els.scorePill.textContent = `✅ מילים: ${state.settings.score || 0}`;
+    els.scorePill.textContent = ` מילים: ${state.settings.score || 0}`;
   }
 }
 
@@ -799,7 +799,7 @@ function
   if(starBtn){ starBtn.disabled = false; }
 
   els.rewardHint.textContent = hintText || "כל הכבוד!";
-  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "";
+  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} מטבעות` : "";
   els.rewardSub.textContent = "לחץ על הכוכב לקבל מטבעות";
   els.rewardOverlay.classList.remove("hidden");
 }
@@ -980,7 +980,7 @@ function chooseAnswer(letter){
     if(btn){ btn.disabled = true; btn.classList.add("disabled"); }
 
     // Small feedback
-    toast("לא נכון — נסה שוב 🙂");
+    toast("לא נכון — נסה שוב ");
 
     // If only one option left (forced correct), allow click but zero coins later
     const enabled = [...els.answers.querySelectorAll("button.answerBtn:not([disabled])")];
@@ -997,13 +997,13 @@ function grantStarsBonus(starsAdd, title){
   renderStats();
 
   
-  els.rewardCoinsText.textContent = `+${starsAdd} ⭐`;
+  els.rewardCoinsText.textContent = `+${starsAdd} *`;
   els.rewardSub.textContent = "קיבלת כוכבים!";
   els.starsNum.textContent = String(state.settings.stars || 0);
 
   // End game: all logos unlocked
   if((state.settings.unlockedLogos || 1) >= LOGOS.length){
-    els.rewardHint.textContent = "🎆 כל הכבוד! סיימת את המשחק 🎆";
+    els.rewardHint.textContent = " כל הכבוד! סיימת את המשחק ";
     els.rewardSub.textContent = "פתחת את כל הלוגואים!";
   }
 }
@@ -1028,13 +1028,13 @@ async function claimReward(){
     settingsSave();
     renderStats();
 
-    els.rewardCoinsText.textContent = `+${addStars} ⭐`;
+    els.rewardCoinsText.textContent = `+${addStars} *`;
     els.rewardHint.textContent = "הפתעה!";
-    els.rewardSub.textContent = "קיבלת כוכבים 🎉";
+    els.rewardSub.textContent = "קיבלת כוכבים ";
 
     // End game
     if((state.settings.unlockedLogos || 1) >= LOGOS.length){
-      els.rewardHint.textContent = "🎆 כל הכבוד! סיימת את המשחק 🎆";
+      els.rewardHint.textContent = " כל הכבוד! סיימת את המשחק ";
       els.rewardSub.textContent = "פתחת את כל הלוגואים!";
       return;
     }
@@ -1056,7 +1056,7 @@ async function claimReward(){
   state.settings.coins = toCoins;
   settingsSave();
 
-  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "0 🪙";
+  els.rewardCoinsText.textContent = addCoins ? `+${addCoins} מטבעות` : "0 מטבעות";
   els.rewardHint.textContent = addCoins ? "כל הכבוד!" : "ניסית יפה!";
   els.rewardSub.textContent = addCoins ? "קיבלת מטבעות" : "הפעם בלי מטבעות";
 
@@ -1071,9 +1071,9 @@ async function claimReward(){
     // Show chest overlay requiring a click
     showRewardOverlay(
       "chest",
-      "כל הכבוד! צברת 1000 מטבעות 🎁",
+      "כל הכבוד! צברת 1000 מטבעות ",
       "לחץ על ההפתעה כדי לקבל כוכבים",
-      "🎁",
+      "",
       ""
     );
     return;
@@ -1144,7 +1144,7 @@ function clearLetters(){
 function openLogo(fromUnlock=false){
   const unlocked = Math.max(1, Math.min(LOGOS.length, state.settings.unlockedLogos));
   els.logoUnlockText.textContent = fromUnlock
-    ? "נפתח לך לוגו חדש! בחר לוגו נוסף 🎁"
+    ? "נפתח לך לוגו חדש! בחר לוגו נוסף "
     : `לוגואים פתוחים: ${unlocked} / ${LOGOS.length} (כל 100 כוכבים נפתח עוד)`;
   els.logosGrid.innerHTML="";
   LOGOS.forEach((fn, idx)=>{
@@ -1160,7 +1160,7 @@ function openLogo(fromUnlock=false){
     img.alt = "logo";
     const cap = document.createElement("div");
     cap.className="muted";
-    cap.textContent = locked ? "🔒 נעול" : "בחר";
+    cap.textContent = locked ? " נעול" : "בחר";
     card.appendChild(img);
     card.appendChild(cap);
     els.logosGrid.appendChild(card);
