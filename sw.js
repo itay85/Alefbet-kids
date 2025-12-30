@@ -1,10 +1,10 @@
 
-const CACHE_NAME = "brawl-letters-v92.6";
+const CACHE_NAME = "brawl-letters-v92.7";
 const ASSETS = [
   "./",
-  "./index.html?v=92.6",
+  "./index.html?v=92.7",
   "./styles.css?v=92.1",
-  "./app.js?v=92.6",
+  "./app.js?v=92.7",
   "./manifest.webmanifest?v=92.1",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",

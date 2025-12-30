@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v92.6";
+const BUILD = "v92.7";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -629,7 +629,7 @@ const els = {
   rewardMainBtn: document.getElementById("rewardMainBtn"),
 
   streakNum: document.getElementById("streakNum"),
-  scorePill: document.getElementById("scorePill"),
+  scoreNum: document.getElementById("scoreNum"),
   howBody: document.getElementById("howBody"),
 
   lettersDialog: document.getElementById("lettersDialog"),
@@ -830,8 +830,10 @@ function renderStats(){
   if(els.streakNum){
     els.streakNum.textContent = String(state.settings.streak || 0);
   }
-  if(els.scorePill){
-    els.scorePill.textContent = `✅ מילים: ${state.settings.score || 0}`;
+  
+  if(els.scoreNum){ els.scoreNum.textContent = String(state.settings.score || 0); }
+if(els.scoreNum){
+    els.scoreNum.textContent = `✅ מילים: ${state.settings.score || 0}`;
   }
 }
 

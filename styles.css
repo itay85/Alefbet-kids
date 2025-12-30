@@ -139,3 +139,18 @@ h2{margin:0 0 10px 0;}
 /* v92.6 streak as stat */
 #battleStatsRow{ gap:6px !important; }
 #battleStatsRow .statCompact{ min-width:64px !important; }
+
+
+/* v92.7 compact stats to fit words on same row */
+#battleStatsRow{ gap:4px !important; }
+#battleStatsRow .stat{ min-width:56px !important; }
+#battleStatsRow .statNum{ font-size:15px; }
+#battleStatsRow .statLbl{ font-size:10.5px; }
+#battleStatsRow .logoImg{ width:32px; height:32px; }
+#battleStatsRow{ flex-wrap:nowrap; }
+@media (max-width: 420px){
+  #battleStatsRow{ flex-wrap:wrap; } /* fallback if too tight */
+}
+
+/* push letters button slightly down to avoid collision on phone */
+.lettersBtn{ margin-top:6px !important; }

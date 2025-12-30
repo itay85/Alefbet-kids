@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Brawl Letters</title>
-  <link rel="manifest" href="manifest.webmanifest?v=92.6">
-  <link rel="stylesheet" href="styles.css?v=92.6">
+  <link rel="manifest" href="manifest.webmanifest?v=92.7">
+  <link rel="stylesheet" href="styles.css?v=92.7">
   <meta name="theme-color" content="#0b0f24" />
 </head>
 <body>
@@ -54,7 +54,7 @@
 
         <div class="stat statCompact" id="streakStat"><div class="statNum" id="streakNum">0</div><div class="statLbl">🔥 רצף</div></div>
 
-        <div class="scorePill" id="scorePill">✅ מילים: 0</div>
+        <div class="stat statCompact" id="scoreStat"><div class="statNum" id="scoreNum">0</div><div class="statLbl">✅ מילים</div></div>
       </div>
 </div>
 
@@ -177,7 +177,7 @@
     <pre id="debugLog" class="debugLog"></pre>
   </div>
 
-  <script src="app.js?v=92.6"></script>
+  <script src="app.js?v=92.7"></script>
   <script>
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('./sw.js?v=92').catch(()=>{});
