@@ -1,172 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Brawl Letters</title>
-  <link rel="manifest" href="manifest.webmanifest?v=73">
-  <link rel="stylesheet" href="styles.css?v=73">
-  <meta name="theme-color" content="#0b0f24" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>קרב האותיות</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+
 </head>
 <body>
-<header class="topbar">
-    <button class="iconBtn" type="button" data-action="openPlayers" aria-label="הגדרות">⚙️</button>
-    <div class="brand">
-      <div class="title">BRAWL LETTERS</div>
-      <div class="subtitle">קרב האותיות</div>
-    </div>
-    <button class="pill pillBtn" type="button" data-action="openPlayers" id="currentPlayerPill" aria-label="שחקן נוכחי">שחקן: -</button>
-  </header>
 
-  <main class="wrap">
-    <section class="card" id="howCard">
-      <div class="cardHead">
-        <h2>איך מנצחים?</h2>
-        <button class="btn small" type="button" data-action="toggleHow">הסתר</button>
-      </div>
-      <div id="howBody">
-        <p>שומעים מילה 🎧 ובוחרים איזו אות שומעים בתחילת המילה.</p>
-        <p>כל תשובה נכונה נותנת ⭐ כוכב. כשלוחצים על הכוכב מקבלים 🪙 מטבעות זהב.</p>
-        <p>מגיעים ל־1000 מטבעות? מקבלים ⭐ כוכב מתנה (ללא מטבעות).</p>
-        <p class="muted">טיפ: אפשר להוסיף לאייפון למסך הבית: Share → Add to Home Screen</p>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>קרב האותיות!</h2>
-
-      
-      <div class="row stats">
-        <div class="stat">
-          <div class="statNum" id="starsNum">0</div>
-          <div class="statLbl">⭐ כוכבים</div>
-        </div>
-
-        <div class="midColumn">
-          <button class="logoBtn" type="button" data-action="openPlayers" aria-label="לוגו">
-            <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
-          </button>
-          <div class="streakPill" id="streakPill">🔥 סופר: 0</div>
-        </div>
-
-        <div class="stat">
-          <div class="statNum" id="coinsNum">0</div>
-          <div class="statLbl">🪙 מטבעות זהב</div>
-        </div>
-      </div>
-<div class="statLbl">🪙 מטבעות זהב</div>
-        </div>
-      </div>
-
-      <button class="btn primary full" type="button" data-action="startGame">🎮 התחל משחק</button>
-
-      <div class="rowBetween">
-        <button class="btn" type="button" data-action="openPlayers">👨‍👩‍👦 בחירת אותיות (הורה)</button>
-        <div class="scorePill" id="scorePill">✅ מילים: 0</div>
-        <div class="muted" id="lettersModeText">מצב אותיות: כל האותיות (א–ת)</div>
-      </div>
-
-      <div class="questionBox" id="questionBox" aria-live="polite">
-        <div class="qTitle">איזו אות שומעים בתחילת המילה?</div>
-        <div class="wordBox" id="wordMasked">—</div>
-        <div class="rowCenter">
-          <button class="btn btnSmall" type="button" data-action="revealFirst">👀 גלה אות</button>
-          <button class="btn btnSmall" type="button" data-action="repeatWord">🔊 השמע מילה</button>
-        </div>
-      </div>
-
-      <div class="answers" id="answers"></div>
-
-      
-      <div class="muted" id="rewardSub">לחץ על הכוכב לקבל מטבעות</div>
-        </div>
-      </div>
-<div class="muted" id="rewardText"></div>
-      </div>
-    </section>
+  <main id="app">
+    <!-- האפליקציה נטענת כאן ע״י JS -->
   </main>
 
-  <!-- Letters modal -->
-  <dialog id="lettersDialog" class="dialog">
-    <h2>בחירת אותיות להתמקדות</h2>
-    <p class="muted">בחר לפחות 4 אותיות. (או בחר “כולן”)</p>
-    <div class="lettersGrid" id="lettersGrid"></div>
-    <div class="rowBetween">
-      <button class="btn" type="button" data-action="selectAllLetters">כולן</button>
-      <button class="btn" type="button" data-action="clearLetters">נקה</button>
-      <button class="btn primary" type="button" data-action="closeLetters">סגור</button>
-    </div>
-    <div class="muted" id="lettersCount"></div>
-  </dialog>
+  <!-- App script (NO hard-coded version!) -->
+  <script src="app.js" defer></script>
 
-  <!-- Logo modal -->
-  <dialog id="logoDialog" class="dialog">
-    <h2>בחר לוגו</h2>
-    <p class="muted" id="logoUnlockText"></p>
-    <div class="logosGrid" id="logosGrid"></div>
-    <div class="rowBetween">
-      <button class="btn primary" type="button" data-action="closeLogo">סגור</button>
-    </div>
-  </dialog>
-
-  <!-- Players -->
-  <dialog id="firstPlayerDialog" class="dialog">
-    <h2>בוא נתחיל 🎮</h2>
-    <p class="muted">מה שם השחקן הראשון?</p>
-    <input id="firstPlayerName" class="input" type="text" placeholder="למשל: נדב" />
-    <div class="rowBetween">
-      <button class="btn primary" type="button" data-action="createFirstPlayer">המשך</button>
-    </div>
-  </dialog>
-
-  <dialog id="playersDialog" class="dialog">
-    <h2>שחקנים</h2>
-    <label class="rowBetween">
-      <span class="muted">בחר שחקן</span>
-      <select id="playerSelect" class="select"></select>
-    </label>
-    <div class="rowBetween">
-      <button class="btn" type="button" data-action="addPlayer">➕ הוסף</button>
-      <button class="btn" type="button" data-action="renamePlayer">✏️ שנה שם</button>
-      <button class="btn" type="button" data-action="closePlayers">סגור</button>
-    </div>
-  </dialog>
-
-  <!-- Settings -->
-  <dialog id="settingsDialog" class="dialog">
-    <h2>הגדרות</h2>
-    <div class="muted">גרסה: v74</div>
-    <label class="rowBetween">
-      <span class="muted">Debug</span>
-      <select id="debugToggle" class="select">
-        <option value="off" selected>כבוי</option>
-        <option value="on">דלוק</option>
-      </select>
-    </label>
-    <div class="rowBetween">
-      <button class="btn danger" type="button" data-action="resetGame">איפוס שחקן</button>
-      <button class="btn" type="button" data-action="closeSettings">סגור</button>
-    </div>
-  </dialog>
-
-  <!-- Debug panel -->
-  <div id="debugPanel" class="debugPanel hidden">
-    <div class="debugHead">
-      <strong>DEBUG</strong>
-      <div class="debugBtns">
-        <button class="btn small" type="button" data-action="dbgCopy">העתק</button>
-        <button class="btn small" type="button" data-action="dbgClear">נקה</button>
-        <button class="btn small" type="button" data-action="dbgHide">הסתר</button>
-      </div>
-    </div>
-    <pre id="debugLog" class="debugLog"></pre>
-  </div>
-
-  <script src="app.js"></script>
-  <script>
-    if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./sw.js?v=73').catch(()=>{});
-    }
-  </script>
 </body>
 </html>
