@@ -1,218 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BRAWL LETTERS – קרב האותיות</title>
-  <style>
-    :root{--bg:#0b1020;--card:#121a33;--card2:#0f1730;--text:#eaf0ff;--muted:#a9b3d6;--accent:#ffd54a;--danger:#ff5b5b;}
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    body{margin:0;background:radial-gradient(1200px 700px at 30% 10%, #24337a 0%, var(--bg) 55%);color:var(--text);min-height:100vh}
-    header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 8px}
-    .pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:10px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:10px}
-    .pill button{all:unset;cursor:pointer;color:var(--text)}
-    .stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .stat{min-width:110px;justify-content:center}
-    .stat b{font-size:18px}
-    .logoSmall{width:34px;height:34px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2)}
-    main{padding:0 14px 18px;max-width:720px;margin:0 auto}
-    h1{margin:6px 0 10px;font-size:22px}
-    .card{background:rgba(18,26,51,.85);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;margin:10px 0}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .btn{cursor:pointer;border:none;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.10);color:var(--text);font-weight:700}
-    .btn.primary{background:linear-gradient(135deg,#ffcf3a,#ff8a00);color:#1b1b1b}
-    .btn.small{padding:10px 12px;border-radius:12px}
-    .btn.danger{background:rgba(255,91,91,.18);border:1px solid rgba(255,91,91,.35)}
-    .sub{color:var(--muted);font-size:13px;line-height:1.35}
-    #wordMasked{font-size:42px;text-align:center;letter-spacing:2px;margin:8px 0 2px}
-    .q{font-size:16px;text-align:center;color:var(--muted)}
-    #answers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
-    .answerBtn{cursor:pointer;border:none;border-radius:14px;padding:16px 10px;background:rgba(255,255,255,.10);color:var(--text);font-size:22px;font-weight:900}
-    .answerBtn:disabled{opacity:.45;cursor:not-allowed}
-    .actionRow{display:flex;justify-content:space-between;gap:10px;margin-top:12px}
-    .actionRow .btn{flex:1}
-    /* dialogs */
-    dialog{border:none;border-radius:16px;padding:0;max-width:min(92vw,720px);background:rgba(18,26,51,.97);color:var(--text)}
-    dialog::backdrop{background:rgba(0,0,0,.55)}
-    .dialogBody{padding:14px}
-    .dialogHead{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.10);display:flex;align-items:center;justify-content:space-between}
-    .gridLetters{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-    .letterChip{border:none;cursor:pointer;border-radius:12px;padding:10px;background:rgba(255,255,255,.10);color:var(--text);font-weight:900;font-size:16px}
-    .letterChip.sel{outline:2px solid var(--accent);background:rgba(255,213,74,.18)}
-    .muted{color:var(--muted);font-size:12px}
-    /* reward overlay */
-    #rewardOverlay.hidden{display:none}
-    #rewardOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:50}
-    .rewardCard{width:min(92vw,420px);background:rgba(18,26,51,.98);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px;text-align:center}
-    #rewardMainBtn{width:120px;height:120px;border-radius:999px;border:none;cursor:pointer;background:radial-gradient(circle at 30% 30%, #fff4b2 0%, #ffd54a 45%, #ff8a00 100%);font-size:48px}
-    #debugPanel{position:fixed;left:10px;right:10px;bottom:10px;background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px;z-index:60}
-    #debugPanel.hidden{display:none}
-    #debugLog{white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#d7e3ff;max-height:180px;overflow:auto}
-    .topBtns{display:flex;gap:10px;align-items:center}
-    .topBtns .btn{padding:10px 12px}
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Brawl Letters</title>
+  <link rel="manifest" href="manifest.webmanifest?v=73">
+  <link rel="stylesheet" href="styles.css?v=73">
+  <meta name="theme-color" content="#0b0f24" />
 </head>
 <body>
-  <header>
-    <div class="pill">
-      <button id="currentPlayerPill" data-action="openPlayers" title="שחקנים">שחקן: —</button>
+<header class="topbar">
+    <button class="iconBtn" type="button" data-action="openSettings" aria-label="הגדרות">⚙️</button>
+    
+    <div class="brand">
+      <div class="title">BRAWL LETTERS</div>
+      <div class="subtitle">קרב האותיות – משחק מהיר ואנרגטי</div>
     </div>
-
-    <div class="stats">
-      <div class="pill stat"><span>⭐</span><b id="starsNum">0</b></div>
-      <div class="pill stat"><span>🪙</span><b id="coinsNum">0</b></div>
-      <div class="pill stat" style="min-width:auto">
-        <img id="logoImg" class="logoSmall" src="assets/logos/logo1.png" alt="logo" data-action="openLogo" title="לוגו"/>
-      </div>
-    </div>
+    <button class="pill pillBtn" type="button" data-action="openPlayers" id="currentPlayerPill" aria-label="שחקן נוכחי">—</button>
   </header>
 
-  <main>
-    <h1>קרב האותיות</h1>
-
-    <div class="card">
-      <div class="row topBtns">
-        <button class="btn primary" data-action="startGame">התחל משחק</button>
-        <button class="btn" data-action="openLetters">בחירת אותיות</button>
-        <button class="btn" data-action="openSettings">הגדרות</button>
+  <main class="wrap">
+    <section class="card" id="howCard">
+      <div class="cardHead">
+        <h2>איך מנצחים?</h2>
+        <button class="btn small" type="button" data-action="toggleHow">הסתר</button>
       </div>
-      <div class="sub" id="lettersModeText">מצב אותיות: כל האותיות (א–ת)</div>
-    </div>
-
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div class="pill" id="streakPill">🔥 סופר: 0</div>
-        <div class="pill" id="scorePill">✅ מילים: 0</div>
+      <div id="howBody">
+        <p>שומעים מילה 🎧 ובוחרים איזו אות שומעים בתחילת המילה.</p>
+        <p>כל תשובה נכונה נותנת ⭐ כוכב. כשלוחצים על הכוכב מקבלים 🪙 מטבעות זהב.</p>
+        <p>מגיעים ל־1000 מטבעות? מקבלים ⭐ כוכב מתנה (ללא מטבעות).</p>
+        <p class="muted">טיפ: אפשר להוסיף לאייפון למסך הבית: Share → Add to Home Screen</p>
       </div>
-      <div class="row" style="justify-content:space-between;margin-top:10px">
-        <div class="sub"><b>איך מנצחים?</b></div>
-        <button class="btn small" data-action="toggleHow">הסתר</button>
-      </div>
-      <div id="howBody" class="sub" style="margin-top:8px">
-        שומעים מילה ובוחרים את האות הראשונה. תשובה נכונה → כוכב באמצע המסך לאיסוף מטבעות.
-        1000 מטבעות → הפתעה (כוכבים) → נפתחים לוגואים.
-        כל 40 ברצף → בונוס כוכבים 🔥
-      </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <div class="q">איזו אות שומעים בתחילת המילה?</div>
-      <div id="wordMasked">—</div>
+    <section class="card">
+      <h2>קרב האותיות!</h2>
 
-      <div class="actionRow">
-        <button class="btn small" data-action="revealFirst">גלה אות</button>
-        <button class="btn small" data-action="repeatWord">השמע מילה</button>
+      <div class="row stats">
+        <div class="stat">
+          <div class="statNum" id="starsNum">0</div>
+          <div class="statLbl">⭐ כוכבים</div>
+        </div>
+
+        <div class="midColumn">
+          <button class="logoBtn" type="button" data-action="openLogo" aria-label="לוגו">
+            <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
+          </button>
+          <div class="streakPill" id="streakPill">🔥 סופר: 0</div>
+        </div>
+
+        <div class="stat">
+          <div class="statNum" id="coinsNum">0</div>
+          <div class="statLbl">🪙 מטבעות זהב</div>
+        </div>
       </div>
 
-      <div id="answers"></div>
-    </div>
+      <button class="btn primary full" type="button" data-action="startGame">🎮 התחל משחק</button>
+
+      <div class="rowBetween">
+        <button class="btn" type="button" data-action="openLetters">👨‍👩‍👦 בחירת אותיות (הורה)</button>
+        <div class="scorePill" id="scorePill">✅ מילים: 0</div>
+        <div class="muted" id="lettersModeText">מצב אותיות: כל האותיות (א–ת)</div>
+      </div>
+
+      <div class="questionBox" id="questionBox" aria-live="polite">
+        <div class="qTitle">איזו אות שומעים בתחילת המילה?</div>
+        <div class="wordBox" id="wordMasked">—</div>
+        <div class="rowCenter controlsRow">
+          <button class="btn btnSmall" type="button" data-action="repeatWord">🔊 השמע מילה</button>
+          <button class="btn btnSmall" type="button" data-action="revealFirst">👀 גלה אות</button>
+        </div>
+      </div>
+
+      <div class="answers" id="answers"></div>
+
+      
+      <div class="rewardOverlay hidden" id="rewardOverlay" role="dialog" aria-modal="true">
+        <div class="rewardCard">
+          <div class="rewardHint" id="rewardHint">כל הכבוד!</div>
+          <div class="rewardCoins" id="rewardCoinsText">+0 🪙</div>
+          <div class="muted" id="rewardSub">לחץ על הכוכב לקבל מטבעות</div>
+        </div>
+      </div>
+<div class="muted" id="rewardText"></div>
+      </div>
+    </section>
   </main>
 
-  <!-- Reward overlay -->
-  <div id="rewardOverlay" class="hidden" role="dialog" aria-modal="true">
-    <div class="rewardCard">
-      <div id="rewardHint" style="font-weight:900;font-size:18px;margin-bottom:10px">כל הכבוד!</div>
-      <button id="rewardMainBtn" data-action="claimReward" aria-label="אסוף פרס">⭐</button>
-      <div id="rewardCoinsText" style="margin-top:12px;font-weight:900"></div>
-      <div id="rewardSub" class="sub" style="margin-top:6px"></div>
+  <!-- Letters modal -->
+  <dialog id="lettersDialog" class="dialog">
+    <h2>בחירת אותיות להתמקדות</h2>
+    <p class="muted">בחר לפחות 4 אותיות. (או בחר “כולן”)</p>
+    <div class="lettersGrid" id="lettersGrid"></div>
+    <div class="rowBetween">
+      <button class="btn" type="button" data-action="selectAllLetters">כולן</button>
+      <button class="btn" type="button" data-action="clearLetters">נקה</button>
+      <button class="btn primary" type="button" data-action="closeLetters">סגור</button>
     </div>
-  </div>
+    <div class="muted" id="lettersCount"></div>
+  </dialog>
 
-  <!-- Letters dialog -->
-  <dialog id="lettersDialog">
-    <div class="dialogHead">
-      <div><b>בחירת אותיות</b></div>
-      <button class="btn small" data-action="closeLetters">סגור</button>
-    </div>
-    <div class="dialogBody">
-      <div class="sub">לחץ על אות כדי לסמן/לבטל. במצב מיקוד חייבים לפחות 4 אותיות.</div>
-      <div class="row" style="margin:10px 0">
-        <button class="btn small" data-action="selectAllLetters">בחר הכל</button>
-        <button class="btn small" data-action="clearLetters">נקה</button>
-        <div class="muted" id="lettersCount">נבחרו: 0</div>
-      </div>
-      <div id="lettersGrid" class="gridLetters"></div>
+  <!-- Logo modal -->
+  <dialog id="logoDialog" class="dialog">
+    <h2>בחר לוגו</h2>
+    <p class="muted" id="logoUnlockText"></p>
+    <div class="logosGrid" id="logosGrid"></div>
+    <div class="rowBetween">
+      <button class="btn primary" type="button" data-action="closeLogo">סגור</button>
     </div>
   </dialog>
 
-  <!-- Logo dialog -->
-  <dialog id="logoDialog">
-    <div class="dialogHead">
-      <div><b>לוגו</b></div>
-      <button class="btn small" data-action="closeLogo">סגור</button>
-    </div>
-    <div class="dialogBody">
-      <div id="logoUnlockText" class="sub">לוגואים פתוחים…</div>
-      <div id="logosGrid" class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap"></div>
+  <!-- Players -->
+  <dialog id="firstPlayerDialog" class="dialog">
+    <h2>בוא נתחיל 🎮</h2>
+    <p class="muted">מה שם השחקן הראשון?</p>
+    <input id="firstPlayerName" class="input" type="text" placeholder="למשל: נדב" />
+    <div class="rowBetween">
+      <button class="btn primary" type="button" data-action="createFirstPlayer">המשך</button>
     </div>
   </dialog>
 
-  <!-- First player dialog -->
-  <dialog id="firstPlayerDialog">
-    <div class="dialogHead">
-      <div><b>ברוכים הבאים!</b></div>
-    </div>
-    <div class="dialogBody">
-      <div class="sub">בוא ניצור שחקן ראשון.</div>
-      <input id="firstPlayerName" placeholder="שם השחקן" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:var(--text);margin-top:10px" />
-      <button class="btn primary" style="width:100%;margin-top:12px" data-action="createFirstPlayer">אישור</button>
-    </div>
-  </dialog>
-
-  <!-- Players dialog -->
-  <dialog id="playersDialog">
-    <div class="dialogHead">
-      <div><b>שחקנים</b></div>
-      <button class="btn small" data-action="closePlayers">סגור</button>
-    </div>
-    <div class="dialogBody">
-      <div class="row">
-        <select id="playerSelect" style="flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:var(--text)"></select>
-        <button class="btn small" data-action="addPlayer">הוסף</button>
-        <button class="btn small" data-action="renamePlayer">שנה שם</button>
-      </div>
+  <dialog id="playersDialog" class="dialog">
+    <h2>שחקנים</h2>
+    <label class="rowBetween">
+      <span class="muted">בחר שחקן</span>
+      <select id="playerSelect" class="select"></select>
+    </label>
+    <div class="rowBetween">
+      <button class="btn" type="button" data-action="addPlayer">➕ הוסף</button>
+      <button class="btn" type="button" data-action="renamePlayer">✏️ שנה שם</button>
+      <button class="btn" type="button" data-action="closePlayers">סגור</button>
     </div>
   </dialog>
 
-  <!-- Settings dialog -->
-  <dialog id="settingsDialog">
-    <div class="dialogHead">
-      <div><b>הגדרות</b></div>
-      <button class="btn small" data-action="closeSettings">סגור</button>
-    </div>
-    <div class="dialogBody">
-      <div class="row" style="justify-content:space-between">
-        <div>ניקוד במילים</div>
-        <select id="nikkudToggle" style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:var(--text)">
-          <option value="on">כן</option>
-          <option value="off">לא</option>
-        </select>
-      </div>
-      <div class="row" style="justify-content:space-between;margin-top:10px">
-        <div>Debug</div>
-        <select id="debugToggle" style="padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.2);color:var(--text)">
-          <option value="off">כבוי</option>
-          <option value="on">דולק</option>
-        </select>
-      </div>
-
-      <button class="btn danger" style="width:100%;margin-top:12px" data-action="resetGame">איפוס שחקן</button>
-      <div class="sub" style="margin-top:8px">הערה: הקראה תלויה בקול עברי במכשיר.</div>
+  <!-- Settings -->
+  <dialog id="settingsDialog" class="dialog">
+    <h2>הגדרות</h2>
+    <div class="muted">גרסה: v74</div>
+    <label class="rowBetween">
+      <span class="muted">Debug</span>
+      <select id="debugToggle" class="select">
+        <option value="off" selected>כבוי</option>
+        <option value="on">דלוק</option>
+      </select>
+    </label>
+    <div class="rowBetween">
+      <button class="btn danger" type="button" data-action="resetGame">איפוס שחקן</button>
+      <button class="btn" type="button" data-action="closeSettings">סגור</button>
     </div>
   </dialog>
 
   <!-- Debug panel -->
-  <div id="debugPanel" class="hidden">
-    <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
-      <b>Debug</b>
-      <div class="row" style="gap:8px">
-        <button class="btn small" data-action="dbgClear">נקה</button>
-        <button class="btn small" data-action="dbgHide">הסתר</button>
+  <div id="debugPanel" class="debugPanel hidden">
+    <div class="debugHead">
+      <strong>DEBUG</strong>
+      <div class="debugBtns">
+        <button class="btn small" type="button" data-action="dbgCopy">העתק</button>
+        <button class="btn small" type="button" data-action="dbgClear">נקה</button>
+        <button class="btn small" type="button" data-action="dbgHide">הסתר</button>
       </div>
     </div>
-    <div id="debugLog"></div>
+    <pre id="debugLog" class="debugLog"></pre>
   </div>
 
-  <script src="app.js" defer></script>
+  <script src="app.js?v=89"></script>
+  <script>
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('./sw.js?v=73').catch(()=>{});
+    }
+  </script>
 </body>
 </html>
