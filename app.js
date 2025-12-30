@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v92.3";
+const BUILD = "v92.5";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -1149,7 +1149,7 @@ async function claimReward(){
     if(state.pendingSuperBonus){
       state.pendingSuperBonus = false;
       const sAdd2 = randInt(defaults.superBonusStarsMin, defaults.superBonusStarsMax);
-      setTimeout(()=>{ grantStarsBonus(sAdd2, "🔥 בוסט סופר! 🔥"); }, 950);
+      setTimeout(()=>{ grantStarsBonus(sAdd2, "🔥 בוסט רצף! 🔥"); }, 950);
       setTimeout(()=>{ hideReward(); newQuestion(); }, 1900);
     }
     return;
@@ -1164,7 +1164,7 @@ async function claimReward(){
     state.pendingSuperBonus = false;
     const sAdd = randInt(defaults.superBonusStarsMin, defaults.superBonusStarsMax);
     // Show bonus overlay briefly, then continue
-    grantStarsBonus(sAdd, "🔥 בוסט סופר! 🔥");
+    grantStarsBonus(sAdd, "🔥 בוסט רצף! 🔥");
     setTimeout(()=>{ hideReward(); newQuestion(); }, 950);
     return;
   }

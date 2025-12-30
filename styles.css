@@ -119,3 +119,18 @@ h2{margin:0 0 10px 0;}
 @media (max-width: 420px){
   #battleStatsRow .stat{ min-width:70px; }
 }
+
+
+/* v92.4 compact stats spacing */
+#battleStatsRow{
+  gap:6px !important;
+}
+#battleStatsRow .stat{ min-width:64px !important; }
+#battleStatsRow .statNum{ font-size:16px; }
+#battleStatsRow .statLbl{ font-size:11px; }
+#battleStatsRow .streakPill,
+#battleStatsRow .scorePill{
+  padding:6px 8px;
+  font-size:12px;
+}
+#battleStatsRow .logoImg{ width:34px; height:34px; }

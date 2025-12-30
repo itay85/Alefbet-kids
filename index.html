@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Brawl Letters</title>
-  <link rel="manifest" href="manifest.webmanifest?v=92.3">
-  <link rel="stylesheet" href="styles.css?v=92.3">
+  <link rel="manifest" href="manifest.webmanifest?v=92.5">
+  <link rel="stylesheet" href="styles.css?v=92.5">
   <meta name="theme-color" content="#0b0f24" />
 </head>
 <body>
@@ -27,7 +27,7 @@
       </div>
       <div id="howBody">
         <p>שומעים מילה 🎧 ובוחרים איזו אות שומעים בתחילת המילה.</p>
-        <p>כל תשובה נכונה נותנת ⭐ כוכב. כשלוחצים על הכוכב מקבלים 🪙 מטבעות זהב.</p>
+        <p>כל תשובה נכונה נותנת ⭐ כוכב. כשלוחצים על הכוכב מקבלים 🪙 מטבעות.</p>
         <p>מגיעים ל־1000 מטבעות? מקבלים ⭐ כוכב מתנה (ללא מטבעות).</p>
         <p class="muted">טיפ: אפשר להוסיף לאייפון למסך הבית: Share → Add to Home Screen</p>
       </div>
@@ -56,16 +56,11 @@
 
         <div class="scorePill" id="scorePill">✅ מילים: 0</div>
       </div>
-        <div class="midColumn">
-          <button class="logoBtn" type="button" data-action="openLogo" aria-label="לוגו">
-            <img id="logoImg" class="logoImg" src="assets/logos/logo1.png" alt="לוגו">
-          </button>
-          <div class="streakPill" id="streakPill">🔥 רצף: 0</div>
-        </div>
+</div>
 
         <div class="stat">
           <div class="statNum" id="coinsNum">0</div>
-          <div class="statLbl">🪙 מטבעות זהב</div>
+          <div class="statLbl">🪙 מטבעות</div>
         </div>
       </div>
 
@@ -185,7 +180,7 @@
     <pre id="debugLog" class="debugLog"></pre>
   </div>
 
-  <script src="app.js?v=92.3"></script>
+  <script src="app.js?v=92.5"></script>
   <script>
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('./sw.js?v=92').catch(()=>{});
