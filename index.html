@@ -137,7 +137,15 @@
   <!-- Settings -->
   <dialog id="settingsDialog" class="dialog">
     <h2>הגדרות</h2>
-    <div class="muted">גרסה: v74</div>
+    <div class="muted">גרסה: v91</div>
+    <label class="rowBetween">
+      <span class="muted">ניקוד במילים</span>
+      <select id="nikkudToggle" class="select">
+        <option value="on" selected>כן</option>
+        <option value="off">לא</option>
+      </select>
+    </label>
+
     <label class="rowBetween">
       <span class="muted">Debug</span>
       <select id="debugToggle" class="select">
@@ -164,10 +172,10 @@
     <pre id="debugLog" class="debugLog"></pre>
   </div>
 
-  <script src="app.js?v=90"></script>
+  <script src="app.js?v=92"></script>
   <script>
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./sw.js?v=73').catch(()=>{});
+      navigator.serviceWorker.register('./sw.js?v=92').catch(()=>{});
     }
   </script>
 </body>

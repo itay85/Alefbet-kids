@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v90";
+const BUILD = "v92";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -597,6 +597,16 @@ const defaults = {
   goalCoins: 1000,
   coinsPerWinMin: 20,
   coinsPerWinMax: 45, // ~ 5-30 wins to 1000
+  // If child made mistakes but not forced-correct: reduced coins range
+  coinsReducedMin: 5,
+  coinsReducedMax: 12,
+  // Surprise chest stars range (when converting 1000 coins)
+  chestStarsMin: 3,
+  chestStarsMax: 13,
+  // Super streak bonus every N perfect words
+  superBonusEvery: 40,
+  superBonusStarsMin: 3,
+  superBonusStarsMax: 8,
   starsToUnlockStep: 100,
   // initial unlocked logos: first 1
   initialUnlockedLogos: 1,
@@ -656,6 +666,24 @@ const state = {
   player: null,
   settings: null,
 };
+
+
+function safeShowModal(d){
+  try{
+    if(d && typeof d.showModal === "function"){ d.showModal(); return; }
+  }catch(e){}
+  try{
+    if(d){ d.setAttribute("open",""); }
+  }catch(e){}
+}
+function safeCloseDialog(d){
+  try{
+    if(d && typeof d.close === "function"){ d.close(); return; }
+  }catch(e){}
+  try{
+    if(d){ d.removeAttribute("open"); }
+  }catch(e){}
+}
 
 function dbg(msg){
   if(!debugIsOn()) return;
@@ -787,6 +815,7 @@ function hideReward(){
   els.rewardOverlay.classList.add("hidden");
 }
 function showRewardOverlay(hintText, addCoins=0){
+  try{ window.scrollTo({top:0, left:0, behavior:"smooth"}); }catch(e){}
   state.rewardClaimed = false;
   if(els.rewardMainBtn){ els.rewardMainBtn.disabled = false; }
   els.rewardHint.textContent = hintText || "כל הכבוד!";
@@ -998,7 +1027,7 @@ function grantStarsBonus(starsAdd, title){
   }
 }
 
-async async function claimReward(){
+async function claimReward(){
   if(!state.answered) return;
   if(els.rewardOverlay.classList.contains("hidden")) return;
   if(state.rewardClaimed) return;
@@ -1106,7 +1135,7 @@ async async function claimReward(){
 }
 function openLetters(){
   renderLettersGrid();
-  els.lettersDialog.showModal();
+  safeShowModal(els.lettersDialog);
 }
 function closeLetters(){
   // validate
@@ -1116,7 +1145,7 @@ function closeLetters(){
   }
   settingsSave();
   renderLettersMode();
-  els.lettersDialog.close();
+  safeCloseDialog(els.lettersDialog);
 }
 function renderLettersGrid(){
   els.lettersGrid.innerHTML="";
@@ -1179,10 +1208,10 @@ function openLogo(fromUnlock=false){
     card.appendChild(cap);
     els.logosGrid.appendChild(card);
   });
-  els.logoDialog.showModal();
+  safeShowModal(els.logoDialog);
 }
 function closeLogo(){
-  els.logoDialog.close();
+  safeCloseDialog(els.logoDialog);
 }
 function pickLogo(fn){
   state.settings.logo = fn;
@@ -1193,10 +1222,10 @@ function pickLogo(fn){
 
 function openPlayers(){
   renderPlayersSelect();
-  els.playersDialog.showModal();
+  safeShowModal(els.playersDialog);
 }
 function closePlayers(){
-  els.playersDialog.close();
+  safeCloseDialog(els.playersDialog);
 }
 function renderPlayersSelect(){
   const ps = playersGet();
@@ -1214,7 +1243,7 @@ function createFirstPlayer(){
   const p = {id:"p1", name};
   playersSave([p]);
   playerIdSet("p1");
-  els.firstPlayerDialog.close();
+  safeCloseDialog(els.firstPlayerDialog);
   boot();
 }
 function addPlayer(){
@@ -1246,12 +1275,12 @@ function onPlayerSelectChange(){
 }
 
 function openSettings(){
-  els.nikkudToggle.value = (state.settings.showNikkud ? "on" : "off");
-  els.debugToggle.value = debugIsOn() ? "on" : "off";
-  els.settingsDialog.showModal();
+  if(els.nikkudToggle) els.nikkudToggle.value = (state.settings.showNikkud ? "on" : "off");
+  if(els.debugToggle) els.debugToggle.value = (debugIsOn() ? "on" : "off");
+  safeShowModal(els.settingsDialog);
 }
 function closeSettings(){
-  els.settingsDialog.close();
+  safeCloseDialog(els.settingsDialog);
 }
 function resetGame(){
   if(!confirm("לאפס את ההתקדמות לשחקן הנוכחי?")) return;
@@ -1337,15 +1366,19 @@ function attachDelegation(){
     const action = btn.getAttribute("data-action");
     handleAction(action, btn);
   });
-  els.playerSelect.addEventListener("change", onPlayerSelectChange);
-  els.nikkudToggle.addEventListener("change", ()=>{
+  if(els.playerSelect) els.playerSelect.addEventListener("change", onPlayerSelectChange);
+  if(els.nikkudToggle){
+  if(els.nikkudToggle) els.nikkudToggle.addEventListener("change", ()=>{
   state.settings.showNikkud = (els.nikkudToggle.value==="on");
   settingsSave();
   // re-render current word
   renderWord();
-});
+  });
+}
 
-els.debugToggle.addEventListener("change", ()=> { debugSet(els.debugToggle.value==="on"); if(debugIsOn()){ els.debugPanel.classList.remove("hidden"); dbg("Debug enabled"); } else { els.debugPanel.classList.add("hidden"); } });
+if(els.debugToggle){
+  if(els.debugToggle) els.debugToggle.addEventListener("change", ()=>{ debugSet(els.debugToggle.value==="on"); if(debugIsOn()){ els.debugPanel.classList.remove("hidden"); dbg("Debug enabled"); } else { els.debugPanel.classList.add("hidden"); } });
+}
 }
 
 function boot(){
