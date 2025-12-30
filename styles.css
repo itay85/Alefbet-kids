@@ -190,3 +190,9 @@ h2{margin:0 0 10px 0;}
 
 /* score/words tile: keep on one line inside the label */
 #scoreStat .statLbl{white-space:nowrap !important;}
+
+
+/* v93: words stat = number only + tighter spacing */
+#battleStatsRow{ gap:4px !important; align-items:center; }
+#battleStatsRow .stat{ min-width:42px !important; padding:2px 4px !important; }
+#battleStatsRow .statNum{ font-size:15px; line-height:1; }
