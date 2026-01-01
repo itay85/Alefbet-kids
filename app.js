@@ -3,7 +3,7 @@
  * Brawl Letters v89
  * Clean architecture: single source of truth, no legacy listeners.
  */
-const BUILD = "v93.5";
+const BUILD = "v93.9";
 const HEB_LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק", "ר", "ש", "ת"];
 const WORD_BANK = {
   "א": [
@@ -604,7 +604,7 @@ const defaults = {
   chestStarsMin: 3,
   chestStarsMax: 13,
   // Super streak bonus every N perfect words
-  superBonusEvery: 40,
+  superBonusEvery: 15,
   superBonusStarsMin: 3,
   superBonusStarsMax: 8,
   starsToUnlockStep: 100,
@@ -1120,7 +1120,19 @@ async function claimReward(){
   }
 
   const from = state.settings.coins || 0;
-  state.settings.coins = from + addCoins;
+  const toCoins = from + addCoins;
+  state.settings.coins = toCoins;
+
+  // +1 star for every correct answer
+  const fromStars = state.settings.stars || 0;
+  const toStars = fromStars + 1;
+  state.settings.stars = toStars;
+  let unlockedNow = false;
+  const newUnlock = Math.min(LOGOS.length, 1 + Math.floor(toStars / defaults.starsToUnlockStep));
+  if(newUnlock > (state.settings.unlockedLogos || 1)){
+    state.settings.unlockedLogos = newUnlock;
+    unlockedNow = true;
+  }
 
   // Update overlay text
   els.rewardCoinsText.textContent = addCoins ? `+${addCoins} 🪙` : "0 🪙";
@@ -1253,6 +1265,7 @@ function clearLetters(){
 }
 
 function openLogo(fromUnlock=false){
+  state.afterLogoContinue = !!fromUnlock;
   const unlocked = Math.max(1, Math.min(LOGOS.length, state.settings.unlockedLogos));
   els.logoUnlockText.textContent = fromUnlock
     ? "נפתח לך לוגו חדש! בחר לוגו נוסף 🎁"
@@ -1280,12 +1293,16 @@ function openLogo(fromUnlock=false){
 }
 function closeLogo(){
   safeCloseDialog(els.logoDialog);
+
+  if(state.afterLogoContinue){ state.afterLogoContinue=false; setTimeout(()=>newQuestion(),120); }
 }
 function pickLogo(fn){
   state.settings.logo = fn;
   settingsSave();
   renderStats();
   closeLogo();
+
+  if(state.afterLogoContinue){ state.afterLogoContinue=false; setTimeout(()=>newQuestion(),120); }
 }
 
 function openPlayers(){
